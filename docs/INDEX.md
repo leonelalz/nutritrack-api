@@ -75,6 +75,11 @@ Organización basada en **User Stories** (25 historias de usuario en total):
   - Environments (Local, Dev, Staging, Prod)
   - Scripts de automatización
   - 27 endpoints documentados
+  
+- **[Colecciones Postman (../postman/)](../postman/)**
+  - 5 colecciones organizadas por módulo
+  - Environments configurados
+  - Listos para importar y usar
 
 - **Guía de Testing Unitario** (Pendiente)
   - Tests unitarios con JUnit

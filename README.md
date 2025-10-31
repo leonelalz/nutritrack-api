@@ -169,6 +169,7 @@ El sistema está dividido en 5 módulos principales basados en las User Stories:
 - **[Guía de Despliegue](docs/deployment/DEPLOYMENT_GUIDE.md)** - Instrucciones de deployment
 - **[API Reference](docs/API_REFERENCE.md)** - Referencia completa de endpoints
 - **[Testing con Postman](docs/testing/POSTMAN_GUIDE.md)** - Guía de pruebas API
+- **[Colecciones Postman](postman/)** - Colecciones y environments listos para usar
 
 ## 👥 Equipo de Desarrollo
 

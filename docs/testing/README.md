@@ -7,21 +7,20 @@ Documentación y recursos para testing del API.
 ```
 testing/
 ├── README.md                           # Este archivo
-├── POSTMAN_GUIDE.md                    # Guía completa de Postman
-├── postman/
-│   ├── collections/                    # Colecciones de Postman
-│   │   ├── Module_1_Cuentas_Preferencias.postman_collection.json
-│   │   ├── Module_2_Biblioteca_Contenido.postman_collection.json
-│   │   ├── Module_3_Gestor_Catalogo.postman_collection.json
-│   │   ├── Module_4_Exploracion_Activacion.postman_collection.json
-│   │   └── Module_5_Seguimiento_Progreso.postman_collection.json
-│   └── environments/                   # Environments de Postman
-│       ├── Local.postman_environment.json
-│       ├── Development.postman_environment.json
-│       ├── Staging.postman_environment.json
-│       └── Production.postman_environment.json
-└── scripts/                            # Scripts de automatización
-    └── run-tests.sh                    # Ejecutar todos los tests
+└── POSTMAN_GUIDE.md                    # Guía completa de Postman
+
+postman/                                # Carpeta en raíz del proyecto
+├── collections/                        # Colecciones de Postman
+│   ├── Module_1_Cuentas_Preferencias.postman_collection.json
+│   ├── Module_2_Biblioteca_Contenido.postman_collection.json
+│   ├── Module_3_Gestor_Catalogo.postman_collection.json
+│   ├── Module_4_Exploracion_Activacion.postman_collection.json
+│   └── Module_5_Seguimiento_Progreso.postman_collection.json
+└── environments/                       # Environments de Postman
+    ├── Local.postman_environment.json
+    ├── Development.postman_environment.json
+    ├── Staging.postman_environment.json
+    └── Production.postman_environment.json
 ```
 
 ## 🚀 Inicio Rápido

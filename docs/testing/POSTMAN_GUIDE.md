@@ -23,7 +23,7 @@
 
 ### Importar Colecciones
 
-Los archivos de colección están en: `docs/testing/postman/collections/`
+Los archivos de colección están en: `postman/collections/`
 
 1. Click en "Import" en Postman
 2. Seleccionar archivo JSON de la colección
