@@ -44,6 +44,19 @@ public class PerfilUsuarioService {
     }
 
     /**
+     * Obtener ID de perfil por email de cuenta (para testing sin JWT)
+     */
+    public UUID obtenerPerfilIdPorEmail(String email) {
+        CuentaAuth cuenta = cuentaRepo.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Cuenta no encontrada con email: " + email));
+        
+        PerfilUsuario perfil = perfilRepo.findByCuenta_Id(cuenta.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado para la cuenta"));
+        
+        return perfil.getId();
+    }
+
+    /**
      * US-03, US-04: Actualizar perfil del usuario
      */
     public PerfilUsuarioResponse actualizarPerfil(UUID perfilId, ActualizarPerfilRequest request) {

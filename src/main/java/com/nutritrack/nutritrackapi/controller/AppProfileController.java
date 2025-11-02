@@ -24,10 +24,23 @@ public class AppProfileController {
     /**
      * US-04: Obtener mi perfil
      * GET /api/v1/app/profile
+     * 
+     * TEMPORAL: Acepta email como query param para testing sin JWT
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<PerfilUsuarioResponse>> obtenerMiPerfil(HttpServletRequest request) {
-        UUID perfilId = extraerPerfilIdDelToken(request);
+    public ResponseEntity<ApiResponse<PerfilUsuarioResponse>> obtenerMiPerfil(
+            HttpServletRequest request,
+            @RequestParam(required = false) String email) {
+        
+        UUID perfilId;
+        if (email != null) {
+            // Modo testing: buscar perfil por email
+            perfilId = perfilUsuarioService.obtenerPerfilIdPorEmail(email);
+        } else {
+            // Modo producción: extraer del token JWT
+            perfilId = extraerPerfilIdDelToken(request);
+        }
+        
         PerfilUsuarioResponse perfil = perfilUsuarioService.obtenerPerfilCompleto(perfilId);
         
         return ResponseEntity.ok(
@@ -38,13 +51,22 @@ public class AppProfileController {
     /**
      * US-03, US-04: Actualizar mi perfil
      * PUT /api/v1/app/profile
+     * 
+     * TEMPORAL: Acepta email como query param para testing sin JWT
      */
     @PutMapping
     public ResponseEntity<ApiResponse<PerfilUsuarioResponse>> actualizarMiPerfil(
             HttpServletRequest request,
+            @RequestParam(required = false) String email,
             @Valid @RequestBody ActualizarPerfilRequest updateRequest) {
         
-        UUID perfilId = extraerPerfilIdDelToken(request);
+        UUID perfilId;
+        if (email != null) {
+            perfilId = perfilUsuarioService.obtenerPerfilIdPorEmail(email);
+        } else {
+            perfilId = extraerPerfilIdDelToken(request);
+        }
+        
         PerfilUsuarioResponse perfilActualizado = perfilUsuarioService.actualizarPerfil(perfilId, updateRequest);
         
         return ResponseEntity.ok(
@@ -55,10 +77,21 @@ public class AppProfileController {
     /**
      * US-05: Eliminar mi cuenta
      * DELETE /api/v1/app/profile
+     * 
+     * TEMPORAL: Acepta email como query param para testing sin JWT
      */
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> eliminarMiCuenta(HttpServletRequest request) {
-        UUID perfilId = extraerPerfilIdDelToken(request);
+    public ResponseEntity<ApiResponse<Void>> eliminarMiCuenta(
+            HttpServletRequest request,
+            @RequestParam(required = false) String email) {
+        
+        UUID perfilId;
+        if (email != null) {
+            perfilId = perfilUsuarioService.obtenerPerfilIdPorEmail(email);
+        } else {
+            perfilId = extraerPerfilIdDelToken(request);
+        }
+        
         perfilUsuarioService.eliminarCuenta(perfilId);
         
         return ResponseEntity.ok(

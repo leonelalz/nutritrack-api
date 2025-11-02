@@ -52,7 +52,7 @@ public class AuthService {
         // Crear Customer asociado
         PerfilUsuario customer = new PerfilUsuario();
         customer.setCuenta(savedUser);
-        customer.setNombre(request.name());
+        customer.setNombre(request.nombre());
         PerfilUsuario savedCustomer = customerRepository.save(customer);
 
         // Generar JWT con email, nombre y customerId
