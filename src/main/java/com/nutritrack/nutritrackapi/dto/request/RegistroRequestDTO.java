@@ -30,4 +30,9 @@ public record RegistroRequestDTO(
 
         String nationality,
         String occupation
-) {}
+) {
+    // Constructor adicional con solo email, password y nombre
+    public RegistroRequestDTO(String email, String password, String name) {
+        this(email, password, name, null, null, null, null, null, null, null, null);
+    }
+}

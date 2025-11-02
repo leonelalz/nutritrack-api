@@ -44,7 +44,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.password()));
 
         Rol userRole = roleRepository.findByTipo(TipoRol.ROLE_USER)
-                .orElseThrow(() -> new BusinessRuleException("Role ROLE_USER not found"));
+                .orElseThrow(() -> new BusinessRuleException("Role not found"));
         user.setRol(userRole);
 
         CuentaAuth savedUser = userRepository.save(user);
