@@ -3,6 +3,8 @@ package com.nutritrack.nutritrackapi.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import com.nutritrack.nutritrackapi.model.enums.*;
 
@@ -17,7 +19,7 @@ public class UsuarioPerfilSalud {
 
     @Id
     @Column(name = "id_perfil")
-    private UUID idperfil;
+    private UUID idPerfil;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "objetivo_actual", nullable = false)
@@ -27,11 +29,14 @@ public class UsuarioPerfilSalud {
     @Column(name = "nivel_actividad_actual", nullable = false)
     private NivelActividad nivelActividadActual;
 
-    @Column(columnDefinition = "TEXT")
-    private String alergias;
-
-    @Column(name = "condiciones_medicas", columnDefinition = "TEXT")
-    private String condicionesMedicas;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "usuario_etiquetas_salud",
+        joinColumns = @JoinColumn(name = "id_perfil"),
+        inverseJoinColumns = @JoinColumn(name = "id_etiqueta")
+    )
+    @Builder.Default
+    private Set<Etiqueta> etiquetasSalud = new HashSet<>();
 
     @Column(name = "fecha_actualizacion", nullable = false)
     private LocalDate fechaActualizacion;
@@ -39,4 +44,10 @@ public class UsuarioPerfilSalud {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_perfil", referencedColumnName = "id", insertable = false, updatable = false)
     private PerfilUsuario perfil;
+
+    @PrePersist
+    @PreUpdate
+    protected void onUpdate() {
+        this.fechaActualizacion = LocalDate.now();
+    }
 }

@@ -1,5 +1,6 @@
 package com.nutritrack.nutritrackapi.model;
 
+import com.nutritrack.nutritrackapi.model.enums.TipoEtiqueta;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -23,8 +24,9 @@ public class Etiqueta {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "tipo_etiqueta", length = 50)
-    private String tipoEtiqueta;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_etiqueta", nullable = false, length = 50)
+    private TipoEtiqueta tipoEtiqueta;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
