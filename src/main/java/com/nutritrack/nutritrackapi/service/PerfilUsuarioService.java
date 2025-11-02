@@ -1,16 +1,25 @@
 package com.nutritrack.nutritrackapi.service;
 
+import com.nutritrack.nutritrackapi.dto.request.ActualizarPerfilRequest;
+import com.nutritrack.nutritrackapi.dto.response.PerfilUsuarioResponse;
+import com.nutritrack.nutritrackapi.exception.ResourceNotFoundException;
 import com.nutritrack.nutritrackapi.model.CuentaAuth;
+import com.nutritrack.nutritrackapi.model.Etiqueta;
 import com.nutritrack.nutritrackapi.model.PerfilUsuario;
+import com.nutritrack.nutritrackapi.model.UsuarioPerfilSalud;
 import com.nutritrack.nutritrackapi.repository.CuentaAuthRepository;
+import com.nutritrack.nutritrackapi.repository.EtiquetaRepository;
 import com.nutritrack.nutritrackapi.repository.PerfilUsuarioRepository;
+import com.nutritrack.nutritrackapi.repository.UsuarioPerfilSaludRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,53 +28,139 @@ public class PerfilUsuarioService {
 
     private final PerfilUsuarioRepository perfilRepo;
     private final CuentaAuthRepository cuentaRepo;
+    private final UsuarioPerfilSaludRepository perfilSaludRepo;
+    private final EtiquetaRepository etiquetaRepo;
 
     /**
-     * Actualizar el nombre del perfil de un usuario.
+     * US-04: Obtener perfil completo del usuario
      */
+    public PerfilUsuarioResponse obtenerPerfilCompleto(UUID perfilId) {
+        PerfilUsuario perfil = perfilRepo.findById(perfilId)
+                .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado"));
+
+        UsuarioPerfilSalud perfilSalud = perfilSaludRepo.findById(perfilId).orElse(null);
+
+        return mapearAPerfilResponse(perfil, perfilSalud);
+    }
+
+    /**
+     * US-03, US-04: Actualizar perfil del usuario
+     */
+    public PerfilUsuarioResponse actualizarPerfil(UUID perfilId, ActualizarPerfilRequest request) {
+        PerfilUsuario perfil = perfilRepo.findById(perfilId)
+                .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado"));
+
+        // Actualizar datos básicos del perfil
+        if (request.getNombre() != null) {
+            perfil.setNombre(request.getNombre());
+        }
+        if (request.getUnidadesMedida() != null) {
+            perfil.setUnidadesMedida(request.getUnidadesMedida());
+        }
+
+        perfil = perfilRepo.save(perfil);
+
+        // Actualizar perfil de salud si existen datos
+        if (request.getObjetivoActual() != null || request.getNivelActividadActual() != null 
+            || request.getEtiquetasSaludIds() != null) {
+            
+            UsuarioPerfilSalud perfilSalud = perfilSaludRepo.findById(perfilId)
+                    .orElse(UsuarioPerfilSalud.builder()
+                            .idPerfil(perfilId)
+                            .build());
+
+            if (request.getObjetivoActual() != null) {
+                perfilSalud.setObjetivoActual(request.getObjetivoActual());
+            }
+            if (request.getNivelActividadActual() != null) {
+                perfilSalud.setNivelActividadActual(request.getNivelActividadActual());
+            }
+            if (request.getEtiquetasSaludIds() != null) {
+                Set<Etiqueta> etiquetas = new HashSet<>(etiquetaRepo.findAllById(request.getEtiquetasSaludIds()));
+                perfilSalud.setEtiquetasSalud(etiquetas);
+            }
+
+            perfilSaludRepo.save(perfilSalud);
+        }
+
+        return obtenerPerfilCompleto(perfilId);
+    }
+
+    /**
+     * US-05: Eliminar cuenta del usuario (eliminación lógica)
+     */
+    public void eliminarCuenta(UUID perfilId) {
+        PerfilUsuario perfil = perfilRepo.findById(perfilId)
+                .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado"));
+
+        CuentaAuth cuenta = perfil.getCuenta();
+        if (cuenta != null) {
+            cuenta.setActive(false); // Desactivar cuenta en lugar de borrar
+            cuentaRepo.save(cuenta);
+        }
+    }
+
+    /**
+     * Mapear entidades a DTO de respuesta
+     */
+    private PerfilUsuarioResponse mapearAPerfilResponse(PerfilUsuario perfil, UsuarioPerfilSalud perfilSalud) {
+        PerfilUsuarioResponse.PerfilSaludDTO perfilSaludDTO = null;
+
+        if (perfilSalud != null) {
+            Set<PerfilUsuarioResponse.EtiquetaSaludDTO> etiquetasDTO = perfilSalud.getEtiquetasSalud() != null 
+                ? perfilSalud.getEtiquetasSalud().stream()
+                    .map(e -> PerfilUsuarioResponse.EtiquetaSaludDTO.builder()
+                            .id(e.getId())
+                            .nombre(e.getNombre())
+                            .tipoEtiqueta(e.getTipoEtiqueta().name())
+                            .build())
+                    .collect(Collectors.toSet())
+                : new HashSet<>();
+
+            perfilSaludDTO = PerfilUsuarioResponse.PerfilSaludDTO.builder()
+                    .objetivoActual(perfilSalud.getObjetivoActual())
+                    .nivelActividadActual(perfilSalud.getNivelActividadActual())
+                    .etiquetasSalud(etiquetasDTO)
+                    .fechaActualizacion(perfilSalud.getFechaActualizacion())
+                    .build();
+        }
+
+        return PerfilUsuarioResponse.builder()
+                .profileId(perfil.getId())
+                .nombre(perfil.getNombre())
+                .unidadesMedida(perfil.getUnidadesMedida())
+                .fechaInicioApp(perfil.getFechaInicioApp())
+                .perfilSalud(perfilSaludDTO)
+                .build();
+    }
+
+    // ==========================================
+    // Métodos legacy (mantener compatibilidad)
+    // ==========================================
+
     public PerfilUsuario actualizarNombre(UUID idPerfil, String nuevoNombre) {
         PerfilUsuario perfil = perfilRepo.findById(idPerfil)
-                .orElseThrow(() -> new RuntimeException("Perfil no encontrado con id: " + idPerfil));
+                .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado con id: " + idPerfil));
 
-        perfil.setName(nuevoNombre);
+        perfil.setNombre(nuevoNombre);
         return perfilRepo.save(perfil);
     }
 
-    /**
-     * Actualizar la fecha de inicio de la app (si es necesario reiniciar o resetear el progreso).
-     */
-    public PerfilUsuario reiniciarFechaInicio(UUID idPerfil) {
-        PerfilUsuario perfil = perfilRepo.findById(idPerfil)
-                .orElseThrow(() -> new RuntimeException("Perfil no encontrado con id: " + idPerfil));
-
-        perfil.setFecha_inicio_app(LocalDate.now());
-        return perfilRepo.save(perfil);
-    }
-
-    /**
-     * Obtener perfil por ID de cuenta.
-     */
     public PerfilUsuario obtenerPorCuenta(UUID idCuenta) {
         CuentaAuth cuenta = cuentaRepo.findById(idCuenta)
-                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada con id: " + idCuenta));
+                .orElseThrow(() -> new ResourceNotFoundException("Cuenta no encontrada con id: " + idCuenta));
 
         return perfilRepo.findByCuenta_Id(cuenta.getId())
-                .orElseThrow(() -> new RuntimeException("No existe perfil asociado a esta cuenta"));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe perfil asociado a esta cuenta"));
     }
 
-    /**
-     * Listar todos los perfiles de usuarios.
-     */
     public List<PerfilUsuario> listarPerfiles() {
         return perfilRepo.findAll();
     }
 
-    /**
-     * Eliminar perfil de usuario (borrado físico).
-     */
     public void eliminarPerfil(UUID idPerfil) {
         if (!perfilRepo.existsById(idPerfil)) {
-            throw new RuntimeException("Perfil no encontrado");
+            throw new ResourceNotFoundException("Perfil no encontrado");
         }
         perfilRepo.deleteById(idPerfil);
     }
