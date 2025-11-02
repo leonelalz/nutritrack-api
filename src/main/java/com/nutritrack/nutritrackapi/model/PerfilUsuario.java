@@ -1,5 +1,6 @@
 package com.nutritrack.nutritrackapi.model;
 
+import com.nutritrack.nutritrackapi.model.enums.UnidadesMedida;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,18 +20,28 @@ public class PerfilUsuario {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(nullable = false, length = 255)
+    private String nombre;
 
-    @Column(nullable = false)
-    private LocalDate fecha_inicio_app;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "unidades_medida", length = 10)
+    @Builder.Default
+    private UnidadesMedida unidadesMedida = UnidadesMedida.KG;
+
+    @Column(name = "fecha_inicio_app", nullable = false)
+    private LocalDate fechaInicioApp;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_cuenta", nullable = false, unique = true)
+    @JoinColumn(name = "id_usuario", nullable = false, unique = true, referencedColumnName = "id")
     private CuentaAuth cuenta;
 
     @PrePersist
     protected void onCreate() {
-        this.fecha_inicio_app = LocalDate.now();
+        if (this.fechaInicioApp == null) {
+            this.fechaInicioApp = LocalDate.now();
+        }
+        if (this.unidadesMedida == null) {
+            this.unidadesMedida = UnidadesMedida.KG;
+        }
     }
 }
