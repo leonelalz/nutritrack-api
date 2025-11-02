@@ -27,11 +27,12 @@ public class PerfilUsuarioController {
     }
 
     // 🔁 Reiniciar fecha de inicio de la app
-    @PatchMapping("/{id}/reiniciar-fecha")
+    // TODO: Migrar a AppProfileController
+    /*@PatchMapping("/{id}/reiniciar-fecha")
     public ResponseEntity<PerfilUsuario> reiniciarFecha(@PathVariable UUID id) {
         PerfilUsuario actualizado = perfilUsuarioService.reiniciarFechaInicio(id);
         return ResponseEntity.ok(actualizado);
-    }
+    }*/
 
     // 🔍 Obtener perfil por id de cuenta
     @GetMapping("/cuenta/{idCuenta}")

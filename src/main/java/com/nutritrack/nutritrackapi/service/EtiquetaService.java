@@ -6,6 +6,7 @@ import com.nutritrack.nutritrackapi.exception.DuplicateResourceException;
 import com.nutritrack.nutritrackapi.exception.ResourceInUseException;
 import com.nutritrack.nutritrackapi.exception.ResourceNotFoundException;
 import com.nutritrack.nutritrackapi.model.*;
+import com.nutritrack.nutritrackapi.model.enums.TipoEtiqueta;
 import com.nutritrack.nutritrackapi.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class EtiquetaService {
         Etiqueta etiqueta = Etiqueta.builder()
                 .nombre(request.nombre())
                 .descripcion(request.descripcion())
-                .tipoEtiqueta(request.tipoEtiqueta())
+                .tipoEtiqueta(TipoEtiqueta.valueOf(request.tipoEtiqueta()))
                 .build();
 
         Etiqueta saved = etiquetaRepository.save(etiqueta);
@@ -78,7 +79,7 @@ public class EtiquetaService {
 
         etiqueta.setNombre(request.nombre());
         etiqueta.setDescripcion(request.descripcion());
-        etiqueta.setTipoEtiqueta(request.tipoEtiqueta());
+        etiqueta.setTipoEtiqueta(TipoEtiqueta.valueOf(request.tipoEtiqueta()));
 
         Etiqueta updated = etiquetaRepository.save(etiqueta);
         return toResponse(updated);
@@ -250,7 +251,7 @@ public class EtiquetaService {
                 etiqueta.getId(),
                 etiqueta.getNombre(),
                 etiqueta.getDescripcion(),
-                etiqueta.getTipoEtiqueta(),
+                etiqueta.getTipoEtiqueta().name(),
                 etiqueta.getCreatedAt(),
                 etiqueta.getUpdatedAt()
         );

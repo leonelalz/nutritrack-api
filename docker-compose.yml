@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16
+    container_name: nutritrack-postgres
+    environment:
+      POSTGRES_DB: nutritrack_db
+      POSTGRES_USER: nutritrack
+      POSTGRES_PASSWORD: nutritrack123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./SQL/NutriDB.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nutritrack -d nutritrack_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nutritrack-network
+
+  # Spring Boot API (opcional - comentado para desarrollo local)
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: nutritrack-api
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nutritrack_db
+  #     SPRING_DATASOURCE_USERNAME: nutritrack
+  #     SPRING_DATASOURCE_PASSWORD: nutritrack123
+  #     JWT_SECRET: NutriTrack2025SecretKeyForJWTTokenGenerationAndValidation256Bits
+  #     JWT_EXPIRATION: 86400000
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   networks:
+  #     - nutritrack-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  nutritrack-network:
+    driver: bridge

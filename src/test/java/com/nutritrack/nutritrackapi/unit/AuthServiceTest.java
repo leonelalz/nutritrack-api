@@ -80,7 +80,7 @@ class AuthServiceTest {
         PerfilUsuario perfil = new PerfilUsuario();
         perfil.setId(UUID.randomUUID());
         perfil.setCuenta(cuenta);
-        perfil.setName(nombre);
+        perfil.setNombre(nombre);
         return perfil;
     }
 

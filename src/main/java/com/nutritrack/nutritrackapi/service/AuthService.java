@@ -52,17 +52,17 @@ public class AuthService {
         // Crear Customer asociado
         PerfilUsuario customer = new PerfilUsuario();
         customer.setCuenta(savedUser);
-        customer.setName(request.name());
+        customer.setNombre(request.name());
         PerfilUsuario savedCustomer = customerRepository.save(customer);
 
         // Generar JWT con email, nombre y customerId
         String token = jwtUtil.generateToken(
                 savedUser.getEmail(),
-                savedCustomer.getName(),
+                savedCustomer.getNombre(),
                 savedCustomer.getId()
         );
 
-        return new AuthResponse(token, savedUser.getEmail(), savedCustomer.getName());
+        return new AuthResponse(token, savedUser.getEmail(), savedCustomer.getNombre());
     }
 
     @Transactional(readOnly = true)
@@ -83,10 +83,10 @@ public class AuthService {
         // Generar JWT con email, nombre y customerId
         String token = jwtUtil.generateToken(
                 user.getEmail(),
-                customer.getName(),
+                customer.getNombre(),
                 customer.getId()
         );
 
-        return new AuthResponse(token, user.getEmail(), customer.getName());
+        return new AuthResponse(token, user.getEmail(), customer.getNombre());
     }
 }

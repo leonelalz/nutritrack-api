@@ -13,10 +13,10 @@ import java.util.*;
 @Component
 public class JwtUtil {
 
-    @Value("${JWT_SECRET}")
+    @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${JWT_EXPIRATION}")
+    @Value("${jwt.expiration}")
     private Long expiration;
 
     // Lista temporal para tokens invalidados (logout)

@@ -32,16 +32,14 @@ public class UsuarioPerfilSaludService {
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con id: " + idCliente));
 
         // Buscar si ya tiene perfil de salud
-        UsuarioPerfilSalud perfilSalud = perfilSaludRepo.findByIdperfil(idCliente);
+        UsuarioPerfilSalud perfilSalud = perfilSaludRepo.findByIdPerfil(idCliente);
 
         if (perfilSalud == null) {
             // Crear nuevo perfil
             perfilSalud = UsuarioPerfilSalud.builder()
-                    .idperfil(idCliente)
+                    .idPerfil(idCliente)
                     .objetivoActual(objetivo)
                     .nivelActividadActual(nivelActividad)
-                    .alergias(alergias)
-                    .condicionesMedicas(condicionesMedicas)
                     .fechaActualizacion(LocalDate.now())
                     .perfil(cliente)
                     .build();
@@ -49,8 +47,6 @@ public class UsuarioPerfilSaludService {
             // Actualizar perfil existente
             perfilSalud.setObjetivoActual(objetivo);
             perfilSalud.setNivelActividadActual(nivelActividad);
-            perfilSalud.setAlergias(alergias);
-            perfilSalud.setCondicionesMedicas(condicionesMedicas);
             perfilSalud.setFechaActualizacion(LocalDate.now());
         }
 
@@ -61,7 +57,7 @@ public class UsuarioPerfilSaludService {
      * Obtener el perfil de salud de un usuario.
      */
     public UsuarioPerfilSalud obtenerPerfilSalud(UUID idPerfil) {
-        UsuarioPerfilSalud perfil = perfilSaludRepo.findByIdperfil(idPerfil);
+        UsuarioPerfilSalud perfil = perfilSaludRepo.findByIdPerfil(idPerfil);
         if (perfil == null) {
             throw new RuntimeException("No existe un perfil de salud para el cliente con id: " + idPerfil);
         }

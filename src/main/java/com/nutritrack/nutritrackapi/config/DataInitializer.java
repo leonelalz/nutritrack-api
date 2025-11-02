@@ -56,6 +56,7 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
+        // Create CuentaAuth first
         CuentaAuth adminUser = new CuentaAuth();
         adminUser.setEmail(adminEmail);
         adminUser.setPassword(passwordEncoder.encode("admin123"));
@@ -63,9 +64,10 @@ public class DataInitializer implements CommandLineRunner {
         adminUser.setActive(true);
         CuentaAuth savedAdmin = userRepository.save(adminUser);
 
+        // Create PerfilUsuario linked to the CuentaAuth
         PerfilUsuario adminCustomer = new PerfilUsuario();
         adminCustomer.setCuenta(savedAdmin);
-        adminCustomer.setName("System Administrator");
+        adminCustomer.setNombre("System Administrator");
         customerRepository.save(adminCustomer);
 
         log.info("========================================");
