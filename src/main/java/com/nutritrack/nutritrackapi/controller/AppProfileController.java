@@ -5,6 +5,13 @@ import com.nutritrack.nutritrackapi.dto.response.ApiResponse;
 import com.nutritrack.nutritrackapi.dto.response.PerfilUsuarioResponse;
 import com.nutritrack.nutritrackapi.security.JwtUtil;
 import com.nutritrack.nutritrackapi.service.PerfilUsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Tag(name = "Perfil de Usuario", description = "Endpoints para gestión del perfil y preferencias del usuario")
 @RestController
 @RequestMapping("/app/profile")
 @RequiredArgsConstructor
@@ -21,15 +29,21 @@ public class AppProfileController {
     private final PerfilUsuarioService perfilUsuarioService;
     private final JwtUtil jwtUtil;
 
-    /**
-     * US-04: Obtener mi perfil
-     * GET /api/v1/app/profile
-     * 
-     * TEMPORAL: Acepta email como query param para testing sin JWT
-     */
+    @Operation(
+        summary = "Obtener mi perfil",
+        description = "Retorna el perfil completo del usuario autenticado, incluyendo preferencias de salud y etiquetas. TEMPORAL: acepta email como parámetro para testing sin JWT.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Perfil obtenido exitosamente",
+            content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Perfil no encontrado",
+            content = @Content)
+    })
     @GetMapping
     public ResponseEntity<ApiResponse<PerfilUsuarioResponse>> obtenerMiPerfil(
             HttpServletRequest request,
+            @Parameter(description = "Email del usuario (solo para testing, será removido en v0.2.0)", example = "user@nutritrack.com")
             @RequestParam(required = false) String email) {
         
         UUID perfilId;
@@ -48,15 +62,21 @@ public class AppProfileController {
         );
     }
 
-    /**
-     * US-03, US-04: Actualizar mi perfil
-     * PUT /api/v1/app/profile
-     * 
-     * TEMPORAL: Acepta email como query param para testing sin JWT
-     */
+    @Operation(
+        summary = "Actualizar mi perfil",
+        description = "Actualiza la información del perfil, preferencias de unidades, objetivo de salud, nivel de actividad y etiquetas de salud.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Perfil actualizado exitosamente",
+            content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Perfil no encontrado",
+            content = @Content)
+    })
     @PutMapping
     public ResponseEntity<ApiResponse<PerfilUsuarioResponse>> actualizarMiPerfil(
             HttpServletRequest request,
+            @Parameter(description = "Email del usuario (solo para testing)")
             @RequestParam(required = false) String email,
             @Valid @RequestBody ActualizarPerfilRequest updateRequest) {
         
@@ -74,15 +94,21 @@ public class AppProfileController {
         );
     }
 
-    /**
-     * US-05: Eliminar mi cuenta
-     * DELETE /api/v1/app/profile
-     * 
-     * TEMPORAL: Acepta email como query param para testing sin JWT
-     */
+    @Operation(
+        summary = "Eliminar mi cuenta",
+        description = "Desactiva la cuenta del usuario (eliminación lógica). El usuario no podrá iniciar sesión después de esta acción.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Cuenta eliminada exitosamente",
+            content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Perfil no encontrado",
+            content = @Content)
+    })
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> eliminarMiCuenta(
             HttpServletRequest request,
+            @Parameter(description = "Email del usuario (solo para testing)")
             @RequestParam(required = false) String email) {
         
         UUID perfilId;
