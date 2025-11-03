@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "etiquetas")
+@Table(name = "ejercicios")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Etiqueta {
+public class Ejercicio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +25,17 @@ public class Etiqueta {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "tipo_etiqueta", length = 50)
-    private String tipoEtiqueta;
+    @Column(columnDefinition = "TEXT")
+    private String instrucciones;
+
+    @Column(name = "duracion_minutos")
+    private Integer duracionMinutos;
+
+    @Column(name = "calorias_quemadas")
+    private Integer caloriasQuemadas;
+
+    @Column(name = "video_url")
+    private String videoUrl;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -34,22 +43,9 @@ public class Etiqueta {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // (Opcional ejej)
-    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "ejercicio", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<EtiquetaPlan> planes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<EtiquetaEjercicio> ejercicios = new ArrayList<>();
-
-    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<EtiquetaIngrediente> ingredientes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<EtiquetaMeta> metas = new ArrayList<>();
+    private List<EtiquetaEjercicio> etiquetas = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

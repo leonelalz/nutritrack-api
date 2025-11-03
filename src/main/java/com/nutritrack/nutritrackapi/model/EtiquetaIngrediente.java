@@ -17,9 +17,11 @@ public class EtiquetaIngrediente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "id_ingrediente", nullable = false)
-    private Long idIngrediente;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_ingrediente", nullable = false)
+    private Ingrediente ingrediente;  // ✅ Relación con entidad Ingrediente
 
-    @Column(name = "id_etiqueta", nullable = false)
-    private Long idEtiqueta;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_etiqueta", nullable = false)
+    private Etiqueta etiqueta;
 }

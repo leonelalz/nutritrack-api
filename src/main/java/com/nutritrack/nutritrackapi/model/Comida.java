@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "etiquetas")
+@Table(name = "comidas")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Etiqueta {
+public class Comida {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +25,20 @@ public class Etiqueta {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "tipo_etiqueta", length = 50)
-    private String tipoEtiqueta;
+    @Column(name = "tipo_comida", length = 50)
+    private String tipoComida; // "Desayuno", "Almuerzo", "Cena", "Snack"
+
+    @Column(name = "tiempo_preparacion")
+    private Integer tiempoPreparacion; // en minutos
+
+    @Column(columnDefinition = "TEXT")
+    private String instruccionesPreparacion;
+
+    @Column(name = "porciones")
+    private Integer porciones;
+
+    @Column(name = "imagen_url")
+    private String imagenUrl;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -34,22 +46,10 @@ public class Etiqueta {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // (Opcional ejej)
-    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
+    // Relación con recetas (ingredientes)
+    @OneToMany(mappedBy = "comida", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<EtiquetaPlan> planes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<EtiquetaEjercicio> ejercicios = new ArrayList<>();
-
-    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<EtiquetaIngrediente> ingredientes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<EtiquetaMeta> metas = new ArrayList<>();
+    private List<Receta> recetas = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
