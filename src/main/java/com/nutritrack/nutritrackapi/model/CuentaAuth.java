@@ -8,13 +8,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "cuentas_auth")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
-
 public class CuentaAuth {
 
     @Id
@@ -28,7 +25,8 @@ public class CuentaAuth {
     private String password;
 
     @Column(nullable = false)
-    private Boolean active = true;
+    @Builder.Default
+    private boolean active = true;
 
     @Column(nullable = false, updatable = false)
     private LocalDate created_at;
