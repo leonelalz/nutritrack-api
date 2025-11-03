@@ -2,10 +2,15 @@
 
 Guía completa de toda la documentación del proyecto.
 
+**Versión:** 1.0 | **Estado:** ✅ Completado (100%) | **Tests:** 202/202 ✅
+
+---
+
 ## 🚀 Inicio Rápido
 
 - **[Inicio Rápido (QUICKSTART.md)](QUICKSTART.md)** - Poner en marcha el proyecto en 5 minutos
 - **[README Principal](../README.md)** - Descripción general del proyecto
+- **[Resumen del Proyecto (RESUMEN_PROYECTO.md)](../RESUMEN_PROYECTO.md)** - Resumen ejecutivo completo
 - **[Glosario (GLOSSARY.md)](GLOSSARY.md)** - Términos y conceptos importantes
 
 ## 👥 Para Colaboradores
@@ -13,6 +18,12 @@ Guía completa de toda la documentación del proyecto.
 - **[Guía de Contribución (CONTRIBUTING.md)](../CONTRIBUTING.md)** - Cómo contribuir al proyecto
 - **[Asignación de Módulos (TEAM_ASSIGNMENTS.md)](TEAM_ASSIGNMENTS.md)** - Responsables y tareas por módulo
 - **[Guía de Desarrollo (DEVELOPMENT_GUIDE.md)](DEVELOPMENT_GUIDE.md)** - Estándares y mejores prácticas
+
+## 📖 Documentación de API
+
+- **[API Reference Completa (API_REFERENCE_COMPLETE.md)](API_REFERENCE_COMPLETE.md)** - Todos los endpoints documentados
+- **[API Reference Original (API_REFERENCE.md)](API_REFERENCE.md)** - Referencia por User Stories
+- **[Swagger UI](http://localhost:8080/api/v1/swagger-ui/index.html)** - Documentación interactiva (requiere app corriendo)
 
 ## 🏗️ Arquitectura
 
@@ -22,33 +33,90 @@ Guía completa de toda la documentación del proyecto.
   - Flujos de datos
   - Modelo de datos
 
-## 📦 Módulos
+## 📦 Módulos Implementados
 
-### Documentación Detallada por Módulo
+### ✅ Módulo 1: Autenticación y Perfiles
+**Estado:** ✅ Completado | **Tests:** 42/42 ✅
 
-Organización basada en **User Stories** (25 historias de usuario en total):
+**Documentación:**
+- [MODULO1 - Testing](../TESTING_MODULE1.md)
+- Script de pruebas: `testing/test-module1.ps1`
 
-1. **[Gestión de Cuentas y Preferencias](modules/cuentas-preferencias.md)** (Pendiente)
-   - US-01 a US-05: Crear cuenta, login, preferencias, perfil de salud
-   - Responsable: Leonel Alzamora
+**Funcionalidades:**
+- Registro y login con JWT
+- Gestión de perfiles
+- Sistema de roles
+- Configuración de unidades
 
-2. **[Biblioteca de Contenido (Admin)](modules/biblioteca-contenido.md)** (Pendiente)
-   - US-06 a US-10: Etiquetas, ingredientes, ejercicios, comidas, recetas
-   - Responsables: Fabian Rojas, Gonzalo Huaranga, Victor Carranza
+**Endpoints:** 7
 
-3. **[Gestor de Catálogo (Admin)](modules/gestor-catalogo.md)** (Pendiente)
-   - US-11 a US-15: Metas del catálogo, actividades, rutinas
-   - Responsables: Gonzalo Huaranga, Victor Carranza
+---
 
-4. **[Exploración y Activación (Cliente)](modules/exploracion-activacion.md)** (Pendiente)
-   - US-16 a US-20: Ver catálogo, activar metas, pausar/reanudar
-   - Responsables: Gonzalo Huaranga, Victor Carranza
+### ✅ Módulo 2: Biblioteca de Contenido
+**Estado:** ✅ Completado | **Tests:** 54/54 ✅
 
-5. **[Seguimiento de Progreso (Cliente)](modules/seguimiento-progreso.md)** (Pendiente)
-   - US-21 a US-25: Actividades, mediciones, gráficos, reportes
-   - Responsables: Gonzalo Huaranga, Jhamil Peña, Victor Carranza
+**Documentación:**
+- [MODULO2 - Resumen](../MODULO2_RESUMEN.md)
+- [MODULO2 - Biblioteca Contenido](MODULO2_BIBLIOTECA_CONTENIDO.md)
+- Colección Postman: `postman/Modulo2_BibliotecaContenido.postman_collection.json`
 
-### Documentación de Referencia (Técnica)
+**Funcionalidades:**
+- Gestión de etiquetas
+- CRUD de ingredientes
+- CRUD de ejercicios
+- CRUD de comidas
+
+**Endpoints:** 16
+
+---
+
+### ✅ Módulo 3: Planes Nutricionales
+**Estado:** ✅ Completado | **Tests:** 40/40 ✅
+
+**Documentación:**
+- [MODULO3 - Resumen](../MODULO3_RESUMEN.md)
+- Colección Postman: `postman/Modulo3_PlanesNutricionales.postman_collection.json`
+
+**Funcionalidades:**
+- Creación de planes
+- Asignación a usuarios
+- Estados y progreso
+
+**Endpoints:** 8
+
+---
+
+### ✅ Módulo 4: Rutinas de Ejercicio
+**Estado:** ✅ Completado | **Tests:** 36/36 ✅
+
+**Documentación:**
+- [MODULO4 - Resumen](../MODULO4_RESUMEN.md)
+- Colección Postman: `postman/Modulo4_RutinasEjercicio.postman_collection.json`
+
+**Funcionalidades:**
+- Creación de rutinas
+- Asignación a usuarios
+- Seguimiento de progreso
+
+**Endpoints:** 8
+
+---
+
+### ✅ Módulo 5: Seguimiento y Asignaciones
+**Estado:** ✅ Completado | **Tests:** 30/30 ✅
+
+**Documentación:**
+- [MODULO5 - Resumen](../MODULO5_RESUMEN.md)
+- Colección Postman: `postman/Modulo5_SeguimientoAsignaciones.postman_collection.json`
+
+**Funcionalidades:**
+- Registro de comidas
+- Registro de ejercicios
+- Historial y seguimiento
+
+**Endpoints:** 8
+
+---
 
 - **[Autenticación y Seguridad (auth.md)](modules/auth.md)** - Implementación JWT y seguridad
 - **[Sistema de Etiquetas (etiquetas.md)](modules/etiquetas.md)** - Sistema de etiquetado genérico

@@ -21,8 +21,15 @@ API REST para la gestión de seguimiento nutricional y planes de salud personali
 
 ## 📊 Estado del Proyecto
 
-| Módulo | Estado | Progreso | Última Actualización |
-|--------|--------|----------|----------------------|
+| Módulo | Estado | Progreso | Tests | Última Actualización |
+|--------|--------|----------|-------|----------------------|
+| Autenticación y Perfiles | ✅ Completado | 100% | 42/42 ✅ | Nov 2025 |
+| Biblioteca de Contenido | ✅ Completado | 100% | 54/54 ✅ | Nov 2025 |
+| Planes Nutricionales | ✅ Completado | 100% | 40/40 ✅ | Nov 2025 |
+| Rutinas de Ejercicio | ✅ Completado | 100% | 36/36 ✅ | Nov 2025 |
+| Seguimiento y Asignaciones | ✅ Completado | 100% | 30/30 ✅ | Nov 2025 |
+| **Total** | **✅ Completado** | **100%** | **202/202 ✅** | **Nov 2025** |
+
 ## 🛠 Tecnologías
 
 - **Java 17** - Lenguaje de programación
@@ -116,12 +123,23 @@ Esto creará automáticamente:
 
 ### 🧪 Verificar Instalación
 
+**Swagger UI:** http://localhost:8080/api/v1/swagger-ui/index.html
+
 ```bash
-# Probar endpoint de salud (sin autenticación)
+# Probar registro de usuario
 curl http://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"Test123!","nombre":"Test User"}'
+  -d '{"email":"test@example.com","password":"Test123!","nombre":"Test","apellido":"User"}'
+
+# Login con admin por defecto
+curl http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@fintech.com","password":"admin123"}'
 ```
+
+**Usuario Admin por defecto:**
+- Email: `admin@fintech.com`
+- Password: `admin123`
 
 ### 📝 Configuración Adicional
 
@@ -142,7 +160,22 @@ server.servlet.context-path=/api/v1
 server.port=8080
 ```
 
-> ⚠️ **Nota:** La seguridad JWT está temporalmente deshabilitada para facilitar las pruebas iniciales. Se reactivará en versión 0.2.0.
+### 📊 Ejecutar Tests
+
+```bash
+# Ejecutar todos los tests
+./mvnw test
+
+# Ver resumen de tests
+./mvnw test 2>&1 | Select-String -Pattern "(Tests run:|BUILD SUCCESS|BUILD FAILURE)"
+
+# Tests individuales por módulo
+./mvnw test -Dtest=AuthServiceTest
+./mvnw test -Dtest=ComidaServiceTest
+./mvnw test -Dtest=PlanServiceTest
+```
+
+**Cobertura de Tests:** 202 tests unitarios ✅
 
 ### 🧹 Comandos Útiles
 
@@ -167,74 +200,95 @@ La API estará disponible en: `http://localhost:8080`
 
 ## 🧩 Módulos del Sistema
 
-El sistema está dividido en 5 módulos principales basados en las User Stories:
+El sistema está completamente implementado con 5 módulos principales:
 
-### ✅ 1️⃣ Módulo de Gestión de Cuentas y Preferencias [COMPLETADO]
-**Responsable:** Leonel Alzamora  
-**User Stories:** US-01 a US-05 (5/5 implementadas)  
-**Branch:** `feature/modulo-1-cuentas-preferencias`
+### ✅ 1️⃣ Módulo de Autenticación y Perfiles [COMPLETADO]
+**Tests:** 42/42 ✅ | **Última actualización:** Nov 2025
 
-**Funcionalidades implementadas:**
-- ✅ Registro de usuario (US-01)
-- ✅ Inicio de sesión con JWT (US-02)
-- ✅ Configuración de unidades de medida KG/LBS (US-03)
-- ✅ Edición de perfil y etiquetas de salud (US-04)
-- ✅ Eliminación de cuenta (soft delete) (US-05)
+**Funcionalidades:**
+- ✅ Registro y autenticación de usuarios con JWT
+- ✅ Gestión de perfiles de usuario y salud
+- ✅ Configuración de unidades de medida (KG/LBS)
+- ✅ Sistema de roles (ADMIN/USER)
+- ✅ Soft delete de cuentas
 
-**Endpoints:**
-- `POST /api/v1/auth/register` - Crear cuenta
-- `POST /api/v1/auth/login` - Autenticar usuario
+**Endpoints principales:**
+- `POST /api/v1/auth/register` - Registro de usuario
+- `POST /api/v1/auth/login` - Inicio de sesión
 - `GET /api/v1/app/profile` - Obtener perfil
 - `PUT /api/v1/app/profile` - Actualizar perfil
 - `DELETE /api/v1/app/profile` - Eliminar cuenta
-
-**Testing:** [testing/test-module1.ps1](testing/test-module1.ps1) | [TESTING_MODULE1.md](TESTING_MODULE1.md)
-
----
-
-### 🚧 2️⃣ Módulo de Biblioteca de Contenido (Admin)
-**Responsables:** Fabian Rojas, Gonzalo Huaranga, Victor Carranza  
-**User Stories:** US-06 a US-10  
-**Estado:** Pendiente
-
-- Gestión de etiquetas maestras (US-06)
-- Gestión de ingredientes (US-07)
-- Gestión de ejercicios (US-08)
-- Gestión de comidas (US-09)
-- Gestión de recetas (US-10)
+- `GET /api/v1/perfiles` - Listar perfiles (Admin)
+- `GET /api/v1/cuentas` - Gestión de cuentas (Admin)
 
 ---
 
-### 🚧 3️⃣ Módulo de Gestor de Catálogo (Admin)
-**Responsables:** Gonzalo Huaranga, Victor Carranza  
-**User Stories:** US-11 a US-15  
-**Estado:** Pendiente
+### ✅ 2️⃣ Módulo de Biblioteca de Contenido [COMPLETADO]
+**Tests:** 54/54 ✅ | **Última actualización:** Nov 2025
 
-- Crear y gestionar metas del catálogo (US-11, US-12)
-- Ver y eliminar metas (US-13, US-14)
-- Ensamblar rutinas de ejercicio (US-15)
+**Funcionalidades:**
+- ✅ Gestión completa de etiquetas (alergias, dietas, etc.)
+- ✅ CRUD de ingredientes con información nutricional
+- ✅ CRUD de ejercicios con etiquetas
+- ✅ CRUD de comidas con recetas detalladas
+- ✅ Sistema de etiquetado flexible
 
----
-
-### 🚧 4️⃣ Módulo de Exploración y Activación (Cliente)
-**Responsables:** Gonzalo Huaranga, Victor Carranza  
-**User Stories:** US-16 a US-20  
-**Estado:** Pendiente
-
-- Ver catálogo con filtros personalizados (US-16)
-- Ver detalle de metas (US-17)
-- Activar, pausar y gestionar metas (US-18, US-19, US-20)
+**Endpoints principales:**
+- `GET/POST/PUT/DELETE /api/v1/etiquetas` - Gestión de etiquetas
+- `GET/POST/PUT/DELETE /api/v1/admin/ingredientes` - Ingredientes
+- `GET/POST/PUT/DELETE /api/v1/admin/ejercicios` - Ejercicios
+- `GET/POST/PUT/DELETE /api/v1/admin/comidas` - Comidas
 
 ---
 
-### 🚧 5️⃣ Módulo de Seguimiento de Progreso (Cliente)
-**Responsables:** Gonzalo Huaranga, Jhamil Peña, Victor Carranza  
-**User Stories:** US-21 a US-25  
-**Estado:** Pendiente
+### ✅ 3️⃣ Módulo de Planes Nutricionales [COMPLETADO]
+**Tests:** 40/40 ✅ | **Última actualización:** Nov 2025
 
-- Ver y marcar actividades del plan (US-21, US-22, US-23)
-- Registrar mediciones corporales (US-24)
-- Ver gráficos y reportes de progreso (US-25)
+**Funcionalidades:**
+- ✅ Creación y gestión de planes nutricionales
+- ✅ Asignación de planes a usuarios
+- ✅ Seguimiento de estado (activo/pausado/completado)
+- ✅ Historial de planes por usuario
+
+**Endpoints principales:**
+- `GET/POST/PUT/DELETE /api/v1/admin/planes` - Gestión de planes (Admin)
+- `GET /api/v1/usuario-planes` - Mis planes
+- `POST /api/v1/usuario-planes/{planId}/asignar` - Asignar plan
+- `PUT /api/v1/usuario-planes/{id}/estado` - Cambiar estado
+
+---
+
+### ✅ 4️⃣ Módulo de Rutinas de Ejercicio [COMPLETADO]
+**Tests:** 36/36 ✅ | **Última actualización:** Nov 2025
+
+**Funcionalidades:**
+- ✅ Creación de rutinas de ejercicio personalizadas
+- ✅ Asignación de rutinas a usuarios
+- ✅ Gestión de series, repeticiones y duración
+- ✅ Seguimiento de progreso en rutinas
+
+**Endpoints principales:**
+- `GET/POST/PUT/DELETE /api/v1/admin/rutinas` - Gestión de rutinas (Admin)
+- `GET /api/v1/usuario-rutinas` - Mis rutinas
+- `POST /api/v1/usuario-rutinas/{rutinaId}/asignar` - Asignar rutina
+- `PUT /api/v1/usuario-rutinas/{id}/estado` - Cambiar estado
+
+---
+
+### ✅ 5️⃣ Módulo de Seguimiento y Asignaciones [COMPLETADO]
+**Tests:** 30/30 ✅ | **Última actualización:** Nov 2025
+
+**Funcionalidades:**
+- ✅ Registro de comidas consumidas
+- ✅ Registro de ejercicios realizados
+- ✅ Seguimiento de progreso diario
+- ✅ Historial completo de actividades
+
+**Endpoints principales:**
+- `GET/POST /api/v1/registro-comidas` - Registro de comidas
+- `GET/POST /api/v1/registro-ejercicios` - Registro de ejercicios
+- `GET /api/v1/registro-comidas/usuario/{id}` - Historial de comidas
+- `GET /api/v1/registro-ejercicios/usuario/{id}` - Historial de ejercicios
 
 ## 📚 Documentación
 
@@ -260,13 +314,15 @@ El sistema está dividido en 5 módulos principales basados en las User Stories:
 
 ## 👥 Equipo de Desarrollo
 
-| Módulo | Responsable(s) | User Stories | Email |
-|--------|----------------|--------------|-------|
-| Gestión de Cuentas y Preferencias | Leonel Alzamora | US-01 a US-05 | email@example.com |
-| Biblioteca de Contenido (Admin) | Fabian Rojas, Gonzalo Huaranga, Victor Carranza | US-06 a US-10 | email@example.com |
-| Gestor de Catálogo (Admin) | Gonzalo Huaranga, Victor Carranza | US-11 a US-15 | email@example.com |
-| Exploración y Activación | Gonzalo Huaranga, Victor Carranza | US-16 a US-20 | email@example.com |
-| Seguimiento de Progreso | Gonzalo Huaranga, Jhamil Peña, Victor Carranza | US-21 a US-25 | email@example.com |
+| Módulo | Estado | Tests | Responsable(s) |
+|--------|--------|-------|----------------|
+| Autenticación y Perfiles | ✅ Completado | 42/42 | Leonel Alzamora |
+| Biblioteca de Contenido | ✅ Completado | 54/54 | Equipo Backend |
+| Planes Nutricionales | ✅ Completado | 40/40 | Equipo Backend |
+| Rutinas de Ejercicio | ✅ Completado | 36/36 | Equipo Backend |
+| Seguimiento y Asignaciones | ✅ Completado | 30/30 | Equipo Backend |
+
+**Total:** 202 tests unitarios pasando ✅
 
 ## 🤝 Contribuir
 

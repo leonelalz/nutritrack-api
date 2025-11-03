@@ -6,7 +6,7 @@ Guía rápida para poner en marcha el proyecto en 5 minutos.
 
 - ✅ Java 17+
 - ✅ Maven 3.8+
-- ✅ MySQL 8.0+ (o Docker)
+- ✅ PostgreSQL 16+ (o Docker)
 
 ## 🚀 Instalación Rápida
 
@@ -22,94 +22,153 @@ cd nutritrack-api
 **Opción A: Con Docker (Recomendado)**
 
 ```bash
-docker run --name nutritrack-mysql \
-  -e MYSQL_ROOT_PASSWORD=root \
-  -e MYSQL_DATABASE=nutritrack_db \
-  -p 3306:3306 \
-  -d mysql:8.0
+# Iniciar PostgreSQL con Docker Compose
+docker-compose up -d postgres
 ```
 
-**Opción B: MySQL Local**
+Esto creará:
+- Base de datos: `nutritrack_db`
+- Usuario: `nutritrack`
+- Contraseña: `nutritrack123`
+- Puerto: `5433` (para evitar conflictos)
+
+**Opción B: PostgreSQL Local**
 
 ```bash
-mysql -u root -p
+psql -U postgres
 CREATE DATABASE nutritrack_db;
+CREATE USER nutritrack WITH PASSWORD 'nutritrack123';
+GRANT ALL PRIVILEGES ON DATABASE nutritrack_db TO nutritrack;
 ```
 
-### 3. Configurar Aplicación
-
-Crear archivo `src/main/resources/application-local.properties`:
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/nutritrack_db
-spring.datasource.username=root
-spring.datasource.password=root
-jwt.secret=mi-secreto-local-para-desarrollo
-```
-
-### 4. Ejecutar
+### 3. Ejecutar
 
 ```bash
 # Compilar y ejecutar
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+./mvnw spring-boot:run
 ```
 
-**¡Listo!** La API está en: `http://localhost:8080`
+**¡Listo!** La API está en: `http://localhost:8080/api/v1`
+
+**Swagger UI:** http://localhost:8080/api/v1/swagger-ui/index.html
 
 ## 🧪 Verificar Instalación
 
-```bash
-# Health check
-curl http://localhost:8080/actuator/health
+### 1. Health Check (Swagger)
 
-# Respuesta esperada:
-# {"status":"UP"}
+Abre tu navegador en: http://localhost:8080/api/v1/swagger-ui/index.html
+
+### 2. Login con Admin
+
+```bash
+curl http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@fintech.com","password":"admin123"}'
+```
+
+**Usuario Admin por defecto:**
+- Email: `admin@fintech.com`
+- Password: `admin123`
+
+### 3. Registrar nuevo usuario
+
+```bash
+curl http://localhost:8080/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"Test123!","nombre":"Test","apellido":"User"}'
 ```
 
 ## 📚 Próximos Pasos
 
-1. **Leer documentación:** [README.md](../README.md)
-2. **Guía de contribución:** [CONTRIBUTING.md](../CONTRIBUTING.md)
-3. **Arquitectura:** [docs/architecture/ARCHITECTURE.md](architecture/ARCHITECTURE.md)
-4. **Tu módulo:** Ver [docs/modules/](modules/)
+1. **Explorar Swagger UI:** http://localhost:8080/api/v1/swagger-ui/index.html
+2. **Leer documentación:** [README.md](../README.md)
+3. **Importar colecciones Postman:** Ver carpeta [postman/](../postman/)
+4. **Revisar resúmenes de módulos:** [MODULO2_RESUMEN.md](../MODULO2_RESUMEN.md), etc.
+
+## 🎯 Endpoints Principales
+
+### Autenticación
+- `POST /api/v1/auth/register` - Registro
+- `POST /api/v1/auth/login` - Login
+- `GET /api/v1/app/profile` - Mi perfil
+
+### Admin - Biblioteca de Contenido
+- `GET /api/v1/admin/ingredientes` - Ingredientes
+- `GET /api/v1/admin/ejercicios` - Ejercicios
+- `GET /api/v1/admin/comidas` - Comidas
+
+### Planes y Rutinas
+- `GET /api/v1/admin/planes` - Planes nutricionales
+- `GET /api/v1/admin/rutinas` - Rutinas de ejercicio
+- `GET /api/v1/usuario-planes` - Mis planes
+- `GET /api/v1/usuario-rutinas` - Mis rutinas
+
+### Seguimiento
+- `GET /api/v1/registro-comidas` - Registro de comidas
+- `GET /api/v1/registro-ejercicios` - Registro de ejercicios
 
 ## 🆘 Problemas Comunes
 
 ### Error: Port 8080 already in use
 
 ```bash
-# Cambiar puerto en application-local.properties
+# Cambiar puerto en application.properties
 server.port=8081
 ```
 
-### Error: Cannot connect to MySQL
+### Error: Cannot connect to PostgreSQL
 
 ```bash
-# Verificar MySQL iniciado
-docker ps  # Para Docker
-sudo systemctl status mysql  # Para instalación local
+# Verificar PostgreSQL iniciado
+docker-compose ps
+
+# Ver logs
+docker-compose logs postgres
+
+# Reiniciar PostgreSQL
+docker-compose restart postgres
 ```
 
-### Error: JWT secret not configured
+### Error: Database "nutritrack_db" does not exist
 
 ```bash
-# Añadir en application-local.properties
-jwt.secret=cualquier-clave-secreta-de-al-menos-32-caracteres
+# Recrear base de datos
+docker-compose down -v
+docker-compose up -d postgres
+```
+
+### Error: Authentication failed for user "nutritrack"
+
+```bash
+# Verificar credenciales en application.properties
+spring.datasource.username=nutritrack
+spring.datasource.password=nutritrack123
 ```
 
 ## 💡 Tips
 
-- **Ver logs detallados:** Cambiar nivel a DEBUG en properties
-- **Recargar cambios:** Usar Spring DevTools
-- **Tests:** `./mvnw test`
+- **Swagger UI:** Documentación interactiva en http://localhost:8080/api/v1/swagger-ui/index.html
+- **Ver logs detallados:** Cambiar `logging.level.root=DEBUG` en properties
+- **Tests:** `./mvnw test` (202 tests disponibles)
 - **Limpiar build:** `./mvnw clean`
+- **Reiniciar DB:** `docker-compose down -v && docker-compose up -d`
+
+## � Estado del Proyecto
+
+- ✅ Módulo 1: Autenticación y Perfiles (42 tests)
+- ✅ Módulo 2: Biblioteca de Contenido (54 tests)
+- ✅ Módulo 3: Planes Nutricionales (40 tests)
+- ✅ Módulo 4: Rutinas de Ejercicio (36 tests)
+- ✅ Módulo 5: Seguimiento y Asignaciones (30 tests)
+
+**Total:** 202/202 tests pasando ✅
 
 ## 📞 Ayuda
 
-¿Tienes problemas? Contacta al equipo:
-- Slack: #nutritrack-dev
-- Email: team@nutritrack.com
-- Issues: [GitHub Issues](https://github.com/leonelalz/nutritrack-api/issues)
+¿Tienes problemas? 
+- Revisa los logs: `docker-compose logs -f`
+- Verifica la base de datos: `docker-compose exec postgres psql -U nutritrack -d nutritrack_db`
+- Consulta la documentación: [README.md](../README.md)
 
 ---
 
