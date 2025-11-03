@@ -4,6 +4,7 @@ import com.nutritrack.nutritrackapi.dto.request.AsignarPlanRequest;
 import com.nutritrack.nutritrackapi.dto.response.UsuarioPlanResponse;
 import com.nutritrack.nutritrackapi.security.UserDetailsServiceImpl;
 import com.nutritrack.nutritrackapi.service.UsuarioPlanService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "3. Mis Planes (Usuario)", description = "Módulo 3 - Consulta y seguimiento de planes nutricionales asignados")
 @RestController
 @RequestMapping("/api/usuario/planes")
 @RequiredArgsConstructor

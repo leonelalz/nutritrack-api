@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Tag(name = "2. Comidas (ADMIN)", description = "Módulo 2 - Gestión de comidas con recetas e ingredientes - Solo ADMIN")
 @RestController
 @RequestMapping("/admin/comidas")
 @RequiredArgsConstructor

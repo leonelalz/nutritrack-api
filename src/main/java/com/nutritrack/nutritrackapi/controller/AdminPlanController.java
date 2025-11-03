@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "3. Planes Nutricionales (ADMIN)", description = "Módulo 3 - Creación y gestión de planes nutricionales - Solo ADMIN")
 @RestController
 @RequestMapping("/admin/planes")
 @RequiredArgsConstructor

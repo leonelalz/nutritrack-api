@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "2. Ejercicios (ADMIN)", description = "Módulo 2 - Gestión de ejercicios con calorías estimadas - Solo ADMIN")
 @RestController
 @RequestMapping("/admin/ejercicios")
 @RequiredArgsConstructor

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Tag(name = "Perfil de Usuario", description = "Endpoints para gestión del perfil y preferencias del usuario")
+@Tag(name = "1. Gestión de Perfil", description = "Módulo 1 - Gestión del perfil personal del usuario")
 @RestController
 @RequestMapping("/app/profile")
 @RequiredArgsConstructor

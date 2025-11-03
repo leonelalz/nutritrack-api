@@ -4,6 +4,7 @@ import com.nutritrack.nutritrackapi.dto.request.AsignarRutinaRequest;
 import com.nutritrack.nutritrackapi.dto.response.UsuarioRutinaResponse;
 import com.nutritrack.nutritrackapi.security.UserDetailsServiceImpl;
 import com.nutritrack.nutritrackapi.service.UsuarioRutinaService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "4. Mis Rutinas (Usuario)", description = "Módulo 4 - Consulta y seguimiento de rutinas de ejercicio asignadas")
 @RestController
 @RequestMapping("/api/usuario/rutinas")
 @RequiredArgsConstructor
