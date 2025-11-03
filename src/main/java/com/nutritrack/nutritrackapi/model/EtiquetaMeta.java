@@ -17,9 +17,11 @@ public class EtiquetaMeta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "id_catalogo_meta", nullable = false)
-    private Long idCatalogoMeta;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_catalogo_meta", nullable = false)
+    private CatalogoMeta meta;  // ✅ Relación con entidad CatalogoMeta
 
-    @Column(name = "id_etiqueta", nullable = false)
-    private Long idEtiqueta;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_etiqueta", nullable = false)
+    private Etiqueta etiqueta;
 }
