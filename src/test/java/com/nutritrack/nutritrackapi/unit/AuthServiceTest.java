@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +28,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,13 +69,13 @@ class AuthServiceTest {
     }
 
     private CuentaAuth crearCuentaMock(String email, String password) {
-        CuentaAuth cuenta = new CuentaAuth();
-        cuenta.setId(UUID.randomUUID());
-        cuenta.setEmail(email);
-        cuenta.setPassword(password);
-        cuenta.setRol(rolUsuario);
-        cuenta.setActive(true);
-        return cuenta;
+        return CuentaAuth.builder()
+                .id(UUID.randomUUID())
+                .email(email)
+                .password(password)
+                .rol(rolUsuario)
+                .active(true)
+                .build();
     }
 
     private PerfilUsuario crearPerfilMock(CuentaAuth cuenta, String nombre) {
@@ -175,5 +177,205 @@ class AuthServiceTest {
         assertThat(response.name()).isEqualTo("John Doe");
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+    }
+
+    @Test
+    @DisplayName("Login debe lanzar excepción si cuenta no existe después de autenticar")
+    void login_CuentaNoExiste_ThrowsException() {
+        // Arrange
+        LoginRequestDTO request = new LoginRequestDTO("user@example.com", "pass123");
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(authentication);
+        when(cuentaAuthRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(org.springframework.security.core.userdetails.UsernameNotFoundException.class)
+                .hasMessageContaining("User not found");
+
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(cuentaAuthRepository).findByEmail("user@example.com");
+    }
+
+    @Test
+    @DisplayName("Login debe lanzar excepción si perfil no existe")
+    void login_PerfilNoExiste_ThrowsException() {
+        // Arrange
+        LoginRequestDTO request = new LoginRequestDTO("user@example.com", "pass123");
+        CuentaAuth cuenta = crearCuentaMock("user@example.com", "encodedPassword");
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(authentication);
+        when(cuentaAuthRepository.findByEmail("user@example.com")).thenReturn(Optional.of(cuenta));
+        when(perfilUsuarioRepository.findByCuenta_Id(cuenta.getId())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Customer not found");
+
+        verify(perfilUsuarioRepository).findByCuenta_Id(cuenta.getId());
+    }
+
+    // ==================== TEST: CASOS EDGE ====================
+
+    @Test
+    @DisplayName("Debe manejar emails con diferentes formatos válidos")
+    void register_EmailFormatsValidos_Success() {
+        // Arrange
+        String[] emailsValidos = {
+            "user@domain.com",
+            "user.name@domain.com",
+            "user+tag@domain.co.uk",
+            "user123@sub.domain.com"
+        };
+
+        for (String email : emailsValidos) {
+            RegistroRequestDTO request = new RegistroRequestDTO(email, "pass123", "Test User");
+
+            when(cuentaAuthRepository.existsByEmail(email)).thenReturn(false);
+            when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
+            when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+
+            CuentaAuth cuenta = crearCuentaMock(email, "encodedPassword");
+            when(cuentaAuthRepository.save(any(CuentaAuth.class))).thenReturn(cuenta);
+
+            PerfilUsuario perfil = crearPerfilMock(cuenta, "Test User");
+            when(perfilUsuarioRepository.save(any(PerfilUsuario.class))).thenReturn(perfil);
+
+            when(jwtUtil.generateToken(eq(email), any(), any())).thenReturn("fake-jwt-token");
+
+            // Act
+            AuthResponse response = authService.register(request);
+
+            // Assert
+            assertThat(response.email()).isEqualTo(email);
+        }
+
+        verify(cuentaAuthRepository, times(emailsValidos.length)).save(any(CuentaAuth.class));
+    }
+
+    @Test
+    @DisplayName("Debe manejar nombres con caracteres especiales")
+    void register_NombresEspeciales_Success() {
+        // Arrange
+        String[] nombresEspeciales = {
+            "José García",
+            "María José Pérez",
+            "O'Connor",
+            "Jean-Pierre Dubois"
+        };
+
+        for (String nombre : nombresEspeciales) {
+            RegistroRequestDTO request = new RegistroRequestDTO("user@test.com", "pass123", nombre);
+
+            when(cuentaAuthRepository.existsByEmail(any())).thenReturn(false);
+            when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
+            when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+
+            CuentaAuth cuenta = crearCuentaMock("user@test.com", "encodedPassword");
+            when(cuentaAuthRepository.save(any(CuentaAuth.class))).thenReturn(cuenta);
+
+            PerfilUsuario perfil = crearPerfilMock(cuenta, nombre);
+            when(perfilUsuarioRepository.save(any(PerfilUsuario.class))).thenReturn(perfil);
+
+            when(jwtUtil.generateToken(any(), eq(nombre), any())).thenReturn("fake-jwt-token");
+
+            // Act
+            AuthResponse response = authService.register(request);
+
+            // Assert
+            assertThat(response.name()).isEqualTo(nombre);
+        }
+    }
+
+    @Test
+    @DisplayName("Debe crear cuenta con rol USER por defecto")
+    void register_VerificaRolUsuario_Success() {
+        // Arrange
+        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "Test User");
+
+        when(cuentaAuthRepository.existsByEmail(request.email())).thenReturn(false);
+        when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
+        when(passwordEncoder.encode(request.password())).thenReturn("encodedPassword");
+
+        ArgumentCaptor<CuentaAuth> cuentaCaptor = ArgumentCaptor.forClass(CuentaAuth.class);
+        CuentaAuth cuentaGuardada = crearCuentaMock("user@example.com", "encodedPassword");
+        when(cuentaAuthRepository.save(cuentaCaptor.capture())).thenReturn(cuentaGuardada);
+
+        PerfilUsuario perfil = crearPerfilMock(cuentaGuardada, "Test User");
+        when(perfilUsuarioRepository.save(any(PerfilUsuario.class))).thenReturn(perfil);
+        when(jwtUtil.generateToken(any(), any(), any())).thenReturn("fake-jwt-token");
+
+        // Act
+        authService.register(request);
+
+        // Assert
+        CuentaAuth cuentaCreada = cuentaCaptor.getValue();
+        assertThat(cuentaCreada.getRol().getTipo()).isEqualTo(TipoRol.ROLE_USER);
+        assertThat(cuentaCreada.isActive()).isTrue();
+
+        verify(rolRepository).findByTipo(TipoRol.ROLE_USER);
+    }
+
+    @Test
+    @DisplayName("Debe encriptar password antes de guardar")
+    void register_EncriptaPassword_Success() {
+        // Arrange
+        String rawPassword = "MySecurePass123!";
+        String encodedPassword = "encodedSecurePassword";
+        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", rawPassword, "Test User");
+
+        when(cuentaAuthRepository.existsByEmail(request.email())).thenReturn(false);
+        when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
+        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
+
+        ArgumentCaptor<CuentaAuth> cuentaCaptor = ArgumentCaptor.forClass(CuentaAuth.class);
+        CuentaAuth cuentaGuardada = crearCuentaMock("user@example.com", encodedPassword);
+        when(cuentaAuthRepository.save(cuentaCaptor.capture())).thenReturn(cuentaGuardada);
+
+        PerfilUsuario perfil = crearPerfilMock(cuentaGuardada, "Test User");
+        when(perfilUsuarioRepository.save(any(PerfilUsuario.class))).thenReturn(perfil);
+        when(jwtUtil.generateToken(any(), any(), any())).thenReturn("fake-jwt-token");
+
+        // Act
+        authService.register(request);
+
+        // Assert
+        CuentaAuth cuentaCreada = cuentaCaptor.getValue();
+        assertThat(cuentaCreada.getPassword()).isEqualTo(encodedPassword);
+        assertThat(cuentaCreada.getPassword()).isNotEqualTo(rawPassword);
+
+        verify(passwordEncoder).encode(rawPassword);
+    }
+
+    @Test
+    @DisplayName("Debe crear perfil vinculado a la cuenta")
+    void register_CreaPerfilVinculado_Success() {
+        // Arrange
+        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "John Doe");
+
+        when(cuentaAuthRepository.existsByEmail(request.email())).thenReturn(false);
+        when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
+        when(passwordEncoder.encode(request.password())).thenReturn("encodedPassword");
+
+        CuentaAuth cuentaGuardada = crearCuentaMock("user@example.com", "encodedPassword");
+        when(cuentaAuthRepository.save(any(CuentaAuth.class))).thenReturn(cuentaGuardada);
+
+        ArgumentCaptor<PerfilUsuario> perfilCaptor = ArgumentCaptor.forClass(PerfilUsuario.class);
+        PerfilUsuario perfilGuardado = crearPerfilMock(cuentaGuardada, "John Doe");
+        when(perfilUsuarioRepository.save(perfilCaptor.capture())).thenReturn(perfilGuardado);
+        when(jwtUtil.generateToken(any(), any(), any())).thenReturn("fake-jwt-token");
+
+        // Act
+        authService.register(request);
+
+        // Assert
+        PerfilUsuario perfilCreado = perfilCaptor.getValue();
+        assertThat(perfilCreado.getNombre()).isEqualTo("John Doe");
+        assertThat(perfilCreado.getCuenta()).isEqualTo(cuentaGuardada);
+
+        verify(perfilUsuarioRepository).save(any(PerfilUsuario.class));
     }
 }
