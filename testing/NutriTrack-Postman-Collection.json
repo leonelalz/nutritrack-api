@@ -1,0 +1,182 @@
+{
+	"info": {
+		"_postman_id": "nutritrack-api-v1",
+		"name": "NutriTrack API - Módulo 1",
+		"description": "Colección de Postman para probar los endpoints del Módulo 1: Cuentas y Preferencias",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "testEmail",
+			"value": "test@nutritrack.com",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Autenticación",
+			"item": [
+				{
+					"name": "Registrar Usuario",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"token\", jsonData.token);",
+									"    pm.environment.set(\"testEmail\", jsonData.email);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"Test123!@#\",\n  \"nombre\": \"Usuario de Prueba Postman\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "US-01: Registra un nuevo usuario en el sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"Test123!@#\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "US-02: Autentica un usuario y obtiene el token JWT"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Perfil de Usuario",
+			"item": [
+				{
+					"name": "Obtener Mi Perfil",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/app/profile?email={{testEmail}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["app", "profile"],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{testEmail}}",
+									"description": "TEMPORAL: Para testing sin JWT"
+								}
+							]
+						},
+						"description": "US-04: Obtiene el perfil completo del usuario autenticado"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Mi Perfil",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Usuario Actualizado Postman\",\n  \"unidadesMedida\": \"LBS\",\n  \"objetivoActual\": \"PERDER_PESO\",\n  \"nivelActividadActual\": \"MODERADO\",\n  \"etiquetasSaludIds\": [1, 2, 10]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/app/profile?email={{testEmail}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["app", "profile"],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{testEmail}}"
+								}
+							]
+						},
+						"description": "US-03: Actualiza el perfil del usuario incluyendo preferencias de salud"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Mi Cuenta",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/app/profile?email={{testEmail}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["app", "profile"],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{testEmail}}"
+								}
+							]
+						},
+						"description": "US-05: Desactiva la cuenta del usuario (eliminación lógica)"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
