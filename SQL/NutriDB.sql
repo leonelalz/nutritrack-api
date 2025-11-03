@@ -215,10 +215,11 @@ COMMENT ON COLUMN "usuario_actividades_progreso"."id_meta_asignada" IS 'FK a usu
 
 ALTER TABLE "cuentas_auth" ADD FOREIGN KEY ("id_rol") REFERENCES "roles" ("id");
 
--- TEMPORARILY DISABLED: Circular FK constraints cause initialization issues
--- Will be handled by application logic instead
--- ALTER TABLE "cuentas_auth" ADD FOREIGN KEY ("id") REFERENCES "perfiles_usuario" ("id_usuario");
--- ALTER TABLE "perfiles_usuario" ADD FOREIGN KEY ("id") REFERENCES "usuario_perfil_salud" ("id_perfil");
+-- Relación correcta: PerfilUsuario pertenece a CuentaAuth
+ALTER TABLE "perfiles_usuario" ADD FOREIGN KEY ("id_usuario") REFERENCES "cuentas_auth" ("id") ON DELETE CASCADE;
+
+-- Relación correcta: UsuarioPerfilSalud extiende PerfilUsuario (mismo ID)
+ALTER TABLE "usuario_perfil_salud" ADD FOREIGN KEY ("id_perfil") REFERENCES "perfiles_usuario" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "usuario_historial_medidas" ADD FOREIGN KEY ("id_perfil") REFERENCES "perfiles_usuario" ("id");
 
