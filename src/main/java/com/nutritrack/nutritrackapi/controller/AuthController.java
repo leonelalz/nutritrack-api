@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 
 import java.util.UUID;
 
-@Tag(name = "Autenticación", description = "Endpoints para registro, login y gestión de sesiones")
+@Tag(name = "Autenticación", description = "🔐 Registro, login y gestión de sesiones")
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor

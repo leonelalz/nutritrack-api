@@ -2,6 +2,7 @@ package com.nutritrack.nutritrackapi.controller;
 
 import com.nutritrack.nutritrackapi.model.PerfilUsuario;
 import com.nutritrack.nutritrackapi.service.PerfilUsuarioService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "1. Administración de Perfiles (ADMIN)", description = "Módulo 1 - Gestión de perfiles de usuario - Solo ADMIN")
 @RestController
 @RequestMapping("/perfiles")
 @RequiredArgsConstructor

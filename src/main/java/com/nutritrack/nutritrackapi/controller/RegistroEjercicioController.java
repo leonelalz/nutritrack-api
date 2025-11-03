@@ -5,6 +5,7 @@ import com.nutritrack.nutritrackapi.dto.response.EstadisticasEjercicioResponse;
 import com.nutritrack.nutritrackapi.dto.response.RegistroEjercicioResponse;
 import com.nutritrack.nutritrackapi.security.UserDetailsServiceImpl;
 import com.nutritrack.nutritrackapi.service.RegistroEjercicioService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@Tag(name = "5. Registro de Ejercicios", description = "Módulo 5 - Registro y seguimiento de ejercicios realizados")
 @RestController
 @RequestMapping("/api/usuario/registros/ejercicios")
 @RequiredArgsConstructor

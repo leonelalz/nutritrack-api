@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/admin/ingredientes")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-@Tag(name = "Ingredientes (Admin)", description = "Gestión de ingredientes - Solo ADMIN")
+@Tag(name = "2. Ingredientes (ADMIN)", description = "Módulo 2 - Gestión de ingredientes con información nutricional - Solo ADMIN")
 public class AdminIngredienteController {
     
     private final IngredienteService ingredienteService;

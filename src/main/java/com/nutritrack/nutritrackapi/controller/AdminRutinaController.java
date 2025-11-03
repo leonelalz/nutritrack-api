@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "4. Rutinas de Ejercicio (ADMIN)", description = "Módulo 4 - Creación y gestión de rutinas de ejercicio - Solo ADMIN")
 @RestController
 @RequestMapping("/admin/rutinas")
 @RequiredArgsConstructor

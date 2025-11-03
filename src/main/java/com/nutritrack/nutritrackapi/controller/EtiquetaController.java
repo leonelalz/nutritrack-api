@@ -5,6 +5,7 @@ import com.nutritrack.nutritrackapi.dto.request.EtiquetaRequest;
 import com.nutritrack.nutritrackapi.dto.response.ApiResponse;
 import com.nutritrack.nutritrackapi.dto.response.EtiquetaResponse;
 import com.nutritrack.nutritrackapi.service.EtiquetaService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "2. Etiquetas", description = "Módulo 2 - Gestión de etiquetas para categorización (alergias, dietas, objetivos, etc.)")
 @RestController
 @RequestMapping("/etiquetas")
 @RequiredArgsConstructor

@@ -4,12 +4,14 @@ import com.nutritrack.nutritrackapi.model.CuentaAuth;
 import com.nutritrack.nutritrackapi.model.Rol;
 import com.nutritrack.nutritrackapi.model.enums.TipoRol;
 import com.nutritrack.nutritrackapi.service.CuentaAuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+@Tag(name = "1. Administración de Cuentas (ADMIN)", description = "Módulo 1 - Gestión de cuentas de usuario - Solo ADMIN")
 @RestController
 @RequestMapping("/cuentas")
 @RequiredArgsConstructor
