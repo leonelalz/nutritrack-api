@@ -17,7 +17,7 @@ import com.nutritrack.nutritrackapi.model.enums.*;
 public class UsuarioPerfilSalud {
 
     @Id
-    @Column(name = "id_perfil")
+    @Column(name = "id_perfil", columnDefinition = "bigint")
     private Long idPerfil;
 
     @Enumerated(EnumType.STRING)
