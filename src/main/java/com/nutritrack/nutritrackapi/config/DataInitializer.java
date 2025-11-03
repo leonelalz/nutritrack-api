@@ -67,7 +67,8 @@ public class DataInitializer implements CommandLineRunner {
         // Create PerfilUsuario linked to the CuentaAuth
         PerfilUsuario adminCustomer = new PerfilUsuario();
         adminCustomer.setCuenta(savedAdmin);
-        adminCustomer.setNombre("System Administrator");
+        adminCustomer.setNombre("System");
+        adminCustomer.setApellido("Administrator");
         customerRepository.save(adminCustomer);
 
         log.info("========================================");

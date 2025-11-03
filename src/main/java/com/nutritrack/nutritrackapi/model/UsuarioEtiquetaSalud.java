@@ -2,7 +2,6 @@ package com.nutritrack.nutritrackapi.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.UUID;
 
 @Entity
 @Table(name = "usuario_etiquetas_salud")
@@ -35,7 +34,7 @@ public class UsuarioEtiquetaSalud {
     public static class UsuarioEtiquetaSaludId implements java.io.Serializable {
         
         @Column(name = "id_perfil")
-        private UUID idPerfil;
+        private Long idPerfil;
 
         @Column(name = "id_etiqueta")
         private Long idEtiqueta;
