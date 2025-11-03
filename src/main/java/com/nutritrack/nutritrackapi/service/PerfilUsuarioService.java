@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +33,7 @@ public class PerfilUsuarioService {
     /**
      * US-04: Obtener perfil completo del usuario
      */
-    public PerfilUsuarioResponse obtenerPerfilCompleto(UUID perfilId) {
+    public PerfilUsuarioResponse obtenerPerfilCompleto(Long perfilId) {
         PerfilUsuario perfil = perfilRepo.findById(perfilId)
                 .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado"));
 
@@ -46,7 +45,7 @@ public class PerfilUsuarioService {
     /**
      * Obtener ID de perfil por email de cuenta (para testing sin JWT)
      */
-    public UUID obtenerPerfilIdPorEmail(String email) {
+    public Long obtenerPerfilIdPorEmail(String email) {
         CuentaAuth cuenta = cuentaRepo.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuenta no encontrada con email: " + email));
         
@@ -59,7 +58,7 @@ public class PerfilUsuarioService {
     /**
      * US-03, US-04: Actualizar perfil del usuario
      */
-    public PerfilUsuarioResponse actualizarPerfil(UUID perfilId, ActualizarPerfilRequest request) {
+    public PerfilUsuarioResponse actualizarPerfil(Long perfilId, ActualizarPerfilRequest request) {
         PerfilUsuario perfil = perfilRepo.findById(perfilId)
                 .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado"));
 
@@ -102,7 +101,7 @@ public class PerfilUsuarioService {
     /**
      * US-05: Eliminar cuenta del usuario (eliminación lógica)
      */
-    public void eliminarCuenta(UUID perfilId) {
+    public void eliminarCuenta(Long perfilId) {
         PerfilUsuario perfil = perfilRepo.findById(perfilId)
                 .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado"));
 
@@ -151,7 +150,7 @@ public class PerfilUsuarioService {
     // Métodos legacy (mantener compatibilidad)
     // ==========================================
 
-    public PerfilUsuario actualizarNombre(UUID idPerfil, String nuevoNombre) {
+    public PerfilUsuario actualizarNombre(Long idPerfil, String nuevoNombre) {
         PerfilUsuario perfil = perfilRepo.findById(idPerfil)
                 .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado con id: " + idPerfil));
 
@@ -159,7 +158,7 @@ public class PerfilUsuarioService {
         return perfilRepo.save(perfil);
     }
 
-    public PerfilUsuario obtenerPorCuenta(UUID idCuenta) {
+    public PerfilUsuario obtenerPorCuenta(Long idCuenta) {
         CuentaAuth cuenta = cuentaRepo.findById(idCuenta)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuenta no encontrada con id: " + idCuenta));
 
@@ -171,7 +170,7 @@ public class PerfilUsuarioService {
         return perfilRepo.findAll();
     }
 
-    public void eliminarPerfil(UUID idPerfil) {
+    public void eliminarPerfil(Long idPerfil) {
         if (!perfilRepo.existsById(idPerfil)) {
             throw new ResourceNotFoundException("Perfil no encontrado");
         }

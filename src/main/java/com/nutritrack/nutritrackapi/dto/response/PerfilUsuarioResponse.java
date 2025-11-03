@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Set;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -18,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PerfilUsuarioResponse {
 
-    private UUID profileId;
+    private Long profileId;
     private String nombre;
     private UnidadesMedida unidadesMedida;
     private LocalDate fechaInicioApp;

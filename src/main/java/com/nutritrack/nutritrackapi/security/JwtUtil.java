@@ -25,7 +25,7 @@ public class JwtUtil {
     // ==================== GENERACIÓN ====================
 
     /** Generar token con email, nombre y perfilId */
-    public String generateToken(String email, String name, UUID perfilId) {
+    public String generateToken(String email, String name, Long perfilId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
 
@@ -44,7 +44,7 @@ public class JwtUtil {
         Claims claims = getAllClaimsFromToken(oldToken);
         String email = claims.getSubject();
         String name = claims.get("name", String.class);
-        UUID perfilId = claims.get("perfilId", UUID.class);
+        Long perfilId = claims.get("perfilId", Long.class);
         return generateToken(email, name, perfilId);
     }
 
@@ -70,8 +70,8 @@ public class JwtUtil {
     }
 
     /** Extraer perfilId */
-    public UUID getPerfilIdFromToken(String token) {
-        return getAllClaimsFromToken(token).get("perfilId", UUID.class);
+    public Long getPerfilIdFromToken(String token) {
+        return getAllClaimsFromToken(token).get("perfilId", Long.class);
     }
 
     /** Obtener todos los claims */

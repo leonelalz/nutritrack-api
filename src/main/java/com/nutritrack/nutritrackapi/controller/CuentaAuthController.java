@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/cuentas")
@@ -21,7 +20,7 @@ public class CuentaAuthController {
     // 🔐 Cambiar contraseña
     @PutMapping("/{id}/password")
     public ResponseEntity<String> cambiarPassword(
-            @PathVariable UUID id,
+            @PathVariable Long id,
             @RequestParam String nuevaPassword) {
         cuentaAuthService.cambiarPassword(id, nuevaPassword);
         return ResponseEntity.ok("Contraseña actualizada correctamente");
@@ -30,7 +29,7 @@ public class CuentaAuthController {
     // 🧩 Cambiar rol (ej. USER -> ADMIN)
     @PutMapping("/{id}/rol")
     public ResponseEntity<String> cambiarRol(
-            @PathVariable UUID id,
+            @PathVariable Long id,
             @RequestParam Rol nuevoRol) {
         cuentaAuthService.cambiarRol(id, nuevoRol);
         return ResponseEntity.ok("Rol actualizado a: " + nuevoRol);
@@ -38,14 +37,14 @@ public class CuentaAuthController {
 
     // 🚫 Desactivar cuenta
     @PatchMapping("/{id}/desactivar")
-    public ResponseEntity<String> desactivarCuenta(@PathVariable UUID id) {
+    public ResponseEntity<String> desactivarCuenta(@PathVariable Long id) {
         cuentaAuthService.desactivarCuenta(id);
         return ResponseEntity.ok("Cuenta desactivada correctamente");
     }
 
     // ✅ Reactivar cuenta
     @PatchMapping("/{id}/reactivar")
-    public ResponseEntity<String> reactivarCuenta(@PathVariable UUID id) {
+    public ResponseEntity<String> reactivarCuenta(@PathVariable Long id) {
         cuentaAuthService.reactivarCuenta(id);
         return ResponseEntity.ok("Cuenta reactivada correctamente");
     }

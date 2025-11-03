@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class CuentaAuthService {
     /**
      * Cambiar la contraseña de una cuenta.
      */
-    public void cambiarPassword(UUID idCuenta, String nuevaPassword) {
+    public void cambiarPassword(Long idCuenta, String nuevaPassword) {
         CuentaAuth cuenta = cuentaRepo.findById(idCuenta)
                 .orElseThrow(() -> new RuntimeException("Cuenta no encontrada con id: " + idCuenta));
 
@@ -34,7 +33,7 @@ public class CuentaAuthService {
     /**
      * Desactivar una cuenta (soft delete).
      */
-    public void desactivarCuenta(UUID idCuenta) {
+    public void desactivarCuenta(Long idCuenta) {
         CuentaAuth cuenta = cuentaRepo.findById(idCuenta)
                 .orElseThrow(() -> new RuntimeException("Cuenta no encontrada con id: " + idCuenta));
         cuenta.setActive(false);
@@ -44,7 +43,7 @@ public class CuentaAuthService {
     /**
      * Cambiar el rol de una cuenta.
      */
-    public void cambiarRol(UUID idCuenta, Rol nuevoRol) {
+    public void cambiarRol(Long idCuenta, Rol nuevoRol) {
         CuentaAuth cuenta = cuentaRepo.findById(idCuenta)
                 .orElseThrow(() -> new RuntimeException("Cuenta no encontrada con id: " + idCuenta));
         cuenta.setRol(nuevoRol);
@@ -61,7 +60,7 @@ public class CuentaAuthService {
     /**
      * Reactivar una cuenta previamente desactivada.
      */
-    public void reactivarCuenta(UUID idCuenta) {
+    public void reactivarCuenta(Long idCuenta) {
         CuentaAuth cuenta = cuentaRepo.findById(idCuenta)
                 .orElseThrow(() -> new RuntimeException("Cuenta no encontrada con id: " + idCuenta));
         cuenta.setActive(true);

@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/perfiles")
@@ -20,7 +19,7 @@ public class PerfilUsuarioController {
     // 🧑‍💻 Actualizar nombre del perfil
     @PutMapping("/{id}/nombre")
     public ResponseEntity<PerfilUsuario> actualizarNombre(
-            @PathVariable UUID id,
+            @PathVariable Long id,
             @RequestParam String nuevoNombre) {
         PerfilUsuario actualizado = perfilUsuarioService.actualizarNombre(id, nuevoNombre);
         return ResponseEntity.ok(actualizado);
@@ -36,7 +35,7 @@ public class PerfilUsuarioController {
 
     // 🔍 Obtener perfil por id de cuenta
     @GetMapping("/cuenta/{idCuenta}")
-    public ResponseEntity<PerfilUsuario> obtenerPorCuenta(@PathVariable UUID idCuenta) {
+    public ResponseEntity<PerfilUsuario> obtenerPorCuenta(@PathVariable Long idCuenta) {
         PerfilUsuario perfil = perfilUsuarioService.obtenerPorCuenta(idCuenta);
         return ResponseEntity.ok(perfil);
     }
@@ -49,7 +48,7 @@ public class PerfilUsuarioController {
 
     // ❌ Eliminar perfil
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarPerfil(@PathVariable UUID id) {
+    public ResponseEntity<String> eliminarPerfil(@PathVariable Long id) {
         perfilUsuarioService.eliminarPerfil(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .body("Perfil eliminado correctamente");

@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +20,7 @@ public class UsuarioPerfilSaludService {
     /**
      * Crear o actualizar el perfil de salud de un usuario.
      */
-    public UsuarioPerfilSalud actualizarPerfilSalud(UUID idCliente,
+    public UsuarioPerfilSalud actualizarPerfilSalud(Long idCliente,
                                                     ObjetivoGeneral objetivo,
                                                     NivelActividad nivelActividad,
                                                     String alergias,
@@ -56,7 +55,7 @@ public class UsuarioPerfilSaludService {
     /**
      * Obtener el perfil de salud de un usuario.
      */
-    public UsuarioPerfilSalud obtenerPerfilSalud(UUID idPerfil) {
+    public UsuarioPerfilSalud obtenerPerfilSalud(Long idPerfil) {
         UsuarioPerfilSalud perfil = perfilSaludRepo.findByIdPerfil(idPerfil);
         if (perfil == null) {
             throw new RuntimeException("No existe un perfil de salud para el cliente con id: " + idPerfil);

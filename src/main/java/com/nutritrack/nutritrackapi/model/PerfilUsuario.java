@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 
 @Entity
@@ -17,11 +16,14 @@ import java.util.UUID;
 @Setter
 public class PerfilUsuario {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 100)
     private String nombre;
+
+    @Column(nullable = false, length = 100)
+    private String apellido;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "unidades_medida", length = 10)

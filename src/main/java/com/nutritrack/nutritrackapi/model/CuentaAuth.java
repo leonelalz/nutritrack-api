@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Table(name = "cuentas_auth")
@@ -15,8 +14,8 @@ import java.util.UUID;
 public class CuentaAuth {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -34,6 +33,9 @@ public class CuentaAuth {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_rol")
     private Rol rol;
+
+    @OneToOne(mappedBy = "cuenta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private PerfilUsuario perfilUsuario;
 
     @PrePersist
     public void prePersist() {

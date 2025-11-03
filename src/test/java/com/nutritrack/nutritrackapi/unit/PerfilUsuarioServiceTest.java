@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
@@ -45,16 +44,16 @@ class PerfilUsuarioServiceTest {
     @InjectMocks
     private PerfilUsuarioService perfilService;
 
-    private UUID perfilId;
-    private UUID cuentaId;
+    private Long perfilId;
+    private Long cuentaId;
     private CuentaAuth cuentaMock;
     private PerfilUsuario perfilMock;
     private UsuarioPerfilSalud perfilSaludMock;
 
     @BeforeEach
     void setUp() {
-        perfilId = UUID.randomUUID();
-        cuentaId = UUID.randomUUID();
+        perfilId = 1L;
+        cuentaId = 1L;
 
         // Mock CuentaAuth
         cuentaMock = CuentaAuth.builder()
@@ -131,7 +130,7 @@ class PerfilUsuarioServiceTest {
     @DisplayName("US-04: Debe lanzar excepción si perfil no existe")
     void obtenerPerfilCompleto_PerfilNoExiste_ThrowsException() {
         // Arrange
-        UUID idInexistente = UUID.randomUUID();
+        Long idInexistente = 999L;
         when(perfilRepo.findById(idInexistente)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -154,7 +153,7 @@ class PerfilUsuarioServiceTest {
         when(perfilRepo.findByCuenta_Id(cuentaId)).thenReturn(Optional.of(perfilMock));
 
         // Act
-        UUID resultado = perfilService.obtenerPerfilIdPorEmail(email);
+        Long resultado = perfilService.obtenerPerfilIdPorEmail(email);
 
         // Assert
         assertThat(resultado).isEqualTo(perfilId);
@@ -278,7 +277,7 @@ class PerfilUsuarioServiceTest {
     @DisplayName("US-03: Debe lanzar excepción si perfil no existe al actualizar")
     void actualizarPerfil_PerfilNoExiste_ThrowsException() {
         // Arrange
-        UUID idInexistente = UUID.randomUUID();
+        Long idInexistente = 999L;
         ActualizarPerfilRequest request = ActualizarPerfilRequest.builder()
                 .nombre("Test")
                 .build();
@@ -316,7 +315,7 @@ class PerfilUsuarioServiceTest {
     @DisplayName("US-05: Debe lanzar excepción si perfil no existe al eliminar")
     void eliminarCuenta_PerfilNoExiste_ThrowsException() {
         // Arrange
-        UUID idInexistente = UUID.randomUUID();
+        Long idInexistente = 999L;
         when(perfilRepo.findById(idInexistente)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -413,7 +412,7 @@ class PerfilUsuarioServiceTest {
     @DisplayName("Legacy: Debe lanzar excepción al eliminar perfil inexistente")
     void eliminarPerfil_NoExiste_ThrowsException() {
         // Arrange
-        UUID idInexistente = UUID.randomUUID();
+        Long idInexistente = 999L;
         when(perfilRepo.existsById(idInexistente)).thenReturn(false);
 
         // Act & Assert

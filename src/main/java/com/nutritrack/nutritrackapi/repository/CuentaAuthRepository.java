@@ -7,10 +7,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface CuentaAuthRepository extends JpaRepository<CuentaAuth, UUID> {
+public interface CuentaAuthRepository extends JpaRepository<CuentaAuth, Long> {
 
     // Buscar cuenta por email
     @Query("SELECT c FROM CuentaAuth c WHERE c.email = :email")
