@@ -1,0 +1,1011 @@
+{
+	"info": {
+		"_postman_id": "nutritrack-api-complete",
+		"name": "NutriTrack API - Colección Completa",
+		"description": "Colección completa de todas las funcionalidades de NutriTrack API\n\n**Módulos incluidos:**\n- Módulo 1: Autenticación y Perfiles\n- Módulo 2: Biblioteca de Contenido (Ingredientes, Ejercicios, Comidas)\n- Módulo 3: Planes Nutricionales\n- Módulo 4: Rutinas de Ejercicio\n- Módulo 5: Seguimiento y Asignaciones\n\n**Variables automáticas:**\n- `adminToken` - Token de autenticación ADMIN\n- `userToken` - Token de autenticación USER\n- `perfilId` - ID del perfil de usuario\n\n**Roles:**\n- ADMIN: Gestiona contenido (ingredientes, ejercicios, comidas, planes, rutinas)\n- USER: Consume contenido (asigna planes/rutinas, registra comidas/ejercicios)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "nutritrack-complete"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "perfilId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Módulo 1 - Autenticación y Perfiles",
+			"description": "Endpoints para registro, login, gestión de perfiles y datos de salud",
+			"item": [
+				{
+					"name": "Registro Usuario",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"usuario@example.com\",\n  \"password\": \"password123\",\n  \"nombre\": \"Juan Pérez\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login ADMIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('adminToken', jsonData.token);",
+									"    console.log('Admin token guardado:', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@fintech.com\",\n  \"password\": \"admin123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Usuario Regular",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('userToken', jsonData.token);",
+									"    pm.collectionVariables.set('perfilId', jsonData.profileId);",
+									"    console.log('User token guardado:', jsonData.token);",
+									"    console.log('Profile ID:', jsonData.profileId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"usuario@example.com\",\n  \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Mi Perfil",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/app/perfil",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "app", "perfil"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Mi Perfil",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"unidadesMedida\": \"METRICO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/app/perfil",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "app", "perfil"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Módulo 2 - Biblioteca de Contenido",
+			"description": "Gestión ADMIN de ingredientes, ejercicios y comidas",
+			"item": [
+				{
+					"name": "Ingredientes",
+					"item": [
+						{
+							"name": "Crear Ingrediente",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Pechuga de Pollo\",\n  \"categoriaAlimento\": \"PROTEINAS\",\n  \"energia\": 165.0,\n  \"proteina\": 31.0,\n  \"carbohidratos\": 0.0,\n  \"grasaTotal\": 3.6,\n  \"fibra\": 0.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/admin/ingredientes",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "admin", "ingredientes"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Ingredientes",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/admin/ingredientes?page=0&size=20",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "admin", "ingredientes"],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Buscar por Nombre",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/admin/ingredientes/buscar?nombre=pollo",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "admin", "ingredientes", "buscar"],
+									"query": [
+										{
+											"key": "nombre",
+											"value": "pollo"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Ejercicios",
+					"item": [
+						{
+							"name": "Crear Ejercicio",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Sentadillas\",\n  \"tipoEjercicio\": \"FUERZA\",\n  \"grupoMuscular\": \"PIERNAS\",\n  \"descripcion\": \"Ejercicio compuesto para piernas\",\n  \"caloriasQuemadasPorMinuto\": 8.5,\n  \"nivelDificultad\": \"INTERMEDIO\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/admin/ejercicios",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "admin", "ejercicios"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Ejercicios",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/admin/ejercicios?page=0&size=20",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "admin", "ejercicios"],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Comidas",
+					"item": [
+						{
+							"name": "Crear Comida",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Ensalada César\",\n  \"tipoComida\": \"ALMUERZO\",\n  \"descripcion\": \"Ensalada clásica con pollo\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/admin/comidas",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "admin", "comidas"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Comidas",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/admin/comidas?page=0&size=20",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "admin", "comidas"],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Módulo 3 - Planes Nutricionales",
+			"description": "Gestión ADMIN de planes nutricionales y asignación de comidas",
+			"item": [
+				{
+					"name": "Crear Plan",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Plan de Volumen Limpio\",\n  \"objetivo\": \"GANANCIA_MUSCULAR\",\n  \"descripcion\": \"Plan diseñado para ganar masa muscular de forma limpia\",\n  \"duracionSemanas\": 12,\n  \"caloriasObjetivo\": 3000,\n  \"proteinasGramos\": 180,\n  \"carbohidratosGramos\": 400,\n  \"grasasGramos\": 80\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/planes",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "planes"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Planes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/planes?page=0&size=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "planes"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Asignar Comida a Plan",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"planId\": 1,\n  \"comidaId\": 1,\n  \"diaSemana\": 1,\n  \"ordenComida\": 1,\n  \"porcionesRecomendadas\": 1.5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/planes-comidas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "planes-comidas"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Plan con Comidas",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/planes/1/con-comidas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "planes", "1", "con-comidas"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Módulo 4 - Rutinas de Ejercicio",
+			"description": "Gestión ADMIN de rutinas de ejercicio con configuración de series, repeticiones y peso",
+			"item": [
+				{
+					"name": "Crear Rutina",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('rutinaId', jsonData.id);",
+									"    console.log('Rutina ID guardado:', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Rutina Fullbody 3x\",\n  \"descripcion\": \"Rutina de cuerpo completo 3 días por semana\",\n  \"nivelDificultad\": \"INTERMEDIO\",\n  \"duracionSemanas\": 8,\n  \"frecuenciaSemanal\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/rutinas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "rutinas"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Rutinas",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/rutinas?page=0&size=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "rutinas"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Agregar Ejercicio a Rutina",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ejercicioId\": 1,\n  \"diaSemana\": 1,\n  \"series\": 4,\n  \"repeticiones\": 12,\n  \"pesoKg\": 60.0,\n  \"duracionMinutos\": 15,\n  \"descansoSegundos\": 90,\n  \"notas\": \"Técnica estricta, controlado\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/rutinas/{{rutinaId}}/ejercicios",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "rutinas", "{{rutinaId}}", "ejercicios"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Rutina con Ejercicios",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/rutinas/{{rutinaId}}/con-ejercicios",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "rutinas", "{{rutinaId}}", "con-ejercicios"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Módulo 5 - Seguimiento y Asignaciones",
+			"description": "Funcionalidades USER: asignación de planes/rutinas y registro de comidas/ejercicios",
+			"item": [
+				{
+					"name": "Asignaciones",
+					"item": [
+						{
+							"name": "Asignar Plan",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"planId\": 1,\n  \"fechaInicio\": \"2025-11-01\",\n  \"fechaFin\": \"2025-12-31\",\n  \"objetivo\": \"Ganar masa muscular\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/user/planes/asignar",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "user", "planes", "asignar"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Asignar Rutina",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"rutinaId\": 1,\n  \"fechaInicio\": \"2025-11-01\",\n  \"fechaFin\": \"2025-12-31\",\n  \"objetivo\": \"Aumentar fuerza\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/user/rutinas/asignar",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "user", "rutinas", "asignar"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Mis Planes",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/user/planes",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "user", "planes"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Mis Rutinas",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/user/rutinas",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "user", "rutinas"]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Registro de Comidas",
+					"item": [
+						{
+							"name": "Registrar Comida",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"comidaId\": 1,\n  \"usuarioPlanId\": 1,\n  \"fecha\": \"2025-11-02\",\n  \"hora\": \"12:30:00\",\n  \"tipoComida\": \"ALMUERZO\",\n  \"porciones\": 1.0,\n  \"notas\": \"Almuerzo post-entrenamiento\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/user/registros-comida",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "user", "registros-comida"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Registros del Día",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/user/registros-comida/fecha/2025-11-02",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "user", "registros-comida", "fecha", "2025-11-02"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Estadísticas Nutrición",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/user/registros-comida/estadisticas?fechaInicio=2025-11-01&fechaFin=2025-11-07",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "user", "registros-comida", "estadisticas"],
+									"query": [
+										{
+											"key": "fechaInicio",
+											"value": "2025-11-01"
+										},
+										{
+											"key": "fechaFin",
+											"value": "2025-11-07"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Registro de Ejercicios",
+					"item": [
+						{
+							"name": "Registrar Ejercicio",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"ejercicioId\": 1,\n  \"usuarioRutinaId\": 1,\n  \"fecha\": \"2025-11-02\",\n  \"hora\": \"08:00:00\",\n  \"series\": 4,\n  \"repeticiones\": 12,\n  \"pesoKg\": 60.0,\n  \"duracionMinutos\": 15,\n  \"notas\": \"Buen entrenamiento\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/user/registros-ejercicio",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "user", "registros-ejercicio"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Registros del Día",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/user/registros-ejercicio/fecha/2025-11-02",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "user", "registros-ejercicio", "fecha", "2025-11-02"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Estadísticas Ejercicio",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/user/registros-ejercicio/estadisticas?fechaInicio=2025-11-01&fechaFin=2025-11-07",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "user", "registros-ejercicio", "estadisticas"],
+									"query": [
+										{
+											"key": "fechaInicio",
+											"value": "2025-11-01"
+										},
+										{
+											"key": "fechaFin",
+											"value": "2025-11-07"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
