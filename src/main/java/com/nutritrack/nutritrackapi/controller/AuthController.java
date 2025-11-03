@@ -72,7 +72,7 @@ public class AuthController {
 
         String email = jwtUtil.getEmailFromToken(oldToken);
         String name = jwtUtil.getNameFromToken(oldToken);
-        UUID perfilId = jwtUtil.getPerfilIdFromToken(oldToken);
+        Long perfilId = jwtUtil.getPerfilIdFromToken(oldToken);
 
         String newToken = jwtUtil.generateToken(email, name, perfilId);
 

@@ -46,7 +46,7 @@ public class AppProfileController {
             @Parameter(description = "Email del usuario (solo para testing, será removido en v0.2.0)", example = "user@nutritrack.com")
             @RequestParam(required = false) String email) {
         
-        UUID perfilId;
+        Long perfilId;
         if (email != null) {
             // Modo testing: buscar perfil por email
             perfilId = perfilUsuarioService.obtenerPerfilIdPorEmail(email);
@@ -80,7 +80,7 @@ public class AppProfileController {
             @RequestParam(required = false) String email,
             @Valid @RequestBody ActualizarPerfilRequest updateRequest) {
         
-        UUID perfilId;
+        Long perfilId;
         if (email != null) {
             perfilId = perfilUsuarioService.obtenerPerfilIdPorEmail(email);
         } else {
@@ -111,7 +111,7 @@ public class AppProfileController {
             @Parameter(description = "Email del usuario (solo para testing)")
             @RequestParam(required = false) String email) {
         
-        UUID perfilId;
+        Long perfilId;
         if (email != null) {
             perfilId = perfilUsuarioService.obtenerPerfilIdPorEmail(email);
         } else {
@@ -128,7 +128,7 @@ public class AppProfileController {
     /**
      * Helper: Extrae el ID del perfil desde el token JWT
      */
-    private UUID extraerPerfilIdDelToken(HttpServletRequest request) {
+    private Long extraerPerfilIdDelToken(HttpServletRequest request) {
         String token = jwtUtil.extractTokenFromRequest(request);
         if (token == null) {
             throw new RuntimeException("Token no encontrado");

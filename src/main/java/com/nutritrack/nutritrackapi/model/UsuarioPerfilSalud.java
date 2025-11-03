@@ -5,7 +5,6 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import com.nutritrack.nutritrackapi.model.enums.*;
 
 @Entity
@@ -19,7 +18,7 @@ public class UsuarioPerfilSalud {
 
     @Id
     @Column(name = "id_perfil")
-    private UUID idPerfil;
+    private Long idPerfil;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "objetivo_actual", nullable = false)

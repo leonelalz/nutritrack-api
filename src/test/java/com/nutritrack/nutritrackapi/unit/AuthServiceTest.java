@@ -23,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -70,7 +69,7 @@ class AuthServiceTest {
 
     private CuentaAuth crearCuentaMock(String email, String password) {
         return CuentaAuth.builder()
-                .id(UUID.randomUUID())
+                .id(1L)
                 .email(email)
                 .password(password)
                 .rol(rolUsuario)
@@ -80,7 +79,7 @@ class AuthServiceTest {
 
     private PerfilUsuario crearPerfilMock(CuentaAuth cuenta, String nombre) {
         PerfilUsuario perfil = new PerfilUsuario();
-        perfil.setId(UUID.randomUUID());
+        perfil.setId(1L);
         perfil.setCuenta(cuenta);
         perfil.setNombre(nombre);
         return perfil;

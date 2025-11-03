@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class UsuarioHistorialMedidaService {
     /**
      * Registrar una nueva medición para un usuario.
      */
-    public UsuarioHistorialMedida registrarMedicion(UUID idCliente, BigDecimal peso, BigDecimal altura) {
+    public UsuarioHistorialMedida registrarMedicion(Long idCliente, BigDecimal peso, BigDecimal altura) {
         PerfilUsuario cliente = perfilRepo.findById(idCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con id: " + idCliente));
 
@@ -43,7 +42,7 @@ public class UsuarioHistorialMedidaService {
     /**
      * Obtener todas las mediciones de un usuario ordenadas por fecha descendente.
      */
-    public List<UsuarioHistorialMedida> obtenerHistorialPorCliente(UUID idCliente) {
+    public List<UsuarioHistorialMedida> obtenerHistorialPorCliente(Long idCliente) {
         PerfilUsuario cliente = perfilRepo.findById(idCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con id: " + idCliente));
 

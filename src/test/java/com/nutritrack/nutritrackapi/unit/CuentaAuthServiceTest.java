@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,14 +34,14 @@ class CuentaAuthServiceTest {
     @InjectMocks
     private CuentaAuthService cuentaService;
 
-    private UUID cuentaId;
+    private Long cuentaId;
     private CuentaAuth cuentaMock;
     private Rol rolUsuario;
     private Rol rolAdmin;
 
     @BeforeEach
     void setUp() {
-        cuentaId = UUID.randomUUID();
+        cuentaId = 1L;
 
         // Mock Roles
         rolUsuario = new Rol();
@@ -93,7 +92,7 @@ class CuentaAuthServiceTest {
     @DisplayName("Debe lanzar excepción si cuenta no existe al cambiar password")
     void cambiarPassword_CuentaNoExiste_ThrowsException() {
         // Arrange
-        UUID idInexistente = UUID.randomUUID();
+        Long idInexistente = 999L;
         when(cuentaRepo.findById(idInexistente)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -132,7 +131,7 @@ class CuentaAuthServiceTest {
     @DisplayName("Debe lanzar excepción si cuenta no existe al desactivar")
     void desactivarCuenta_CuentaNoExiste_ThrowsException() {
         // Arrange
-        UUID idInexistente = UUID.randomUUID();
+        Long idInexistente = 999L;
         when(cuentaRepo.findById(idInexistente)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -171,7 +170,7 @@ class CuentaAuthServiceTest {
     @DisplayName("Debe lanzar excepción si cuenta no existe al reactivar")
     void reactivarCuenta_CuentaNoExiste_ThrowsException() {
         // Arrange
-        UUID idInexistente = UUID.randomUUID();
+        Long idInexistente = 999L;
         when(cuentaRepo.findById(idInexistente)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -209,7 +208,7 @@ class CuentaAuthServiceTest {
     @DisplayName("Debe lanzar excepción si cuenta no existe al cambiar rol")
     void cambiarRol_CuentaNoExiste_ThrowsException() {
         // Arrange
-        UUID idInexistente = UUID.randomUUID();
+        Long idInexistente = 999L;
         when(cuentaRepo.findById(idInexistente)).thenReturn(Optional.empty());
 
         // Act & Assert

@@ -4,6 +4,9 @@ import com.nutritrack.nutritrackapi.model.enums.TipoComida;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -55,5 +58,16 @@ public class Comida {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    // Método para calcular calorías totales de la comida
+    public BigDecimal getCaloriasTotal() {
+        if (ingredientes == null || ingredientes.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        
+        // Necesitamos acceder a las recetas para obtener las cantidades
+        // Este método debe ser usado con JOIN FETCH de recetas
+        return BigDecimal.ZERO; // Placeholder - se calcula en el servicio
     }
 }
