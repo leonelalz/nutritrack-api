@@ -385,7 +385,25 @@ COMMENT ON COLUMN usuarios_planes.dia_actual IS 'Current day of the plan (1 to d
 COMMENT ON COLUMN usuarios_rutinas.semana_actual IS 'Current week of the routine (1 to duracion_semanas)';
 
 -- ============================================================================
--- INITIAL DATA (ROLES)
+-- CLEAN UP: Remove obsolete tables if they exist
+-- ============================================================================
+
+DROP TABLE IF EXISTS etiqueta_ejercicio CASCADE;
+DROP TABLE IF EXISTS etiqueta_ingrediente CASCADE;
+DROP TABLE IF EXISTS etiqueta_meta CASCADE;
+DROP TABLE IF EXISTS etiqueta_plan CASCADE;
+DROP TABLE IF EXISTS catalogo_metas CASCADE;
+DROP TABLE IF EXISTS catalogo_actividades CASCADE;
+DROP TABLE IF EXISTS catalogo_planes_nutricion CASCADE;
+DROP TABLE IF EXISTS catalogo_rutinas CASCADE;
+DROP TABLE IF EXISTS catalogo_plan_comidas CASCADE;
+DROP TABLE IF EXISTS etiquetas_metas CASCADE;
+DROP TABLE IF EXISTS etiquetas_planes CASCADE;
+DROP TABLE IF EXISTS usuario_metas_asignadas CASCADE;
+DROP TABLE IF EXISTS usuario_actividades_progreso CASCADE;
+
+-- ============================================================================
+-- INITIAL DATA - ROLES
 -- ============================================================================
 
 INSERT INTO roles (tipo_rol) VALUES 
@@ -394,5 +412,262 @@ INSERT INTO roles (tipo_rol) VALUES
 ON CONFLICT (tipo_rol) DO NOTHING;
 
 -- ============================================================================
--- END OF SCHEMA
+-- INITIAL DATA - ETIQUETAS (Tags for categorization)
+-- ============================================================================
+
+-- Objetivos
+INSERT INTO etiquetas (nombre, tipo_etiqueta, descripcion) VALUES
+  ('Perder Peso', 'OBJETIVO', 'Reducción de peso corporal'),
+  ('Ganar Masa Muscular', 'OBJETIVO', 'Incremento de masa muscular'),
+  ('Mantener Forma', 'OBJETIVO', 'Mantenimiento del estado físico actual'),
+  ('Mejorar Resistencia', 'OBJETIVO', 'Aumentar resistencia cardiovascular'),
+  ('Tonificar', 'OBJETIVO', 'Tonificación muscular general')
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Alergias comunes
+INSERT INTO etiquetas (nombre, tipo_etiqueta, descripcion) VALUES
+  ('Lácteos', 'ALERGIA', 'Alergia a productos lácteos'),
+  ('Gluten', 'ALERGIA', 'Intolerancia o alergia al gluten'),
+  ('Frutos Secos', 'ALERGIA', 'Alergia a frutos secos'),
+  ('Mariscos', 'ALERGIA', 'Alergia a mariscos'),
+  ('Huevos', 'ALERGIA', 'Alergia al huevo'),
+  ('Soya', 'ALERGIA', 'Alergia a la soya')
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Condiciones médicas
+INSERT INTO etiquetas (nombre, tipo_etiqueta, descripcion) VALUES
+  ('Diabetes', 'CONDICION_MEDICA', 'Diabetes tipo 1 o 2'),
+  ('Hipertensión', 'CONDICION_MEDICA', 'Presión arterial alta'),
+  ('Colesterol Alto', 'CONDICION_MEDICA', 'Niveles elevados de colesterol'),
+  ('Enfermedad Celíaca', 'CONDICION_MEDICA', 'Intolerancia severa al gluten')
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Dietas
+INSERT INTO etiquetas (nombre, tipo_etiqueta, descripcion) VALUES
+  ('Vegetariana', 'DIETA', 'Sin carne ni pescado'),
+  ('Vegana', 'DIETA', 'Sin productos de origen animal'),
+  ('Keto', 'DIETA', 'Baja en carbohidratos, alta en grasas'),
+  ('Paleo', 'DIETA', 'Basada en alimentación prehistórica'),
+  ('Mediterránea', 'DIETA', 'Dieta mediterránea tradicional'),
+  ('Sin Gluten', 'DIETA', 'Libre de gluten')
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Dificultad
+INSERT INTO etiquetas (nombre, tipo_etiqueta, descripcion) VALUES
+  ('Principiante', 'DIFICULTAD', 'Nivel básico'),
+  ('Intermedio', 'DIFICULTAD', 'Nivel medio'),
+  ('Avanzado', 'DIFICULTAD', 'Nivel alto'),
+  ('Experto', 'DIFICULTAD', 'Nivel profesional')
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Grupos musculares
+INSERT INTO etiquetas (nombre, tipo_etiqueta, descripcion) VALUES
+  ('Pecho', 'GRUPO_MUSCULAR', 'Ejercicios de pecho'),
+  ('Espalda', 'GRUPO_MUSCULAR', 'Ejercicios de espalda'),
+  ('Piernas', 'GRUPO_MUSCULAR', 'Ejercicios de piernas'),
+  ('Brazos', 'GRUPO_MUSCULAR', 'Ejercicios de brazos'),
+  ('Abdomen', 'GRUPO_MUSCULAR', 'Ejercicios abdominales'),
+  ('Hombros', 'GRUPO_MUSCULAR', 'Ejercicios de hombros')
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Tipos de ejercicio
+INSERT INTO etiquetas (nombre, tipo_etiqueta, descripcion) VALUES
+  ('Cardio', 'TIPO_EJERCICIO', 'Ejercicios cardiovasculares'),
+  ('Fuerza', 'TIPO_EJERCICIO', 'Entrenamiento de fuerza'),
+  ('Flexibilidad', 'TIPO_EJERCICIO', 'Ejercicios de flexibilidad'),
+  ('HIIT', 'TIPO_EJERCICIO', 'Entrenamiento de alta intensidad')
+ON CONFLICT (nombre) DO NOTHING;
+
+-- ============================================================================
+-- INITIAL DATA - INGREDIENTES (Sample ingredients)
+-- ============================================================================
+
+INSERT INTO ingredientes (nombre, grupo_alimenticio, energia, proteinas, grasas, carbohidratos) VALUES
+  -- Proteínas
+  ('Pechuga de Pollo', 'PROTEINAS_ANIMALES', 165, 31.0, 3.6, 0.0),
+  ('Salmón', 'PROTEINAS_ANIMALES', 208, 20.0, 13.0, 0.0),
+  ('Huevo', 'PROTEINAS_ANIMALES', 155, 13.0, 11.0, 1.1),
+  ('Tofu', 'PROTEINAS_VEGETALES', 76, 8.0, 4.8, 1.9),
+  ('Lentejas', 'LEGUMBRES', 116, 9.0, 0.4, 20.0),
+  
+  -- Carbohidratos
+  ('Arroz Integral', 'CEREALES', 111, 2.6, 0.9, 23.0),
+  ('Avena', 'CEREALES', 389, 16.9, 6.9, 66.3),
+  ('Quinoa', 'CEREALES', 120, 4.4, 1.9, 21.3),
+  ('Batata', 'VERDURAS', 86, 1.6, 0.1, 20.1),
+  ('Pan Integral', 'CEREALES', 247, 13.0, 3.4, 41.0),
+  
+  -- Frutas
+  ('Plátano', 'FRUTAS', 89, 1.1, 0.3, 23.0),
+  ('Manzana', 'FRUTAS', 52, 0.3, 0.2, 14.0),
+  ('Fresa', 'FRUTAS', 32, 0.7, 0.3, 7.7),
+  
+  -- Verduras
+  ('Brócoli', 'VERDURAS', 34, 2.8, 0.4, 7.0),
+  ('Espinaca', 'VERDURAS', 23, 2.9, 0.4, 3.6),
+  ('Zanahoria', 'VERDURAS', 41, 0.9, 0.2, 10.0),
+  ('Tomate', 'VERDURAS', 18, 0.9, 0.2, 3.9),
+  
+  -- Grasas saludables
+  ('Aguacate', 'GRASAS_SALUDABLES', 160, 2.0, 15.0, 9.0),
+  ('Almendras', 'FRUTOS_SECOS', 579, 21.0, 50.0, 22.0),
+  ('Aceite de Oliva', 'GRASAS_SALUDABLES', 884, 0.0, 100.0, 0.0),
+  
+  -- Lácteos
+  ('Leche Descremada', 'LACTEOS', 34, 3.4, 0.1, 5.0),
+  ('Yogur Griego', 'LACTEOS', 59, 10.0, 0.4, 3.6),
+  ('Queso Cottage', 'LACTEOS', 98, 11.0, 4.3, 3.4)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- INITIAL DATA - EJERCICIOS (Sample exercises)
+-- ============================================================================
+
+INSERT INTO ejercicios (nombre, tipo_ejercicio, musculo_principal, duracion, dificultad, calorias_estimadas) VALUES
+  -- Cardio
+  ('Correr', 'CARDIO', 'CARDIO', 30, 'INTERMEDIO', 300),
+  ('Caminar', 'CARDIO', 'CARDIO', 30, 'PRINCIPIANTE', 150),
+  ('Ciclismo', 'CARDIO', 'PIERNAS', 30, 'INTERMEDIO', 250),
+  ('Natación', 'CARDIO', 'CUERPO_COMPLETO', 30, 'INTERMEDIO', 350),
+  ('Saltar la Cuerda', 'CARDIO', 'CARDIO', 15, 'INTERMEDIO', 200),
+  
+  -- Fuerza - Pecho
+  ('Press de Banca', 'FUERZA', 'PECHO', 10, 'INTERMEDIO', 100),
+  ('Flexiones', 'FUERZA', 'PECHO', 10, 'PRINCIPIANTE', 80),
+  ('Aperturas con Mancuernas', 'FUERZA', 'PECHO', 10, 'INTERMEDIO', 90),
+  
+  -- Fuerza - Espalda
+  ('Dominadas', 'FUERZA', 'ESPALDA', 10, 'AVANZADO', 120),
+  ('Remo con Barra', 'FUERZA', 'ESPALDA', 10, 'INTERMEDIO', 110),
+  ('Pull-over', 'FUERZA', 'ESPALDA', 10, 'INTERMEDIO', 95),
+  
+  -- Fuerza - Piernas
+  ('Sentadillas', 'FUERZA', 'PIERNAS', 10, 'INTERMEDIO', 130),
+  ('Peso Muerto', 'FUERZA', 'PIERNAS', 10, 'AVANZADO', 150),
+  ('Zancadas', 'FUERZA', 'PIERNAS', 10, 'PRINCIPIANTE', 100),
+  ('Extensiones de Pierna', 'FUERZA', 'CUADRICEPS', 10, 'PRINCIPIANTE', 90),
+  
+  -- Fuerza - Brazos
+  ('Curl de Bíceps', 'FUERZA', 'BICEPS', 10, 'PRINCIPIANTE', 70),
+  ('Extensiones de Tríceps', 'FUERZA', 'TRICEPS', 10, 'PRINCIPIANTE', 75),
+  ('Press Militar', 'FUERZA', 'HOMBROS', 10, 'INTERMEDIO', 110),
+  
+  -- Core
+  ('Plancha', 'FUERZA', 'CORE', 5, 'PRINCIPIANTE', 50),
+  ('Abdominales', 'FUERZA', 'ABDOMINALES', 10, 'PRINCIPIANTE', 60),
+  ('Russian Twist', 'FUERZA', 'ABDOMINALES', 10, 'INTERMEDIO', 80),
+  
+  -- HIIT
+  ('Burpees', 'HIIT', 'CUERPO_COMPLETO', 10, 'AVANZADO', 120),
+  ('Mountain Climbers', 'HIIT', 'CORE', 10, 'INTERMEDIO', 100),
+  ('Jumping Jacks', 'HIIT', 'CARDIO', 10, 'PRINCIPIANTE', 90),
+  
+  -- Flexibilidad
+  ('Yoga Básico', 'YOGA', 'CUERPO_COMPLETO', 30, 'PRINCIPIANTE', 120),
+  ('Estiramientos', 'FLEXIBILIDAD', 'CUERPO_COMPLETO', 15, 'PRINCIPIANTE', 50)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- INITIAL DATA - COMIDAS (Sample meals)
+-- ============================================================================
+
+INSERT INTO comidas (nombre, tipo_comida, tiempo_elaboracion) VALUES
+  -- Desayunos
+  ('Avena con Frutas', 'DESAYUNO', 10),
+  ('Huevos Revueltos con Tostadas', 'DESAYUNO', 15),
+  ('Smoothie Verde', 'DESAYUNO', 5),
+  ('Yogur con Granola', 'DESAYUNO', 5),
+  
+  -- Almuerzos
+  ('Pechuga de Pollo con Arroz y Brócoli', 'ALMUERZO', 30),
+  ('Salmón a la Plancha con Quinoa', 'ALMUERZO', 25),
+  ('Ensalada César con Pollo', 'ALMUERZO', 20),
+  ('Bowl de Lentejas', 'ALMUERZO', 35),
+  
+  -- Cenas
+  ('Ensalada de Atún', 'CENA', 15),
+  ('Tortilla de Espinacas', 'CENA', 20),
+  ('Pollo al Horno con Verduras', 'CENA', 40),
+  ('Sopa de Verduras', 'CENA', 25),
+  
+  -- Snacks
+  ('Frutas Mixtas', 'SNACK', 5),
+  ('Almendras y Nueces', 'SNACK', 0),
+  ('Batido de Proteína', 'SNACK', 5),
+  ('Yogur con Fresas', 'SNACK', 5),
+  
+  -- Pre/Post entrenamiento
+  ('Batido Pre-Entrenamiento', 'PRE_ENTRENAMIENTO', 5),
+  ('Batido Post-Entrenamiento', 'POST_ENTRENAMIENTO', 5)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- INITIAL DATA - RECETAS (Sample recipes - meal ingredients)
+-- ============================================================================
+
+-- Avena con Frutas
+INSERT INTO recetas (id_comida, id_ingrediente, cantidad_ingrediente) VALUES
+  ((SELECT id FROM comidas WHERE nombre = 'Avena con Frutas'), (SELECT id FROM ingredientes WHERE nombre = 'Avena'), 50),
+  ((SELECT id FROM comidas WHERE nombre = 'Avena con Frutas'), (SELECT id FROM ingredientes WHERE nombre = 'Plátano'), 1),
+  ((SELECT id FROM comidas WHERE nombre = 'Avena con Frutas'), (SELECT id FROM ingredientes WHERE nombre = 'Fresa'), 100)
+ON CONFLICT DO NOTHING;
+
+-- Pechuga de Pollo con Arroz y Brócoli
+INSERT INTO recetas (id_comida, id_ingrediente, cantidad_ingrediente) VALUES
+  ((SELECT id FROM comidas WHERE nombre = 'Pechuga de Pollo con Arroz y Brócoli'), (SELECT id FROM ingredientes WHERE nombre = 'Pechuga de Pollo'), 150),
+  ((SELECT id FROM comidas WHERE nombre = 'Pechuga de Pollo con Arroz y Brócoli'), (SELECT id FROM ingredientes WHERE nombre = 'Arroz Integral'), 100),
+  ((SELECT id FROM comidas WHERE nombre = 'Pechuga de Pollo con Arroz y Brócoli'), (SELECT id FROM ingredientes WHERE nombre = 'Brócoli'), 150)
+ON CONFLICT DO NOTHING;
+
+-- Salmón a la Plancha con Quinoa
+INSERT INTO recetas (id_comida, id_ingrediente, cantidad_ingrediente) VALUES
+  ((SELECT id FROM comidas WHERE nombre = 'Salmón a la Plancha con Quinoa'), (SELECT id FROM ingredientes WHERE nombre = 'Salmón'), 150),
+  ((SELECT id FROM comidas WHERE nombre = 'Salmón a la Plancha con Quinoa'), (SELECT id FROM ingredientes WHERE nombre = 'Quinoa'), 100),
+  ((SELECT id FROM comidas WHERE nombre = 'Salmón a la Plancha con Quinoa'), (SELECT id FROM ingredientes WHERE nombre = 'Espinaca'), 100)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- INITIAL DATA - PLANES (Sample nutrition plans)
+-- ============================================================================
+
+INSERT INTO planes (nombre, descripcion, duracion_dias, activo) VALUES
+  ('Plan de Pérdida de Peso', 'Plan nutricional diseñado para pérdida de peso saludable con déficit calórico controlado', 30, true),
+  ('Plan de Ganancia Muscular', 'Plan alto en proteínas para incremento de masa muscular', 60, true),
+  ('Plan Vegetariano Balanceado', 'Plan vegetariano completo y balanceado nutricionalmente', 30, true),
+  ('Plan Keto', 'Plan cetogénico bajo en carbohidratos', 21, true)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- INITIAL DATA - RUTINAS (Sample exercise routines)
+-- ============================================================================
+
+INSERT INTO rutinas (nombre, descripcion, duracion_semanas, activo) VALUES
+  ('Rutina Full Body Principiante', 'Rutina de cuerpo completo para principiantes, 3 días por semana', 8, true),
+  ('Rutina de Fuerza Intermedia', 'Rutina de fuerza dividida en grupos musculares, 4 días por semana', 12, true),
+  ('Rutina HIIT para Pérdida de Grasa', 'Rutina de alta intensidad para quemar grasa', 6, true),
+  ('Rutina de Tonificación', 'Rutina enfocada en tonificación muscular general', 8, true)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- INITIAL DATA - RUTINA_EJERCICIOS (Exercises in routines)
+-- ============================================================================
+
+-- Rutina Full Body Principiante
+INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, orden, series, repeticiones, duracion_minutos, peso) VALUES
+  ((SELECT id FROM rutinas WHERE nombre = 'Rutina Full Body Principiante'), (SELECT id FROM ejercicios WHERE nombre = 'Sentadillas'), 1, 3, 12, 10, NULL),
+  ((SELECT id FROM rutinas WHERE nombre = 'Rutina Full Body Principiante'), (SELECT id FROM ejercicios WHERE nombre = 'Flexiones'), 2, 3, 10, 10, NULL),
+  ((SELECT id FROM rutinas WHERE nombre = 'Rutina Full Body Principiante'), (SELECT id FROM ejercicios WHERE nombre = 'Plancha'), 3, 3, 1, 5, NULL),
+  ((SELECT id FROM rutinas WHERE nombre = 'Rutina Full Body Principiante'), (SELECT id FROM ejercicios WHERE nombre = 'Zancadas'), 4, 3, 10, 10, NULL)
+ON CONFLICT DO NOTHING;
+
+-- Rutina HIIT
+INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, orden, series, repeticiones, duracion_minutos, peso) VALUES
+  ((SELECT id FROM rutinas WHERE nombre = 'Rutina HIIT para Pérdida de Grasa'), (SELECT id FROM ejercicios WHERE nombre = 'Burpees'), 1, 4, 15, 10, NULL),
+  ((SELECT id FROM rutinas WHERE nombre = 'Rutina HIIT para Pérdida de Grasa'), (SELECT id FROM ejercicios WHERE nombre = 'Mountain Climbers'), 2, 4, 20, 10, NULL),
+  ((SELECT id FROM rutinas WHERE nombre = 'Rutina HIIT para Pérdida de Grasa'), (SELECT id FROM ejercicios WHERE nombre = 'Jumping Jacks'), 3, 4, 30, 10, NULL),
+  ((SELECT id FROM rutinas WHERE nombre = 'Rutina HIIT para Pérdida de Grasa'), (SELECT id FROM ejercicios WHERE nombre = 'Saltar la Cuerda'), 4, 4, 1, 15, NULL)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- END OF SCHEMA AND INITIAL DATA
 -- ============================================================================
