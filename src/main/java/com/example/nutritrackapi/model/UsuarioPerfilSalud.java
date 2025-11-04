@@ -18,23 +18,23 @@ import lombok.*;
 public class UsuarioPerfilSalud {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_perfil")
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_perfil", nullable = false, unique = true)
+    @JoinColumn(name = "id_perfil", insertable = false, updatable = false)
     private PerfilUsuario perfilUsuario;
 
-    @Column(name = "objetivo_actual", length = 50)
+    @Column(name = "objetivo_actual", length = 50, nullable = false)
     @Enumerated(EnumType.STRING)
     private ObjetivoSalud objetivoActual;
 
-    @Column(name = "nivel_actividad_actual", length = 20)
+    @Column(name = "nivel_actividad_actual", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
     private NivelActividad nivelActividadActual;
 
-    @Column(length = 1000)
-    private String notas;
+    @Column(name = "fecha_actualizacion", nullable = false)
+    private java.time.LocalDate fechaActualizacion;
 
     /**
      * Objetivos de salud disponibles en el sistema

@@ -27,9 +27,6 @@ public class PerfilSaludRequest {
     @NotNull(message = "El nivel de actividad es obligatorio")
     private UsuarioPerfilSalud.NivelActividad nivelActividadActual;
 
-    @Size(max = 1000, message = "Las notas no pueden exceder 1000 caracteres")
-    private String notas;
-
     /**
      * IDs de etiquetas para alergias y condiciones médicas
      * Se valida que existan en la tabla etiquetas

@@ -23,8 +23,6 @@ public class HistorialMedidasResponse {
     private BigDecimal peso;
     private BigDecimal altura;
     private BigDecimal imc;
-    private BigDecimal circunferenciaCintura;
     private LocalDate fechaMedicion;
-    private String notas;
     private PerfilUsuario.UnidadesMedida unidadPeso; // Unidad en la que se muestra el peso
 }

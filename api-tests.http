@@ -1,0 +1,181 @@
+### NutriTrack API - Manual Tests
+### BASE URL
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+### ============================================================================
+### US-01: Registro de Usuario
+### ============================================================================
+
+### 1. Registro exitoso (RN01: contraseña segura, RN02: email único)
+POST {{baseUrl}}/auth/registro
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Carlos",
+  "apellido": "Martinez",
+  "email": "carlos.martinez@test.com",
+  "password": "Test1234!",
+  "confirmarPassword": "Test1234!"
+}
+
+### 2. Registro fallido - Contraseña débil (RN01)
+POST {{baseUrl}}/auth/registro
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Ana",
+  "apellido": "Garcia",
+  "email": "ana.garcia@test.com",
+  "password": "123",
+  "confirmarPassword": "123"
+}
+
+### 3. Registro fallido - Email duplicado (RN02)
+POST {{baseUrl}}/auth/registro
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Otro",
+  "apellido": "Usuario",
+  "email": "carlos.martinez@test.com",
+  "password": "Test1234!",
+  "confirmarPassword": "Test1234!"
+}
+
+### 4. Registro fallido - Passwords no coinciden
+POST {{baseUrl}}/auth/registro
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Pedro",
+  "apellido": "Lopez",
+  "email": "pedro.lopez@test.com",
+  "password": "Test1234!",
+  "confirmarPassword": "Different123!"
+}
+
+### ============================================================================
+### US-02: Login de Usuario
+### ============================================================================
+
+### 1. Login exitoso (RN03: autenticación válida)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "carlos.martinez@test.com",
+  "password": "Test1234!"
+}
+
+### 2. Login fallido - Credenciales incorrectas (RN03)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "carlos.martinez@test.com",
+  "password": "WrongPassword123!"
+}
+
+### 3. Login fallido - Usuario no existe
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "noexiste@test.com",
+  "password": "Test1234!"
+}
+
+### ============================================================================
+### US-05: Eliminar Cuenta (RN04, RN05)
+### ============================================================================
+
+### 1. Eliminar cuenta con confirmación correcta (RN05: debe escribir "ELIMINAR")
+DELETE {{baseUrl}}/auth/cuenta
+Content-Type: {{contentType}}
+
+{
+  "email": "carlos.martinez@test.com",
+  "password": "Test1234!",
+  "confirmacion": "ELIMINAR"
+}
+
+### 2. Eliminar cuenta - Confirmación incorrecta (RN05)
+DELETE {{baseUrl}}/auth/cuenta
+Content-Type: {{contentType}}
+
+{
+  "email": "carlos.martinez@test.com",
+  "password": "Test1234!",
+  "confirmacion": "eliminar"
+}
+
+### 3. Eliminar cuenta - Password incorrecto (RN04)
+DELETE {{baseUrl}}/auth/cuenta
+Content-Type: {{contentType}}
+
+{
+  "email": "carlos.martinez@test.com",
+  "password": "WrongPassword123!",
+  "confirmacion": "ELIMINAR"
+}
+
+### ============================================================================
+### US-03: Actualizar Unidades de Medida (RN22)
+### ============================================================================
+
+### 1. Cambiar a LBS (RN22: actualizar unidad global)
+PATCH {{baseUrl}}/perfil/unidades
+Content-Type: {{contentType}}
+
+{
+  "unidadesMedida": "LBS"
+}
+
+### 2. Cambiar a KG
+PATCH {{baseUrl}}/perfil/unidades
+Content-Type: {{contentType}}
+
+{
+  "unidadesMedida": "KG"
+}
+
+### ============================================================================
+### US-04: Actualizar Perfil de Salud
+### ============================================================================
+
+### 1. Actualizar perfil de salud completo
+PUT {{baseUrl}}/perfil/salud
+Content-Type: {{contentType}}
+
+{
+  "objetivoActual": "PERDER_PESO",
+  "nivelActividadActual": "MODERADO"
+}
+
+### 2. Obtener perfil de salud
+GET {{baseUrl}}/perfil/salud
+
+### ============================================================================
+### US-04: Mediciones Corporales
+### ============================================================================
+
+### 1. Registrar medición (RN27: auto-calcula IMC)
+POST {{baseUrl}}/perfil/mediciones
+Content-Type: {{contentType}}
+
+{
+  "peso": 75.5,
+  "altura": 175.0,
+  "fechaMedicion": "2025-11-04"
+}
+
+### 2. Obtener historial de mediciones
+GET {{baseUrl}}/perfil/mediciones
+
+### ============================================================================
+### Health Check
+### ============================================================================
+
+### Verificar que la API está funcionando
+GET {{baseUrl}}/health

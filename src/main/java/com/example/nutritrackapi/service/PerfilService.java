@@ -49,7 +49,7 @@ public class PerfilService {
         
         perfilSalud.setObjetivoActual(request.getObjetivoActual());
         perfilSalud.setNivelActividadActual(request.getNivelActividadActual());
-        perfilSalud.setNotas(request.getNotas());
+        perfilSalud.setFechaActualizacion(java.time.LocalDate.now());
         perfilSaludRepository.save(perfilSalud);
         
         // Actualizar etiquetas (alergias, condiciones médicas)
@@ -93,7 +93,6 @@ public class PerfilService {
             .id(perfilSalud.getId())
             .objetivoActual(perfilSalud.getObjetivoActual())
             .nivelActividadActual(perfilSalud.getNivelActividadActual())
-            .notas(perfilSalud.getNotas())
             .etiquetas(etiquetas.stream()
                 .map(e -> PerfilSaludResponse.EtiquetaDTO.builder()
                     .id(e.getId())
@@ -129,9 +128,7 @@ public class PerfilService {
             .perfilUsuario(perfil)
             .peso(pesoKg)
             .altura(request.getAltura())
-            .circunferenciaCintura(request.getCircunferenciaCintura())
             .fechaMedicion(request.getFechaMedicion())
-            .notas(request.getNotas())
             .build();
         
         medicion = historialMedidasRepository.save(medicion);
@@ -175,9 +172,7 @@ public class PerfilService {
             .peso(pesoConvertido)
             .altura(medicion.getAltura())
             .imc(medicion.getImc())
-            .circunferenciaCintura(medicion.getCircunferenciaCintura())
             .fechaMedicion(medicion.getFechaMedicion())
-            .notas(medicion.getNotas())
             .unidadPeso(unidadPreferida)
             .build();
     }

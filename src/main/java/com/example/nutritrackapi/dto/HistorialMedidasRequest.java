@@ -34,17 +34,9 @@ public class HistorialMedidasRequest {
     @Digits(integer = 3, fraction = 2, message = "La altura debe tener máximo 3 enteros y 2 decimales")
     private BigDecimal altura;
 
-    @DecimalMin(value = "0.0", message = "La circunferencia debe ser positiva")
-    @DecimalMax(value = "500.0", message = "La circunferencia debe ser menor a 500 cm")
-    @Digits(integer = 3, fraction = 2)
-    private BigDecimal circunferenciaCintura;
-
     @NotNull(message = "La fecha de medición es obligatoria")
     @PastOrPresent(message = "La fecha de medición no puede ser futura")
     private LocalDate fechaMedicion;
-
-    @Size(max = 500, message = "Las notas no pueden exceder 500 caracteres")
-    private String notas;
 
     /**
      * Unidad en la que el usuario envía el peso (KG o LBS)

@@ -37,14 +37,8 @@ public class UsuarioHistorialMedidas {
     @Column(precision = 5, scale = 2)
     private BigDecimal imc; // Índice de Masa Corporal
 
-    @Column(name = "circunferencia_cintura", precision = 5, scale = 2)
-    private BigDecimal circunferenciaCintura; // En CM
-
     @Column(name = "fecha_medicion", nullable = false)
     private LocalDate fechaMedicion;
-
-    @Column(length = 500)
-    private String notas;
 
     /**
      * Calcula y establece el IMC basado en peso y altura
