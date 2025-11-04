@@ -1,5 +1,6 @@
 package com.example.nutritrackapi.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -16,9 +17,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Confirmación para eliminar cuenta (requiere escribir 'ELIMINAR')")
 public class DeleteAccountRequest {
 
     @NotBlank(message = "La confirmación es obligatoria")
     @Pattern(regexp = "ELIMINAR", message = "Debes escribir exactamente 'ELIMINAR' para confirmar")
+    @Schema(description = "Debe escribir exactamente ELIMINAR para confirmar", example = "ELIMINAR")
     private String confirmacion;
 }
