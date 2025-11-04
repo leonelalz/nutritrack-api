@@ -1,0 +1,53 @@
+package com.example.nutritrackapi.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "perfiles_usuario")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PerfilUsuario {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 100)
+    private String nombre;
+
+    @Column(nullable = false, length = 100)
+    private String apellido;
+
+    @Column(name = "unidades_medida", length = 10)
+    @Enumerated(EnumType.STRING)
+    private UnidadesMedida unidadesMedida;
+
+    @Column(name = "fecha_inicio_app", nullable = false)
+    private LocalDate fechaInicioApp;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario", nullable = false, unique = true)
+    @JsonIgnore
+    private CuentaAuth cuenta;
+
+    @PrePersist
+    protected void onCreate() {
+        if (fechaInicioApp == null) {
+            fechaInicioApp = LocalDate.now();
+        }
+        if (unidadesMedida == null) {
+            unidadesMedida = UnidadesMedida.KG;
+        }
+    }
+
+    public enum UnidadesMedida {
+        KG, LBS
+    }
+}
