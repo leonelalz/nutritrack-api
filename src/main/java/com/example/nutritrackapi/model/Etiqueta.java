@@ -2,6 +2,11 @@ package com.example.nutritrackapi.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 /**
  * Entidad Etiqueta - Tabla maestra de categorización del sistema
@@ -13,9 +18,14 @@ import lombok.*;
  * - DIFICULTAD: Principiante, Intermedio, Avanzado
  * - GRUPO_MUSCULAR: Pecho, Espalda, Piernas
  * - TIPO_EJERCICIO: Cardio, Fuerza, HIIT, Yoga
+ * 
+ * US-06: Gestionar Etiquetas
+ * RN06: Nombres únicos
+ * RN08: No eliminar si está en uso
  */
 @Entity
 @Table(name = "etiquetas")
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,6 +46,14 @@ public class Etiqueta {
 
     @Column(length = 500)
     private String descripcion;
+
+    @CreatedDate
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     /**
      * Enum de tipos de etiqueta según arquitectura del sistema
