@@ -24,7 +24,7 @@ public class EtiquetaRequest {
 
     @NotBlank(message = "El nombre es obligatorio")
     @Size(min = 2, max = 100, message = "El nombre debe tener entre 2 y 100 caracteres")
-    @Schema(description = "Nombre de la etiqueta", example = "Gluten", required = true)
+    @Schema(description = "Nombre de la etiqueta (único)", example = "Sin Gluten", required = true)
     private String nombre;
 
     @NotNull(message = "El tipo de etiqueta es obligatorio")
@@ -33,6 +33,6 @@ public class EtiquetaRequest {
     private Etiqueta.TipoEtiqueta tipoEtiqueta;
 
     @Size(max = 500, message = "La descripción no puede exceder 500 caracteres")
-    @Schema(description = "Descripción opcional de la etiqueta", example = "Alergia al gluten presente en trigo, cebada y centeno")
+    @Schema(description = "Descripción opcional de la etiqueta", example = "Apto para personas con intolerancia o alergia al gluten")
     private String descripcion;
 }

@@ -17,10 +17,10 @@ public class LoginRequest {
 
     @NotBlank(message = "El email es obligatorio")
     @Email(message = "El email debe ser válido")
-    @Schema(description = "Email del usuario", example = "carlos.martinez@email.com")
+    @Schema(description = "Email del usuario", example = "admin@nutritrack.com")
     private String email;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    @Schema(description = "Contraseña del usuario", example = "MiPassword123!")
+    @Schema(description = "Contraseña del usuario", example = "Admin123!")
     private String password;
 }
