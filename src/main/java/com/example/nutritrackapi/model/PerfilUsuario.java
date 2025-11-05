@@ -53,6 +53,7 @@ public class PerfilUsuario {
         inverseJoinColumns = @JoinColumn(name = "id_etiqueta")
     )
     @JsonIgnore
+    @Builder.Default
     private java.util.Set<Etiqueta> etiquetasSalud = new java.util.HashSet<>();
 
     @PrePersist
