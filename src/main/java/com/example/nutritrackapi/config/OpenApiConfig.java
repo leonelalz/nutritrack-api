@@ -24,6 +24,10 @@ public class OpenApiConfig {
         devServer.setUrl("http://localhost:8080");
         devServer.setDescription("Server URL in Development environment");
 
+        Server prodServer = new Server();
+        prodServer.setUrl("https://nutritrack-api-wt8b.onrender.com");
+        prodServer.setDescription("Server URL in Production environment (Render)");
+
         Contact contact = new Contact();
         contact.setName("NutriTrack Team");
         contact.setEmail("support@nutritrack.com");
@@ -140,7 +144,7 @@ public class OpenApiConfig {
 
         return new OpenAPI()
                 .info(info)
-                .servers(List.of(devServer))
+                .servers(List.of(prodServer, devServer))
                 .addSecurityItem(securityRequirement)
                 .components(new Components()
                         .addSecuritySchemes(SECURITY_SCHEME_NAME, securityScheme));
