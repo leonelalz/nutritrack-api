@@ -1,8 +1,33 @@
 # 🧪 Colecciones Postman - NutriTrack API
 
-> **Guía Completa de Pruebas con Demostración de Unit Tests**  
+> **Guía Completa de Pruebas**  
 > Esta guía documenta cómo usar las colecciones Postman para validar las reglas de negocio  
 > y demostrar la relación con los 175 tests unitarios implementados.
+
+---
+
+## 🌐 Entornos Disponibles
+
+| Archivo | Entorno | URL Base | Uso |
+|---------|---------|----------|-----|
+| `NutriTrack_Render_Production.postman_environment.json` | **🚀 Producción (Render)** | `https://nutritrack-api-wt8b.onrender.com` | Pruebas en producción |
+| `NutriTrack_Local_Development.postman_environment.json` | **💻 Desarrollo Local** | `http://localhost:8080` | Desarrollo local |
+
+### 📥 Cómo Importar Entornos en Postman
+
+1. Abre Postman
+2. Click en **Environments** (panel izquierdo) o el icono de ⚙️ arriba a la derecha
+3. Click en **Import**
+4. Arrastra los archivos `.postman_environment.json`
+5. Selecciona el entorno en el dropdown superior derecho
+
+**Variables incluidas en ambos entornos:**
+- `baseUrl` - URL base de la API
+- `apiVersion` - Versión de la API (v1)
+- `authToken` - Token JWT (se guarda automáticamente al hacer login)
+- `adminEmail` / `adminPassword` - Credenciales de administrador
+- `demoEmail` / `demoPassword` - Credenciales de usuario demo
+- `userId`, `perfilId` - IDs que se guardan automáticamente
 
 ---
 
