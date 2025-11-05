@@ -22,7 +22,8 @@ public class UsuarioPerfilSalud {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_perfil", insertable = false, updatable = false)
+    @MapsId // Usa el ID del PerfilUsuario como ID de esta entidad
+    @JoinColumn(name = "id_perfil")
     private PerfilUsuario perfilUsuario;
 
     @Column(name = "objetivo_actual", length = 50, nullable = false)

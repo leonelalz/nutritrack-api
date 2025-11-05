@@ -44,8 +44,7 @@ public class PerfilService {
         // Crear o actualizar perfil de salud
         UsuarioPerfilSalud perfilSalud = perfilSaludRepository.findByPerfilUsuarioId(perfil.getId())
             .orElse(UsuarioPerfilSalud.builder()
-                .id(perfil.getId()) // IMPORTANTE: Asignar el mismo ID que el perfil (relación 1-to-1)
-                .perfilUsuario(perfil)
+                .perfilUsuario(perfil) // @MapsId asignará automáticamente el ID del perfil
                 .build());
         
         perfilSalud.setObjetivoActual(request.getObjetivoActual());
