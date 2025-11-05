@@ -1,5 +1,6 @@
 package com.nutritrack.nutritrackapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nutritrack.nutritrackapi.model.enums.UnidadesMedida;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,6 +36,7 @@ public class PerfilUsuario {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false, unique = true, referencedColumnName = "id")
+    @JsonIgnore
     private CuentaAuth cuenta;
 
     @PrePersist

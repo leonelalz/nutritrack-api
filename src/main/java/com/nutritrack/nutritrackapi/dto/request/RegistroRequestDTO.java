@@ -19,6 +19,7 @@ public record RegistroRequestDTO(
 
         // Datos de Customer (información personal)
         String nombre,
+        String apellido,
         Float weight,
         Float height,
         String phone,
@@ -32,7 +33,7 @@ public record RegistroRequestDTO(
         String occupation
 ) {
     // Constructor adicional con solo email, password y nombre
-    public RegistroRequestDTO(String email, String password, String nombre) {
-        this(email, password, nombre, null, null, null, null, null, null, null, null);
+    public RegistroRequestDTO(String email, String password, String nombre, String apellido) {
+        this(email, password, nombre, apellido, null, null, null, null, null, null, null, null);
     }
 }

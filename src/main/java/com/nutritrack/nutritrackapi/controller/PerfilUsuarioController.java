@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,12 +15,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/perfiles")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class PerfilUsuarioController {
 
     private final PerfilUsuarioService perfilUsuarioService;
 
     // 🧑‍💻 Actualizar nombre del perfil
-    @PutMapping("/{id}/nombre")
+    @PutMapping("/{id}")
     public ResponseEntity<PerfilUsuario> actualizarNombre(
             @PathVariable Long id,
             @RequestParam String nuevoNombre) {
@@ -38,8 +40,7 @@ public class PerfilUsuarioController {
     // 🔍 Obtener perfil por id de cuenta
     @GetMapping("/cuenta/{idCuenta}")
     public ResponseEntity<PerfilUsuario> obtenerPorCuenta(@PathVariable Long idCuenta) {
-        PerfilUsuario perfil = perfilUsuarioService.obtenerPorCuenta(idCuenta);
-        return ResponseEntity.ok(perfil);
+        return ResponseEntity.ok(perfilUsuarioService.obtenerPorCuenta(idCuenta));
     }
 
     // 📋 Listar todos los perfiles

@@ -90,7 +90,7 @@ class AuthServiceTest {
     @DisplayName("Debe registrar cuenta y perfil exitosamente")
     void register_ValidData_Success() {
         // Arrange
-        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "John Doe");
+        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "John", "Doe");
 
         when(cuentaAuthRepository.existsByEmail(request.email())).thenReturn(false);
         when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
@@ -123,7 +123,7 @@ class AuthServiceTest {
     @DisplayName("Debe lanzar excepción si el email ya existe")
     void register_DuplicateEmail_ThrowsException() {
         // Arrange
-        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "John Doe");
+        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "John", "Doe");
         when(cuentaAuthRepository.existsByEmail(request.email())).thenReturn(true);
 
         // Act & Assert
@@ -138,7 +138,7 @@ class AuthServiceTest {
     @DisplayName("Debe lanzar excepción si el rol ROLE_USER no existe")
     void register_RoleNotFound_ThrowsException() {
         // Arrange
-        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "John Doe");
+        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "John", "Doe");
         when(cuentaAuthRepository.existsByEmail(request.email())).thenReturn(false);
         when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.empty());
 
@@ -231,7 +231,7 @@ class AuthServiceTest {
         };
 
         for (String email : emailsValidos) {
-            RegistroRequestDTO request = new RegistroRequestDTO(email, "pass123", "Test User");
+            RegistroRequestDTO request = new RegistroRequestDTO(email, "pass123", "Test", "User");
 
             when(cuentaAuthRepository.existsByEmail(email)).thenReturn(false);
             when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
@@ -267,7 +267,7 @@ class AuthServiceTest {
         };
 
         for (String nombre : nombresEspeciales) {
-            RegistroRequestDTO request = new RegistroRequestDTO("user@test.com", "pass123", nombre);
+            RegistroRequestDTO request = new RegistroRequestDTO("user@test.com", "pass123", nombre, "apellido");
 
             when(cuentaAuthRepository.existsByEmail(any())).thenReturn(false);
             when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
@@ -293,7 +293,7 @@ class AuthServiceTest {
     @DisplayName("Debe crear cuenta con rol USER por defecto")
     void register_VerificaRolUsuario_Success() {
         // Arrange
-        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "Test User");
+        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "Test User", "apellido");
 
         when(cuentaAuthRepository.existsByEmail(request.email())).thenReturn(false);
         when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
@@ -324,7 +324,7 @@ class AuthServiceTest {
         // Arrange
         String rawPassword = "MySecurePass123!";
         String encodedPassword = "encodedSecurePassword";
-        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", rawPassword, "Test User");
+        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", rawPassword, "Test User", "apellido");
 
         when(cuentaAuthRepository.existsByEmail(request.email())).thenReturn(false);
         when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
@@ -353,7 +353,7 @@ class AuthServiceTest {
     @DisplayName("Debe crear perfil vinculado a la cuenta")
     void register_CreaPerfilVinculado_Success() {
         // Arrange
-        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "John Doe");
+        RegistroRequestDTO request = new RegistroRequestDTO("user@example.com", "pass123", "John", "Doe");
 
         when(cuentaAuthRepository.existsByEmail(request.email())).thenReturn(false);
         when(rolRepository.findByTipo(TipoRol.ROLE_USER)).thenReturn(Optional.of(rolUsuario));
