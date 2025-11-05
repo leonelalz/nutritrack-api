@@ -4,6 +4,8 @@ import com.nutritrack.nutritrackapi.model.enums.TipoEtiqueta;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "etiquetas")
@@ -33,6 +35,23 @@ public class Etiqueta {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // (Opcional ejej)
+    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<EtiquetaPlan> planes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<EtiquetaEjercicio> ejercicios = new ArrayList<>();
+
+    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<EtiquetaIngrediente> ingredientes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "etiqueta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<EtiquetaMeta> metas = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

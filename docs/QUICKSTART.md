@@ -43,9 +43,29 @@ GRANT ALL PRIVILEGES ON DATABASE nutritrack_db TO nutritrack;
 
 ### 3. Ejecutar
 
+**Opción A: Ejecución Directa (Recomendado)**
+
 ```bash
-# Compilar y ejecutar
+# En PowerShell/CMD (Windows)
+.\mvnw.cmd spring-boot:run
+
+# En Linux/Mac
 ./mvnw spring-boot:run
+```
+
+> 💡 **Tip:** La aplicación se ejecutará en la terminal actual. Mantén la terminal abierta mientras uses el API. Para detenerla, presiona `Ctrl+C`.
+
+**Opción B: Ejecutar en Background (Windows PowerShell)**
+
+```powershell
+# Iniciar en background
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; .\mvnw.cmd spring-boot:run"
+```
+
+**Opción C: Con Maven instalado localmente**
+
+```bash
+mvn spring-boot:run
 ```
 
 **¡Listo!** La API está en: `http://localhost:8080/api/v1`
@@ -127,6 +147,80 @@ curl http://localhost:8080/api/v1/auth/register \
 
 ## 🆘 Problemas Comunes
 
+### La aplicación se detiene sola
+
+**Diagnóstico:** Si al ejecutar la aplicación se detiene inmediatamente, puede deberse a errores o a confusión sobre el comportamiento normal.
+
+#### Paso 1: Verificar si es comportamiento normal
+1. Mantén la terminal abierta donde ejecutaste `mvnw spring-boot:run`
+2. La aplicación corre en **foreground** - esto es **NORMAL**
+3. Verás logs en tiempo real en esa terminal
+4. Para detener: presiona `Ctrl+C`
+5. Verifica que esté funcionando: http://localhost:8080/api/v1/swagger-ui/index.html
+
+**Alternativa - Ejecutar en background (Windows):**
+```powershell
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; .\mvnw.cmd spring-boot:run"
+```
+
+#### Paso 2: Si hay errores reales en los logs
+
+**Error común: Foreign key incompatible types (bigint vs uuid)**
+
+Si ves errores como:
+```
+ERROR: foreign key constraint "..." cannot be implemented
+Detail: Key columns "..." and "..." are of incompatible types: bigint and uuid
+```
+
+**Solución - Regenerar esquema de base de datos:**
+
+**Windows PowerShell:**
+```powershell
+# 1. Detener contenedores y ELIMINAR volúmenes
+docker-compose down -v
+
+# 2. Recrear solo PostgreSQL
+docker-compose up -d postgres
+
+# 3. Cambiar temporalmente ddl-auto a create-drop
+# Edita src/main/resources/application.properties:
+# spring.jpa.hibernate.ddl-auto=create-drop
+
+# 4. Iniciar aplicación para regenerar schema
+.\mvnw.cmd spring-boot:run
+
+# 5. Una vez iniciada exitosamente, detener con Ctrl+C
+# 6. Cambiar de vuelta a update en application.properties:
+# spring.jpa.hibernate.ddl-auto=update
+
+# 7. Reiniciar aplicación
+.\mvnw.cmd spring-boot:run
+```
+
+**Linux/Mac:**
+```bash
+# 1. Detener contenedores y ELIMINAR volúmenes  
+docker-compose down -v
+
+# 2. Recrear solo PostgreSQL
+docker-compose up -d postgres
+
+# 3. Cambiar temporalmente ddl-auto a create-drop
+# Edita src/main/resources/application.properties:
+# spring.jpa.hibernate.ddl-auto=create-drop
+
+# 4. Iniciar aplicación para regenerar schema
+./mvnw spring-boot:run
+
+# 5. Una vez iniciada exitosamente, detener con Ctrl+C
+# 6. Cambiar de vuelta a update en application.properties:
+# spring.jpa.hibernate.ddl-auto=update
+
+# 7. Reiniciar aplicación
+./mvnw spring-boot:run
+```
+
 ### Error: Port 8080 already in use
 
 ```bash
@@ -166,7 +260,10 @@ spring.datasource.password=nutritrack123
 ## 💡 Tips
 
 - **Swagger UI:** Documentación interactiva en http://localhost:8080/api/v1/swagger-ui/index.html
+- **Mantener app ejecutándose:** No cierres la terminal donde ejecutaste `mvnw spring-boot:run`
+- **Detener la aplicación:** Presiona `Ctrl+C` en la terminal donde está corriendo
 - **Ver logs detallados:** Cambiar `logging.level.root=DEBUG` en properties
+- **Hot reload:** Spring DevTools está activo - los cambios se recargan automáticamente
 - **Tests:** `./mvnw test` (202 tests disponibles)
 - **Limpiar build:** `./mvnw clean`
 - **Reiniciar DB:** `docker-compose down -v && docker-compose up -d`
