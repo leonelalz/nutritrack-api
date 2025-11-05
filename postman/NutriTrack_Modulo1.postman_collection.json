@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "nutritrack-modulo1-v1",
 		"name": "NutriTrack API - Módulo 1",
-		"description": "Colección de pruebas para Módulo 1: Autenticación y Gestión de Perfiles\n\n**Funcionalidades implementadas:**\n- Registro de usuarios\n- Inicio de sesión\n- Eliminación de cuenta\n- Gestión de perfil de usuario\n- Configuración de perfil de salud\n- Actualización de unidades de medida\n- Registro de historial de medidas\n\n**Variables automáticas:**\n- `adminToken` - Token del usuario admin (admin@nutritrack.com)\n- `userToken` - Token del usuario regular\n- `userId` - ID del usuario autenticado\n\n**Credenciales iniciales:**\n- Admin: admin@nutritrack.com / Admin123!\n\n**Base URL:** http://localhost:8080",
+		"description": "Colección de pruebas para Módulo 1: Autenticación y Gestión de Perfiles\n\n**Funcionalidades implementadas:**\n- Registro de usuarios\n- Inicio de sesión\n- Eliminación de cuenta\n- Gestión de perfil de usuario\n- Configuración de perfil de salud\n- Actualización de unidades de medida\n- Registro de historial de medidas\n\n**Variables automáticas:**\n- `adminToken` - Token del usuario admin (admin@nutritrack.com)\n- `userToken` - Token del usuario regular\n- `userId` - ID del usuario autenticado\n\n**Credenciales iniciales:**\n- Admin: admin@nutritrack.com / Admin123!\n\n**Base URL:** http://localhost:8081",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "nutritrack-modulo1"
 	},
@@ -19,7 +19,7 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:8080",
+			"value": "http://localhost:8081",
 			"type": "string"
 		},
 		{
