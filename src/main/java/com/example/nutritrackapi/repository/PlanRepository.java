@@ -88,9 +88,7 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 
     /**
      * RN14: Verifica si un plan tiene usuarios activos
-     * TODO Módulo 5: Descomentar cuando se implemente UsuarioPlan
      */
-    /*
     @Query("""
         SELECT CASE WHEN COUNT(up) > 0 THEN true ELSE false END
         FROM UsuarioPlan up
@@ -98,7 +96,6 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
         AND up.estado = 'ACTIVO'
     """)
     boolean tieneUsuariosActivos(@Param("planId") Long planId);
-    */
 
     /**
      * Cuenta planes activos

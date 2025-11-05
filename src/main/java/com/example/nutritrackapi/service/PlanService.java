@@ -190,15 +190,12 @@ public class PlanService {
             ));
 
         // RN14: Verificar que no tenga usuarios activos
-        // TODO: Descomentar cuando se implemente UsuarioPlan
-        /*
         if (planRepository.tieneUsuariosActivos(id)) {
             throw new IllegalStateException(
                 "No se puede eliminar el plan porque tiene usuarios activos asignados. " +
                 "Espere a que los usuarios completen o cancelen el plan."
             );
         }
-        */
 
         // RN28: Soft delete - marcar como inactivo
         plan.setActivo(false);

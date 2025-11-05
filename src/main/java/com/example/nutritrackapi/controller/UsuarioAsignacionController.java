@@ -3,6 +3,7 @@ package com.example.nutritrackapi.controller;
 import com.example.nutritrackapi.dto.*;
 import com.example.nutritrackapi.service.UsuarioPlanService;
 import com.example.nutritrackapi.service.UsuarioRutinaService;
+import com.example.nutritrackapi.service.PlanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +22,9 @@ import java.util.List;
  * Módulo 4: Exploración y Activación (Cliente)
  * 
  * Endpoints para US-18, US-19, US-20
+ * 
+ * SEGURIDAD: Todos los endpoints extraen el perfilUsuarioId del token JWT
+ * automáticamente, evitando que usuarios accedan a datos de otros.
  */
 @RestController
 @RequestMapping("/api/v1/usuario")
@@ -30,6 +35,7 @@ public class UsuarioAsignacionController {
 
     private final UsuarioPlanService usuarioPlanService;
     private final UsuarioRutinaService usuarioRutinaService;
+    private final PlanService planService;
 
     // ============================================================================
     // PLANES NUTRICIONALES
@@ -39,12 +45,13 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "👤 USER - US-18: Activar plan nutricional",
-        description = "Activa un plan nutricional para el usuario. RN17: No permite duplicados activos. RN18: Propone reemplazo si existe. SOLO USUARIOS REGULARES."
+        description = "Activa un plan nutricional para el usuario autenticado. RN17: No permite duplicados activos. RN18: Propone reemplazo si existe. SOLO USUARIOS REGULARES."
     )
     public ResponseEntity<ApiResponse<UsuarioPlanResponse>> activarPlan(
-            @RequestParam Long perfilUsuarioId,
+            Authentication authentication,
             @Valid @RequestBody ActivarPlanRequest request) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioPlanResponse response = usuarioPlanService.activarPlan(perfilUsuarioId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.success(response, "Plan activado exitosamente")
@@ -55,12 +62,13 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "👤 USER - US-19: Pausar plan nutricional",
-        description = "Pausa un plan activo. RN19: No permite pausar si está completado/cancelado. SOLO USUARIOS REGULARES."
+        description = "Pausa un plan activo del usuario autenticado. RN19: No permite pausar si está completado/cancelado. SOLO USUARIOS REGULARES."
     )
     public ResponseEntity<ApiResponse<UsuarioPlanResponse>> pausarPlan(
-            @RequestParam Long perfilUsuarioId,
+            Authentication authentication,
             @PathVariable Long usuarioPlanId) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioPlanResponse response = usuarioPlanService.pausarPlan(perfilUsuarioId, usuarioPlanId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Plan pausado exitosamente")
@@ -71,12 +79,13 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "👤 USER - US-19: Reanudar plan nutricional",
-        description = "Reanuda un plan pausado. RN19: Solo permite reanudar planes pausados. SOLO USUARIOS REGULARES."
+        description = "Reanuda un plan pausado del usuario autenticado. RN19: Solo permite reanudar planes pausados. SOLO USUARIOS REGULARES."
     )
     public ResponseEntity<ApiResponse<UsuarioPlanResponse>> reanudarPlan(
-            @RequestParam Long perfilUsuarioId,
+            Authentication authentication,
             @PathVariable Long usuarioPlanId) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioPlanResponse response = usuarioPlanService.reanudarPlan(perfilUsuarioId, usuarioPlanId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Plan reanudado exitosamente")
@@ -87,12 +96,13 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "US-20: Completar plan nutricional",
-        description = "Marca el plan como completado. RN26: Valida transiciones de estado."
+        description = "Marca el plan del usuario autenticado como completado. RN26: Valida transiciones de estado."
     )
     public ResponseEntity<ApiResponse<UsuarioPlanResponse>> completarPlan(
-            @RequestParam Long perfilUsuarioId,
+            Authentication authentication,
             @PathVariable Long usuarioPlanId) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioPlanResponse response = usuarioPlanService.completarPlan(perfilUsuarioId, usuarioPlanId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Plan completado exitosamente")
@@ -103,12 +113,13 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "US-20: Cancelar plan nutricional",
-        description = "Cancela el plan. RN26: Valida transiciones de estado."
+        description = "Cancela el plan del usuario autenticado. RN26: Valida transiciones de estado."
     )
     public ResponseEntity<ApiResponse<UsuarioPlanResponse>> cancelarPlan(
-            @RequestParam Long perfilUsuarioId,
+            Authentication authentication,
             @PathVariable Long usuarioPlanId) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioPlanResponse response = usuarioPlanService.cancelarPlan(perfilUsuarioId, usuarioPlanId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Plan cancelado")
@@ -119,11 +130,12 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "Obtener plan activo",
-        description = "Obtiene el plan activo actual del usuario"
+        description = "Obtiene el plan activo actual del usuario autenticado"
     )
     public ResponseEntity<ApiResponse<UsuarioPlanResponse>> obtenerPlanActivo(
-            @RequestParam Long perfilUsuarioId) {
+            Authentication authentication) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioPlanResponse response = usuarioPlanService.obtenerPlanActivo(perfilUsuarioId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Plan activo obtenido")
@@ -134,11 +146,12 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "Listar todos los planes del usuario",
-        description = "Obtiene historial completo de planes (activos, pausados, completados, cancelados)"
+        description = "Obtiene historial completo de planes del usuario autenticado (activos, pausados, completados, cancelados)"
     )
     public ResponseEntity<ApiResponse<List<UsuarioPlanResponse>>> obtenerPlanes(
-            @RequestParam Long perfilUsuarioId) {
+            Authentication authentication) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         List<UsuarioPlanResponse> response = usuarioPlanService.obtenerPlanes(perfilUsuarioId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Planes obtenidos")
@@ -149,11 +162,12 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "Listar planes activos",
-        description = "Obtiene todos los planes activos del usuario"
+        description = "Obtiene todos los planes activos del usuario autenticado"
     )
     public ResponseEntity<ApiResponse<List<UsuarioPlanResponse>>> obtenerPlanesActivos(
-            @RequestParam Long perfilUsuarioId) {
+            Authentication authentication) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         List<UsuarioPlanResponse> response = usuarioPlanService.obtenerPlanesActivos(perfilUsuarioId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Planes activos obtenidos")
@@ -168,12 +182,13 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "US-18: Activar rutina de ejercicio",
-        description = "Activa una rutina de ejercicio para el usuario. RN17: No permite duplicados activos."
+        description = "Activa una rutina de ejercicio para el usuario autenticado. RN17: No permite duplicados activos."
     )
     public ResponseEntity<ApiResponse<UsuarioRutinaResponse>> activarRutina(
-            @RequestParam Long perfilUsuarioId,
+            Authentication authentication,
             @Valid @RequestBody ActivarRutinaRequest request) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioRutinaResponse response = usuarioRutinaService.activarRutina(perfilUsuarioId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.success(response, "Rutina activada exitosamente")
@@ -184,12 +199,13 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "US-19: Pausar rutina de ejercicio",
-        description = "Pausa una rutina activa. RN19: No permite pausar si está completada/cancelada."
+        description = "Pausa una rutina activa del usuario autenticado. RN19: No permite pausar si está completada/cancelada."
     )
     public ResponseEntity<ApiResponse<UsuarioRutinaResponse>> pausarRutina(
-            @RequestParam Long perfilUsuarioId,
+            Authentication authentication,
             @PathVariable Long usuarioRutinaId) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioRutinaResponse response = usuarioRutinaService.pausarRutina(perfilUsuarioId, usuarioRutinaId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Rutina pausada exitosamente")
@@ -200,12 +216,13 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "US-19: Reanudar rutina de ejercicio",
-        description = "Reanuda una rutina pausada. RN19: Solo permite reanudar rutinas pausadas."
+        description = "Reanuda una rutina pausada del usuario autenticado. RN19: Solo permite reanudar rutinas pausadas."
     )
     public ResponseEntity<ApiResponse<UsuarioRutinaResponse>> reanudarRutina(
-            @RequestParam Long perfilUsuarioId,
+            Authentication authentication,
             @PathVariable Long usuarioRutinaId) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioRutinaResponse response = usuarioRutinaService.reanudarRutina(perfilUsuarioId, usuarioRutinaId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Rutina reanudada exitosamente")
@@ -216,12 +233,13 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "US-20: Completar rutina de ejercicio",
-        description = "Marca la rutina como completada. RN26: Valida transiciones de estado."
+        description = "Marca la rutina del usuario autenticado como completada. RN26: Valida transiciones de estado."
     )
     public ResponseEntity<ApiResponse<UsuarioRutinaResponse>> completarRutina(
-            @RequestParam Long perfilUsuarioId,
+            Authentication authentication,
             @PathVariable Long usuarioRutinaId) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioRutinaResponse response = usuarioRutinaService.completarRutina(perfilUsuarioId, usuarioRutinaId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Rutina completada exitosamente")
@@ -232,12 +250,13 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "US-20: Cancelar rutina de ejercicio",
-        description = "Cancela la rutina. RN26: Valida transiciones de estado."
+        description = "Cancela la rutina del usuario autenticado. RN26: Valida transiciones de estado."
     )
     public ResponseEntity<ApiResponse<UsuarioRutinaResponse>> cancelarRutina(
-            @RequestParam Long perfilUsuarioId,
+            Authentication authentication,
             @PathVariable Long usuarioRutinaId) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioRutinaResponse response = usuarioRutinaService.cancelarRutina(perfilUsuarioId, usuarioRutinaId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Rutina cancelada")
@@ -248,11 +267,12 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "Obtener rutina activa",
-        description = "Obtiene la rutina activa actual del usuario"
+        description = "Obtiene la rutina activa actual del usuario autenticado"
     )
     public ResponseEntity<ApiResponse<UsuarioRutinaResponse>> obtenerRutinaActiva(
-            @RequestParam Long perfilUsuarioId) {
+            Authentication authentication) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         UsuarioRutinaResponse response = usuarioRutinaService.obtenerRutinaActiva(perfilUsuarioId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Rutina activa obtenida")
@@ -263,11 +283,12 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "Listar todas las rutinas del usuario",
-        description = "Obtiene historial completo de rutinas (activas, pausadas, completadas, canceladas)"
+        description = "Obtiene historial completo de rutinas del usuario autenticado (activas, pausadas, completadas, canceladas)"
     )
     public ResponseEntity<ApiResponse<List<UsuarioRutinaResponse>>> obtenerRutinas(
-            @RequestParam Long perfilUsuarioId) {
+            Authentication authentication) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         List<UsuarioRutinaResponse> response = usuarioRutinaService.obtenerRutinas(perfilUsuarioId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Rutinas obtenidas")
@@ -278,11 +299,12 @@ public class UsuarioAsignacionController {
     @PreAuthorize("hasRole('USER')")
     @Operation(
         summary = "Listar rutinas activas",
-        description = "Obtiene todas las rutinas activas del usuario"
+        description = "Obtiene todas las rutinas activas del usuario autenticado"
     )
     public ResponseEntity<ApiResponse<List<UsuarioRutinaResponse>>> obtenerRutinasActivas(
-            @RequestParam Long perfilUsuarioId) {
+            Authentication authentication) {
         
+        Long perfilUsuarioId = planService.obtenerPerfilUsuarioId(authentication.getName());
         List<UsuarioRutinaResponse> response = usuarioRutinaService.obtenerRutinasActivas(perfilUsuarioId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Rutinas activas obtenidas")
