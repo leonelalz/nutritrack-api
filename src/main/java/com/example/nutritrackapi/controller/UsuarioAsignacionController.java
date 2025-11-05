@@ -25,7 +25,7 @@ import java.util.List;
 @RequestMapping("/api/v1/usuario")
 @RequiredArgsConstructor
 @Tag(name = "Módulo 4: Asignación de Metas", description = "Activar, pausar, reanudar y completar planes/rutinas")
-@SecurityRequirement(name = "bearer-jwt")
+@SecurityRequirement(name = "bearerAuth")
 public class UsuarioAsignacionController {
 
     private final UsuarioPlanService usuarioPlanService;
