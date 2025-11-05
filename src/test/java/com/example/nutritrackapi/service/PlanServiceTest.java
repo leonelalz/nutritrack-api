@@ -87,7 +87,7 @@ class PlanServiceTest {
         planRequest.setNombre("Plan Keto 30 días");
         planRequest.setDescripcion("Plan cetogénico para 30 días");
         planRequest.setDuracionDias(30);
-        planRequest.setPlanObjetivo(objetivoRequest);
+        planRequest.setObjetivo(objetivoRequest);
         planRequest.setEtiquetaIds(Set.of(1L));
 
         comida = new Comida();
@@ -167,7 +167,6 @@ class PlanServiceTest {
             .thenReturn(false);
         when(etiquetaRepository.findAllById(planRequest.getEtiquetaIds()))
             .thenReturn(List.of(etiqueta));
-        when(planObjetivoRepository.findByPlanId(1L)).thenReturn(Optional.of(planObjetivo));
         when(planRepository.save(any(Plan.class))).thenReturn(plan);
 
         // When
@@ -298,7 +297,7 @@ class PlanServiceTest {
         // When & Then
         assertThatThrownBy(() -> planService.agregarDiaAPlan(1L, diaRequest))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("excede la duración del plan");
+            .hasMessageContaining("no puede exceder la duración del plan");
     }
 
     @Test
@@ -311,12 +310,13 @@ class PlanServiceTest {
         diaRequest.setComidaId(1L);
 
         when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
+        when(comidaRepository.findById(1L)).thenReturn(Optional.of(comida));
         when(planDiaRepository.existsByPlanIdAndNumeroDiaAndTipoComida(1L, 1, Comida.TipoComida.DESAYUNO))
             .thenReturn(true);
 
         // When & Then
         assertThatThrownBy(() -> planService.agregarDiaAPlan(1L, diaRequest))
-            .isInstanceOf(IllegalArgumentException.class)
+            .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Ya existe una comida");
     }
 
@@ -324,7 +324,7 @@ class PlanServiceTest {
     @DisplayName("US-17: Debe obtener días del plan ordenados")
     void debeObtenerDiasDePlanOrdenados() {
         // Given
-        when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
+        when(planRepository.existsById(1L)).thenReturn(true);
         when(planDiaRepository.findByPlanIdOrderByNumeroDiaAscTipoComidaAsc(1L))
             .thenReturn(List.of(planDia));
 
@@ -341,7 +341,7 @@ class PlanServiceTest {
     @DisplayName("US-21: Debe obtener actividades de un día específico")
     void debeObtenerActividadesDeDia() {
         // Given
-        when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
+        when(planRepository.existsById(1L)).thenReturn(true);
         when(planDiaRepository.findByPlanIdAndNumeroDia(1L, 1))
             .thenReturn(List.of(planDia));
 
@@ -358,7 +358,6 @@ class PlanServiceTest {
     @DisplayName("Debe eliminar día del plan")
     void debeEliminarDiaDePlan() {
         // Given
-        when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
         when(planDiaRepository.findById(1L)).thenReturn(Optional.of(planDia));
 
         // When

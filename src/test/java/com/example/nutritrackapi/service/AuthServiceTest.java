@@ -48,6 +48,9 @@ class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -102,6 +105,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$encodedPassword");
         when(cuentaAuthRepository.save(any(CuentaAuth.class))).thenReturn(cuentaAuth);
         when(perfilUsuarioRepository.save(any(PerfilUsuario.class))).thenReturn(perfilUsuario);
+        when(jwtService.generateToken(any())).thenReturn("TOKEN_PENDIENTE_JWT");
 
         // When
         AuthResponse response = authService.register(request);
@@ -203,6 +207,8 @@ class AuthServiceTest {
             .thenReturn(true);
         when(perfilUsuarioRepository.findByCuentaId(1L))
             .thenReturn(Optional.of(perfilUsuario));
+        when(jwtService.generateToken(any()))
+            .thenReturn("TOKEN_PENDIENTE_JWT");
 
         // When
         AuthResponse response = authService.login(request);

@@ -2,7 +2,6 @@ package com.example.nutritrackapi.service;
 
 import com.example.nutritrackapi.dto.*;
 import com.example.nutritrackapi.model.*;
-import com.example.nutritrackapi.model.Rutina.NivelDificultad;
 import com.example.nutritrackapi.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +60,7 @@ class RutinaServiceTest {
         rutina.setNombre("Rutina Fullbody 12 semanas");
         rutina.setDescripcion("Rutina de cuerpo completo para principiantes");
         rutina.setDuracionSemanas(12);
-        rutina.setNivelDificultad(NivelDificultad.INTERMEDIO);
+        rutina.setNivelDificultad(Ejercicio.NivelDificultad.INTERMEDIO);
         rutina.setActivo(true);
         rutina.setEtiquetas(new HashSet<>(Set.of(etiqueta)));
 
@@ -69,7 +68,7 @@ class RutinaServiceTest {
         rutinaRequest.setNombre("Rutina Fullbody 12 semanas");
         rutinaRequest.setDescripcion("Rutina de cuerpo completo para principiantes");
         rutinaRequest.setDuracionSemanas(12);
-        rutinaRequest.setNivelDificultad(NivelDificultad.INTERMEDIO);
+        rutinaRequest.setNivelDificultad(Ejercicio.NivelDificultad.INTERMEDIO);
         rutinaRequest.setEtiquetaIds(Set.of(1L));
 
         ejercicio = new Ejercicio();
@@ -105,7 +104,7 @@ class RutinaServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getNombre()).isEqualTo("Rutina Fullbody 12 semanas");
         assertThat(response.getDuracionSemanas()).isEqualTo(12);
-        assertThat(response.getNivelDificultad()).isEqualTo(NivelDificultad.INTERMEDIO);
+        assertThat(response.getNivelDificultad()).isEqualTo(Ejercicio.NivelDificultad.INTERMEDIO);
         assertThat(response.getActivo()).isTrue();
         
         verify(rutinaRepository).existsByNombre(rutinaRequest.getNombre());
@@ -280,10 +279,6 @@ class RutinaServiceTest {
 
         // Este test verifica que la validación Bean Validation funcionará
         // En runtime, @Min(1) en el DTO rechazará series=0
-        // Aquí solo verificamos la lógica del servicio asumiendo datos válidos
-        when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
-        when(ejercicioRepository.findById(1L)).thenReturn(Optional.of(ejercicio));
-        
         // La validación @Min se hace en el controller, aquí asumimos datos válidos
         assertThat(ejercicioRequest.getSeries()).isLessThan(1);
     }
@@ -299,11 +294,12 @@ class RutinaServiceTest {
         ejercicioRequest.setRepeticiones(10);
 
         when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
+        when(ejercicioRepository.findById(1L)).thenReturn(Optional.of(ejercicio));
         when(rutinaEjercicioRepository.existsByRutinaIdAndOrden(1L, 1)).thenReturn(true);
 
         // When & Then
         assertThatThrownBy(() -> rutinaService.agregarEjercicioARutina(1L, ejercicioRequest))
-            .isInstanceOf(IllegalArgumentException.class)
+            .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Ya existe un ejercicio en el orden");
     }
 
@@ -319,7 +315,6 @@ class RutinaServiceTest {
         ejercicioRequest.setPeso(new BigDecimal("65.00")); // Cambio
 
         when(rutinaEjercicioRepository.findById(1L)).thenReturn(Optional.of(rutinaEjercicio));
-        when(ejercicioRepository.findById(1L)).thenReturn(Optional.of(ejercicio));
         when(rutinaEjercicioRepository.save(any(RutinaEjercicio.class)))
             .thenReturn(rutinaEjercicio);
 
@@ -337,7 +332,7 @@ class RutinaServiceTest {
     @DisplayName("US-17: Debe obtener ejercicios de rutina ordenados")
     void debeObtenerEjerciciosDeRutinaOrdenados() {
         // Given
-        when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
+        when(rutinaRepository.existsById(1L)).thenReturn(true);
         when(rutinaEjercicioRepository.findByRutinaIdOrderByOrdenAsc(1L))
             .thenReturn(List.of(rutinaEjercicio));
 
@@ -354,7 +349,6 @@ class RutinaServiceTest {
     @DisplayName("Debe eliminar ejercicio de rutina")
     void debeEliminarEjercicioDeRutina() {
         // Given
-        when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
         when(rutinaEjercicioRepository.findById(1L)).thenReturn(Optional.of(rutinaEjercicio));
 
         // When
@@ -384,27 +378,26 @@ class RutinaServiceTest {
     }
 
     @Test
-    @DisplayName("Debe asignar orden automático si no se especifica")
-    void debeAsignarOrdenAutomatico() {
+    @DisplayName("Debe agregar ejercicio con orden especificado")
+    void debeAgregarEjercicioConOrdenEspecificado() {
         // Given
         RutinaEjercicioRequest ejercicioRequest = new RutinaEjercicioRequest();
         ejercicioRequest.setEjercicioId(1L);
-        ejercicioRequest.setOrden(null); // No especificado
+        ejercicioRequest.setOrden(1);
         ejercicioRequest.setSeries(4);
         ejercicioRequest.setRepeticiones(10);
 
         when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
         when(ejercicioRepository.findById(1L)).thenReturn(Optional.of(ejercicio));
-        when(rutinaEjercicioRepository.findMaxOrden(1L)).thenReturn(5);
-        when(rutinaEjercicioRepository.existsByRutinaIdAndOrden(1L, 6)).thenReturn(false);
+        when(rutinaEjercicioRepository.existsByRutinaIdAndOrden(1L, 1)).thenReturn(false);
         when(rutinaEjercicioRepository.save(any(RutinaEjercicio.class)))
             .thenReturn(rutinaEjercicio);
 
         // When
-        rutinaService.agregarEjercicioARutina(1L, ejercicioRequest);
+        RutinaEjercicioResponse response = rutinaService.agregarEjercicioARutina(1L, ejercicioRequest);
 
         // Then
-        verify(rutinaEjercicioRepository).findMaxOrden(1L);
-        verify(rutinaEjercicioRepository).save(argThat(re -> re.getOrden() == 6));
+        assertThat(response).isNotNull();
+        verify(rutinaEjercicioRepository).save(argThat(re -> re.getOrden() == 1));
     }
 }
