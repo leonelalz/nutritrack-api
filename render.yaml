@@ -9,7 +9,7 @@ services:
   # API Spring Boot
   - type: web
     name: nutritrack-api
-    env: java
+    runtime: java
     plan: free
     region: oregon
     buildCommand: ./mvnw clean package -DskipTests
