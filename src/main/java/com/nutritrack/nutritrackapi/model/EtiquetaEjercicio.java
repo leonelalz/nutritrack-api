@@ -17,11 +17,9 @@ public class EtiquetaEjercicio {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ejercicio", nullable = false)
-    private Ejercicio ejercicio;  // ✅ Relación con entidad Ejercicio
+    @Column(name = "id_ejercicio", nullable = false)
+    private Long idEjercicio;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_etiqueta", nullable = false)
-    private Etiqueta etiqueta;
+    @Column(name = "id_etiqueta", nullable = false)
+    private Long idEtiqueta;
 }

@@ -17,13 +17,9 @@ public class EtiquetaPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relación ManyToOne con Plan
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_catalogo_plan", nullable = false)
-    private CatalogoPlan plan;
+    @Column(name = "id_catalogo_plan", nullable = false)
+    private Long idCatalogoPlan;
 
-    // Relación ManyToOne con Etiqueta
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_etiqueta", nullable = false)
-    private Etiqueta etiqueta;
+    @Column(name = "id_etiqueta", nullable = false)
+    private Long idEtiqueta;
 }

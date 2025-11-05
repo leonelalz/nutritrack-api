@@ -25,13 +25,7 @@ public class EtiquetaService {
     private final EtiquetaIngredienteRepository etiquetaIngredienteRepository;
     private final EtiquetaMetaRepository etiquetaMetaRepository;
 
-
-    private final EjercicioRepository ejercicioRepository;
-    private final IngredienteRepository ingredienteRepository;
-    //private final CatalogoPlanRepository catalogoPlanRepository; // Cuando Víctor lo tenga funcionara tengo fe
-    //private final CatalogoMetaRepository catalogoMetaRepository; // Cuando Jhamil lo tenga funcionara tengo fe
-
-    //CRUD de Etiquetas
+    // ==================== CRUD de Etiquetas ====================
 
     @Transactional
     public EtiquetaResponse crearEtiqueta(EtiquetaRequest request) {
@@ -75,7 +69,7 @@ public class EtiquetaService {
                         "Etiqueta no encontrada con ID: " + id
                 ));
 
-        // Verificar que el nuevo nombre no exista (si cambió)
+        // RN06: Verificar que el nuevo nombre no exista (si cambió)
         if (!etiqueta.getNombre().equals(request.nombre()) &&
                 etiquetaRepository.existsByNombre(request.nombre())) {
             throw new DuplicateResourceException(
@@ -110,28 +104,58 @@ public class EtiquetaService {
         etiquetaRepository.deleteById(id);
     }
 
+    //Asignación a Planes
+
+    @Transactional
+    public void asignarEtiquetasAPlan(Long idPlan, List<Long> etiquetasIds) {
+        for (Long idEtiqueta : etiquetasIds) {
+            // RN12: Validar que la etiqueta exista
+            if (!etiquetaRepository.existsById(idEtiqueta)) {
+                throw new ResourceNotFoundException(
+                        "Etiqueta no encontrada con ID: " + idEtiqueta
+                );
+            }
+
+            // Evitar duplicados
+            if (etiquetaPlanRepository.findByIdCatalogoPlanAndIdEtiqueta(idPlan, idEtiqueta).isEmpty()) {
+                EtiquetaPlan etiquetaPlan = EtiquetaPlan.builder()
+                        .idCatalogoPlan(idPlan)
+                        .idEtiqueta(idEtiqueta)
+                        .build();
+                etiquetaPlanRepository.save(etiquetaPlan);
+            }
+        }
+    }
+
+    @Transactional
+    public void quitarEtiquetaDePlan(Long idPlan, Long idEtiqueta) {
+        EtiquetaPlan etiquetaPlan = etiquetaPlanRepository
+                .findByIdCatalogoPlanAndIdEtiqueta(idPlan, idEtiqueta)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe la relación entre el plan " + idPlan +
+                                " y la etiqueta " + idEtiqueta
+                ));
+
+        etiquetaPlanRepository.delete(etiquetaPlan);
+    }
+
     //Asignación a Ejercicios
 
     @Transactional
     public void asignarEtiquetasAEjercicio(Long idEjercicio, List<Long> etiquetasIds) {
-        // Buscar el ejercicio completo
-        Ejercicio ejercicio = ejercicioRepository.findById(idEjercicio)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Ejercicio no encontrado con ID: " + idEjercicio
-                ));
-
         for (Long idEtiqueta : etiquetasIds) {
-            // Buscar la etiqueta completa
-            Etiqueta etiqueta = etiquetaRepository.findById(idEtiqueta)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Etiqueta no encontrada con ID: " + idEtiqueta
-                    ));
+            // RN12: Validar que la etiqueta exista
+            if (!etiquetaRepository.existsById(idEtiqueta)) {
+                throw new ResourceNotFoundException(
+                        "Etiqueta no encontrada con ID: " + idEtiqueta
+                );
+            }
 
             // Evitar duplicados
             if (etiquetaEjercicioRepository.findByIdEjercicioAndIdEtiqueta(idEjercicio, idEtiqueta).isEmpty()) {
                 EtiquetaEjercicio etiquetaEjercicio = EtiquetaEjercicio.builder()
-                        .ejercicio(ejercicio)
-                        .etiqueta(etiqueta)
+                        .idEjercicio(idEjercicio)
+                        .idEtiqueta(idEtiqueta)
                         .build();
                 etiquetaEjercicioRepository.save(etiquetaEjercicio);
             }
@@ -154,24 +178,19 @@ public class EtiquetaService {
 
     @Transactional
     public void asignarEtiquetasAIngrediente(Long idIngrediente, List<Long> etiquetasIds) {
-        //Buscar el ingrediente completo
-        Ingrediente ingrediente = ingredienteRepository.findById(idIngrediente)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Ingrediente no encontrado con ID: " + idIngrediente
-                ));
-
         for (Long idEtiqueta : etiquetasIds) {
-            //Buscar la etiqueta completa
-            Etiqueta etiqueta = etiquetaRepository.findById(idEtiqueta)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Etiqueta no encontrada con ID: " + idEtiqueta
-                    ));
+            // RN12: Validar que la etiqueta exista
+            if (!etiquetaRepository.existsById(idEtiqueta)) {
+                throw new ResourceNotFoundException(
+                        "Etiqueta no encontrada con ID: " + idEtiqueta
+                );
+            }
 
-            //Evitar duplicados
+            // Evitar duplicados
             if (etiquetaIngredienteRepository.findByIdIngredienteAndIdEtiqueta(idIngrediente, idEtiqueta).isEmpty()) {
                 EtiquetaIngrediente etiquetaIngrediente = EtiquetaIngrediente.builder()
-                        .ingrediente(ingrediente)
-                        .etiqueta(etiqueta)
+                        .idIngrediente(idIngrediente)
+                        .idEtiqueta(idEtiqueta)
                         .build();
                 etiquetaIngredienteRepository.save(etiquetaIngrediente);
             }
@@ -190,61 +209,23 @@ public class EtiquetaService {
         etiquetaIngredienteRepository.delete(etiquetaIngrediente);
     }
 
-    //Asignación a Planes (COMENTADO hasta que Víctor(ELGOAT) tenga el repo)
+    //Asignación a Metas
 
-    /*
-    @Transactional
-    public void asignarEtiquetasAPlan(Long idPlan, List<Long> etiquetasIds) {
-        // Buscar el plan
-        CatalogoPlan plan = catalogoPlanRepository.findById(idPlan)
-                .orElseThrow(() -> new ResourceNotFoundException("Plan no encontrado con ID: " + idPlan));
-
-        for (Long idEtiqueta : etiquetasIds) {
-            Etiqueta etiqueta = etiquetaRepository.findById(idEtiqueta)
-                    .orElseThrow(() -> new ResourceNotFoundException("Etiqueta no encontrada con ID: " + idEtiqueta));
-
-            // Verificar si ya existe la relación
-            if (etiquetaPlanRepository.findByIdCatalogoPlanAndIdEtiqueta(idPlan, idEtiqueta).isEmpty()) {
-                EtiquetaPlan etiquetaPlan = EtiquetaPlan.builder()
-                        .plan(plan)
-                        .etiqueta(etiqueta)
-                        .build();
-                etiquetaPlanRepository.save(etiquetaPlan);
-            }
-        }
-    }
-
-    @Transactional
-    public void quitarEtiquetaDePlan(Long idPlan, Long idEtiqueta) {
-        EtiquetaPlan etiquetaPlan = etiquetaPlanRepository
-                .findByIdCatalogoPlanAndIdEtiqueta(idPlan, idEtiqueta)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "No existe la relación entre el plan " + idPlan +
-                                " y la etiqueta " + idEtiqueta
-                ));
-
-        etiquetaPlanRepository.delete(etiquetaPlan);
-    }
-    */
-
-    //Asignación a Metas (COMENTADO hasta que Lu tenga el repo)
-
-    /*
     @Transactional
     public void asignarEtiquetasAMeta(Long idMeta, List<Long> etiquetasIds) {
-        // Buscar la meta
-        CatalogoMeta meta = catalogoMetaRepository.findById(idMeta)
-                .orElseThrow(() -> new ResourceNotFoundException("Meta no encontrada con ID: " + idMeta));
-
         for (Long idEtiqueta : etiquetasIds) {
-            Etiqueta etiqueta = etiquetaRepository.findById(idEtiqueta)
-                    .orElseThrow(() -> new ResourceNotFoundException("Etiqueta no encontrada con ID: " + idEtiqueta));
+            // RN12: Validar que la etiqueta exista
+            if (!etiquetaRepository.existsById(idEtiqueta)) {
+                throw new ResourceNotFoundException(
+                        "Etiqueta no encontrada con ID: " + idEtiqueta
+                );
+            }
 
             // Evitar duplicados
             if (etiquetaMetaRepository.findByIdCatalogoMetaAndIdEtiqueta(idMeta, idEtiqueta).isEmpty()) {
                 EtiquetaMeta etiquetaMeta = EtiquetaMeta.builder()
-                        .meta(meta)
-                        .etiqueta(etiqueta)
+                        .idCatalogoMeta(idMeta)
+                        .idEtiqueta(idEtiqueta)
                         .build();
                 etiquetaMetaRepository.save(etiquetaMeta);
             }
@@ -262,9 +243,8 @@ public class EtiquetaService {
 
         etiquetaMetaRepository.delete(etiquetaMeta);
     }
-    */
 
-    //Metodo Helper
+    //Método helper (conversión)
 
     private EtiquetaResponse toResponse(Etiqueta etiqueta) {
         return new EtiquetaResponse(
