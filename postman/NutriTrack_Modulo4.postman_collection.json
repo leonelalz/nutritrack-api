@@ -1,0 +1,590 @@
+{
+	"info": {
+		"_postman_id": "nutritrack-modulo4-v1",
+		"name": "NutriTrack API - Módulo 4",
+		"description": "Colección de pruebas para Módulo 4: Asignación de Metas (Cliente)\n\n**Funcionalidades implementadas:**\n- US-18: Activar planes nutricionales y rutinas de ejercicio\n- US-19: Pausar y reanudar planes/rutinas\n- US-20: Completar o cancelar planes/rutinas\n- RN16: Filtrado de planes con alérgenos y rutinas con contraindicaciones\n- RN17: Validación de duplicados activos\n- RN18: Propuesta de reemplazo\n- RN19: Validación de pausas\n- RN26: Validación de transiciones de estado\n\n**Variables automáticas:**\n- `userToken` - Token del usuario regular\n- `perfilId` - ID del perfil del usuario\n- `planId` - ID del plan seleccionado\n- `rutinaId` - ID de la rutina seleccionada\n- `usuarioPlanId` - ID de la asignación del plan\n- `usuarioRutinaId` - ID de la asignación de la rutina\n\n**Base URL:** http://localhost:8080",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "nutritrack-modulo4"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{userToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "userToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "perfilId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "planId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "rutinaId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "usuarioPlanId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "usuarioRutinaId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "0. Autenticación",
+			"description": "Endpoints para autenticarse antes de usar el Módulo 4",
+			"item": [
+				{
+					"name": "Login Usuario Demo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.token) {",
+									"        pm.collectionVariables.set('userToken', jsonData.data.token);",
+									"        console.log('✅ Token guardado:', jsonData.data.token);",
+									"    }",
+									"} else {",
+									"    console.log('❌ Login fallido:', pm.response.status);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"demo@nutritrack.com\",\n  \"password\": \"Demo123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "login"]
+						},
+						"description": "Login con usuario demo creado automáticamente.\n\n**Credenciales:**\n- Email: demo@nutritrack.com\n- Password: Demo123!"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "1. Catálogos",
+			"description": "Visualizar planes y rutinas disponibles (US-16, US-17)",
+			"item": [
+				{
+					"name": "Ver Catálogo de Planes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/planes/catalogo?perfilUsuarioId={{perfilId}}&page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "planes", "catalogo"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "**US-16:** Ver catálogo de planes nutricionales disponibles\n\n**RN16:** Filtra automáticamente planes que contengan ingredientes a los que el usuario es alérgico.\n\n**Respuesta:**\n- Lista paginada de planes\n- Cada plan incluye: nombre, descripción, objetivos, duración, calorías diarias"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Detalle de Plan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/planes/{{planId}}?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "planes", "{{planId}}"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-17:** Ver detalles completos de un plan específico\n\n**RN16:** Si el plan contiene alérgenos del usuario, lanza excepción con mensaje de advertencia.\n\n**Respuesta:**\n- Información completa del plan\n- Lista de comidas por día\n- Ingredientes de cada comida"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Catálogo de Rutinas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/rutinas/catalogo?perfilUsuarioId={{perfilId}}&page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "rutinas", "catalogo"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "**US-16:** Ver catálogo de rutinas de ejercicio disponibles\n\n**RN16:** Filtra automáticamente rutinas con ejercicios contraindicados por condiciones médicas del usuario.\n\n**Respuesta:**\n- Lista paginada de rutinas\n- Cada rutina incluye: nombre, descripción, objetivos, nivel, duración"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Detalle de Rutina",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/rutinas/{{rutinaId}}?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "rutinas", "{{rutinaId}}"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-17:** Ver detalles completos de una rutina específica\n\n**RN16:** Si la rutina contiene contraindicaciones, lanza excepción con mensaje de advertencia.\n\n**Respuesta:**\n- Información completa de la rutina\n- Ejercicios por día y semana\n- Detalles de cada ejercicio (series, repeticiones, descanso)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Gestión de Planes",
+			"description": "Activar, pausar, reanudar y completar planes nutricionales (US-18, US-19, US-20)",
+			"item": [
+				{
+					"name": "Activar Plan",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.collectionVariables.set('usuarioPlanId', jsonData.data.id);",
+									"        console.log('✅ Plan activado con ID:', jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"planId\": {{planId}},\n  \"fechaInicio\": \"2025-11-05\",\n  \"notas\": \"Mi primer plan nutricional\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/planes/activar?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "planes", "activar"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-18:** Activar un plan nutricional\n\n**RN17:** No permite duplicar el mismo plan activo\n**RN18:** Si ya hay un plan activo, propone pausarlo o cancelarlo primero\n\n**Respuesta:**\n- ID de la asignación\n- Plan asignado\n- Estado: ACTIVO\n- Fecha de inicio y fin calculada\n- Día actual: 1"
+					},
+					"response": []
+				},
+				{
+					"name": "Pausar Plan",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/planes/{{usuarioPlanId}}/pausar?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "planes", "{{usuarioPlanId}}", "pausar"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-19:** Pausar un plan activo\n\n**RN19:** No permite pausar si el plan ya está completado o cancelado\n\n**Respuesta:**\n- Estado cambiado a PAUSADO\n- Progreso congelado en el día actual"
+					},
+					"response": []
+				},
+				{
+					"name": "Reanudar Plan",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/planes/{{usuarioPlanId}}/reanudar?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "planes", "{{usuarioPlanId}}", "reanudar"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-19:** Reanudar un plan pausado\n\n**RN19:** Solo permite reanudar planes que estén PAUSADOS\n\n**Respuesta:**\n- Estado cambiado a ACTIVO\n- Fecha de fin recalculada considerando días pausados"
+					},
+					"response": []
+				},
+				{
+					"name": "Completar Plan",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/planes/{{usuarioPlanId}}/completar?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "planes", "{{usuarioPlanId}}", "completar"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-20:** Marcar plan como completado\n\n**RN26:** Valida que la transición de estado sea permitida\n\n**Respuesta:**\n- Estado cambiado a COMPLETADO\n- Fecha de fin actualizada"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar Plan",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/planes/{{usuarioPlanId}}/cancelar?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "planes", "{{usuarioPlanId}}", "cancelar"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-20:** Cancelar un plan\n\n**RN26:** Valida que la transición de estado sea permitida\n\n**Respuesta:**\n- Estado cambiado a CANCELADO\n- Fecha de fin actualizada"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Plan Activo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/planes/activo?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "planes", "activo"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "Obtener el plan activo actual del usuario\n\n**Respuesta:**\n- Plan activo con su progreso\n- null si no hay plan activo"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Todos los Planes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/planes?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "planes"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "Obtener historial completo de planes del usuario\n\n**Respuesta:**\n- Lista de todos los planes (activos, pausados, completados, cancelados)\n- Incluye progreso y fechas"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Planes Activos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/planes/activos?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "planes", "activos"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "Obtener solo los planes que están activos\n\n**Respuesta:**\n- Lista de planes con estado ACTIVO"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Gestión de Rutinas",
+			"description": "Activar, pausar, reanudar y completar rutinas de ejercicio (US-18, US-19, US-20)",
+			"item": [
+				{
+					"name": "Activar Rutina",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.collectionVariables.set('usuarioRutinaId', jsonData.data.id);",
+									"        console.log('✅ Rutina activada con ID:', jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rutinaId\": {{rutinaId}},\n  \"fechaInicio\": \"2025-11-05\",\n  \"notas\": \"Mi primera rutina de ejercicio\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/rutinas/activar?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "rutinas", "activar"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-18:** Activar una rutina de ejercicio\n\n**RN17:** No permite duplicar la misma rutina activa\n\n**Respuesta:**\n- ID de la asignación\n- Rutina asignada\n- Estado: ACTIVO\n- Fecha de inicio y fin calculada"
+					},
+					"response": []
+				},
+				{
+					"name": "Pausar Rutina",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/rutinas/{{usuarioRutinaId}}/pausar?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "rutinas", "{{usuarioRutinaId}}", "pausar"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-19:** Pausar una rutina activa\n\n**RN19:** No permite pausar si la rutina ya está completada o cancelada\n\n**Respuesta:**\n- Estado cambiado a PAUSADO"
+					},
+					"response": []
+				},
+				{
+					"name": "Reanudar Rutina",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/rutinas/{{usuarioRutinaId}}/reanudar?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "rutinas", "{{usuarioRutinaId}}", "reanudar"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-19:** Reanudar una rutina pausada\n\n**RN19:** Solo permite reanudar rutinas que estén PAUSADAS\n\n**Respuesta:**\n- Estado cambiado a ACTIVO"
+					},
+					"response": []
+				},
+				{
+					"name": "Completar Rutina",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/rutinas/{{usuarioRutinaId}}/completar?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "rutinas", "{{usuarioRutinaId}}", "completar"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-20:** Marcar rutina como completada\n\n**RN26:** Valida que la transición de estado sea permitida\n\n**Respuesta:**\n- Estado cambiado a COMPLETADO"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar Rutina",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/rutinas/{{usuarioRutinaId}}/cancelar?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "rutinas", "{{usuarioRutinaId}}", "cancelar"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "**US-20:** Cancelar una rutina\n\n**RN26:** Valida que la transición de estado sea permitida\n\n**Respuesta:**\n- Estado cambiado a CANCELADO"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Rutina Activa",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/rutinas/activa?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "rutinas", "activa"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "Obtener la rutina activa actual del usuario\n\n**Respuesta:**\n- Rutina activa con su progreso\n- null si no hay rutina activa"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Todas las Rutinas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuario/rutinas?perfilUsuarioId={{perfilId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "usuario", "rutinas"],
+							"query": [
+								{
+									"key": "perfilUsuarioId",
+									"value": "{{perfilId}}"
+								}
+							]
+						},
+						"description": "Obtener historial completo de rutinas del usuario\n\n**Respuesta:**\n- Lista de todas las rutinas (activas, pausadas, completadas, canceladas)"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
