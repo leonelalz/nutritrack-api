@@ -40,6 +40,25 @@ public class PerfilController {
     }
 
     /**
+     * US-04: Crear perfil de salud (primera vez)
+     * RN04: Usar etiquetas maestras
+     */
+    @PostMapping("/salud")
+    @Operation(summary = "Crear perfil de salud",
+               description = "Crea el perfil de salud del usuario por primera vez (US-04)")
+    public ResponseEntity<ApiResponse<PerfilSaludResponse>> crearPerfilSalud(
+            Authentication authentication,
+            @Valid @RequestBody PerfilSaludRequest request) {
+        try {
+            PerfilSaludResponse response = perfilService.actualizarPerfilSalud(authentication.getName(), request);
+            return ResponseEntity.ok(ApiResponse.success(response, "Perfil de salud creado exitosamente"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
      * US-04: Editar perfil de salud
      * RN04: Usar etiquetas maestras
      */

@@ -37,33 +37,73 @@ public class OpenApiConfig {
                 .version("1.0.0")
                 .contact(contact)
                 .description("""
-                    API para gestión de nutrición y seguimiento de objetivos de salud.
+                    API REST para gestión de nutrición, salud y ejercicio.
                     
                     ## 🔐 Autenticación
+                    Esta API utiliza JWT (JSON Web Tokens) para autenticación.
                     
-                    1. **Registrarse**: POST `/api/v1/auth/registro` - Crea una cuenta nueva
-                    2. **Login**: POST `/api/v1/auth/login` - Retorna un token JWT
-                    3. **Autorizar**: Haz clic en el botón 🔓 "Authorize" arriba
-                    4. **Pegar token**: Ingresa el token (sin "Bearer ") y haz clic en "Authorize"
-                    5. **Usar API**: Ahora puedes usar todos los endpoints protegidos
+                    **Pasos para autenticarse:**
+                    1. Registra un usuario con POST /api/v1/auth/register o usa las cuentas de prueba
+                    2. Inicia sesión con POST /api/v1/auth/login
+                    3. Copia el token JWT de la respuesta
+                    4. Haz clic en el botón "Authorize" 🔓 arriba
+                    5. Pega el token en el campo "Value" (sin agregar "Bearer")
+                    6. ¡Listo! Ahora puedes usar todos los endpoints protegidos
                     
-                    El token expira en 24 horas. Vuelve a hacer login cuando expire.
+                    El token expira en 24 horas.
                     
-                    ## Organización por Módulos
+                    ## 👥 Usuarios de Prueba
                     
-                    ### Módulo 1: Autenticación y Perfil (Leonel Alzamora)
-                    - US-01: Crear cuenta
-                    - US-02: Iniciar sesión
-                    - US-03: Editar perfil
-                    - US-04: Actualizar perfil de salud
-                    - US-05: Eliminar cuenta
+                    ### 🔹 Usuario Admin (Administrador)
+                    - **Email:** admin@nutritrack.com
+                    - **Password:** Admin123!
+                    - **Role:** ROLE_ADMIN
+                    - **Objetivo:** Mantener forma física
+                    - **Actividad:** Alto (5-6 días/semana)
+                    - **Peso:** 70.0 kg → 70.5 kg (11 mediciones desde sep-2025)
+                    - **Altura:** 175 cm | **IMC:** 23.0 (Peso normal)
                     
-                    ### Módulo 2: Biblioteca de Contenido - Admin (Fabián Rojas)
-                    - US-06: Gestionar Etiquetas
-                    - US-07: Gestionar Ingredientes
-                    - US-08: Gestionar Ejercicios
-                    - US-09: Gestionar Comidas
-                    - US-10: Gestionar Recetas (ingredientes de comida)
+                    ### 🔸 Usuario Demo (Usuario Regular)
+                    - **Email:** demo@nutritrack.com
+                    - **Password:** Demo123!
+                    - **Role:** ROLE_USER
+                    - **Objetivo:** Perder peso
+                    - **Actividad:** Moderado (3-4 días/semana)
+                    - **Peso:** 78.0 kg → 72.5 kg (-5.5 kg) 🎯
+                    - **Altura:** 168 cm | **IMC:** 27.6 → 25.7 (Sobrepeso leve)
+                    
+                    ## 📋 Módulos Disponibles
+                    
+                    ### ✅ Módulo 1: Autenticación y Seguridad
+                    - US-01: Registro de usuarios
+                    - US-02: Inicio de sesión con JWT
+                    - US-05: Eliminación de cuenta (requiere confirmación "ELIMINAR")
+                    - Control de acceso basado en roles (ADMIN/USER)
+                    
+                    ### ✅ Módulo 2: Gestión de Perfil y Salud
+                    - US-04: Configurar/actualizar perfil de salud
+                    - US-06: Registrar y consultar mediciones corporales
+                    - Historial de progreso con cálculo automático de IMC
+                    - Validación de duplicados por fecha
+                    
+                    ## 🎯 Objetivos de Salud Disponibles
+                    - **PERDER_PESO** - Pérdida de peso
+                    - **GANAR_MASA_MUSCULAR** - Ganancia muscular
+                    - **MANTENER_FORMA** - Mantenimiento físico
+                    - **REHABILITACION** - Rehabilitación física
+                    - **CONTROLAR_ESTRES** - Control de estrés
+                    
+                    ## 🏃 Niveles de Actividad Física
+                    - **BAJO** - Ejercicio 1-2 días/semana o sedentario
+                    - **MODERADO** - Ejercicio 3-4 días/semana
+                    - **ALTO** - Ejercicio 5-6 días/semana o más
+                    
+                    ---
+                    
+                    **Desarrollado por:** Fabián Rojas  
+                    **Asignatura:** Programación Móvil Transversal  
+                    **Institución:** DUOC UC  
+                    **Fecha:** Noviembre 2025
                     """)
                 .license(mitLicense);
 

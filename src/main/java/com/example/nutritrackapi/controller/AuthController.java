@@ -3,6 +3,9 @@ package com.example.nutritrackapi.controller;
 import com.example.nutritrackapi.dto.*;
 import com.example.nutritrackapi.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +28,47 @@ public class AuthController {
      * RN02: Validación de credenciales
      */
     @PostMapping("/registro")
-    @Operation(summary = "Registrar nuevo usuario", 
-               description = "Crea una nueva cuenta de usuario con su perfil básico")
-    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
+    @Operation(
+        summary = "Registrar nuevo usuario", 
+        description = "Crea una nueva cuenta de usuario con su perfil básico"
+    )
+    @RequestBody(
+        description = "Datos del nuevo usuario",
+        required = true,
+        content = @Content(
+            examples = {
+                @ExampleObject(
+                    name = "Usuario Regular",
+                    summary = "Ejemplo de registro de usuario estándar",
+                    description = "Registro con datos completos de un usuario regular",
+                    value = """
+                        {
+                          "email": "nuevo@ejemplo.com",
+                          "password": "Pass123!",
+                          "nombre": "Juan",
+                          "apellido": "Pérez",
+                          "fechaNacimiento": "1990-05-15"
+                        }
+                        """
+                ),
+                @ExampleObject(
+                    name = "Usuario Joven",
+                    summary = "Ejemplo de registro de usuario joven",
+                    description = "Registro de usuario de menor edad",
+                    value = """
+                        {
+                          "email": "maria@ejemplo.com",
+                          "password": "Maria123!",
+                          "nombre": "María",
+                          "apellido": "González",
+                          "fechaNacimiento": "2000-08-20"
+                        }
+                        """
+                )
+            }
+        )
+    )
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @org.springframework.web.bind.annotation.RequestBody RegisterRequest request) {
         try {
             AuthResponse response = authService.register(request);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -43,9 +84,41 @@ public class AuthController {
      * RN02: Login falla si credenciales incorrectas o cuenta inactiva
      */
     @PostMapping("/login")
-    @Operation(summary = "Iniciar sesión", 
-               description = "Autentica un usuario y retorna un token JWT")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+    @Operation(
+        summary = "Iniciar sesión", 
+        description = "Autentica un usuario y retorna un token JWT"
+    )
+    @RequestBody(
+        description = "Credenciales de acceso",
+        required = true,
+        content = @Content(
+            examples = {
+                @ExampleObject(
+                    name = "Usuario Demo",
+                    summary = "Usuario regular para pruebas",
+                    description = "Cuenta de usuario regular con objetivo de perder peso",
+                    value = """
+                        {
+                          "email": "demo@nutritrack.com",
+                          "password": "Demo123!"
+                        }
+                        """
+                ),
+                @ExampleObject(
+                    name = "Usuario Admin",
+                    summary = "Administrador del sistema",
+                    description = "Cuenta de administrador con permisos completos",
+                    value = """
+                        {
+                          "email": "admin@nutritrack.com",
+                          "password": "Admin123!"
+                        }
+                        """
+                )
+            }
+        )
+    )
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @org.springframework.web.bind.annotation.RequestBody LoginRequest request) {
         try {
             AuthResponse response = authService.login(request);
             return ResponseEntity.ok(ApiResponse.success(response, "Login exitoso"));

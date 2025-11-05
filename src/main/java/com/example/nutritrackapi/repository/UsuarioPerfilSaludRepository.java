@@ -10,18 +10,24 @@ import java.util.Optional;
 public interface UsuarioPerfilSaludRepository extends JpaRepository<UsuarioPerfilSalud, Long> {
 
     /**
-     * Buscar perfil de salud por ID del perfil de usuario
+     * Buscar perfil de salud por ID (que es el mismo que el ID del perfil de usuario)
      * Relación 1-to-1
      */
-    Optional<UsuarioPerfilSalud> findByPerfilUsuarioId(Long perfilUsuarioId);
+    default Optional<UsuarioPerfilSalud> findByPerfilUsuarioId(Long perfilUsuarioId) {
+        return findById(perfilUsuarioId);
+    }
 
     /**
      * Verificar si existe perfil de salud para un usuario
      */
-    boolean existsByPerfilUsuarioId(Long perfilUsuarioId);
+    default boolean existsByPerfilUsuarioId(Long perfilUsuarioId) {
+        return existsById(perfilUsuarioId);
+    }
 
     /**
      * Eliminar perfil de salud por ID del perfil de usuario
      */
-    void deleteByPerfilUsuarioId(Long perfilUsuarioId);
+    default void deleteByPerfilUsuarioId(Long perfilUsuarioId) {
+        deleteById(perfilUsuarioId);
+    }
 }
