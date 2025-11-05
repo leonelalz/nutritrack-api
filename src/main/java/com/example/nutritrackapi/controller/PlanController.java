@@ -108,6 +108,40 @@ public class PlanController {
     }
 
     /**
+     * US-16: Ver Catálogo de Planes (CLIENTE)
+     * RN15: Muestra planes sugeridos según objetivo
+     * RN16: 🚨CRÍTICO - Filtra planes con ingredientes alérgenos
+     */
+    @GetMapping("/catalogo")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Ver catálogo de planes (Cliente)", 
+               description = "US-16: Obtiene planes disponibles. RN15: Sugiere según objetivo. RN16: 🚨FILTRA ALÉRGENOS.")
+    public ResponseEntity<ApiResponse<Page<PlanResponse>>> verCatalogo(
+            @Parameter(description = "ID del perfil usuario") @RequestParam Long perfilUsuarioId,
+            @Parameter(description = "Filtrar solo planes sugeridos según objetivo") @RequestParam(required = false, defaultValue = "false") boolean sugeridos,
+            @PageableDefault(size = 20, sort = "id") Pageable pageable
+    ) {
+        Page<PlanResponse> planes = planService.verCatalogo(perfilUsuarioId, sugeridos, pageable);
+        return ResponseEntity.ok(ApiResponse.success(planes, "Catálogo de planes obtenido"));
+    }
+
+    /**
+     * US-17: Ver Detalle del Plan (CLIENTE)
+     * RN16: 🚨CRÍTICO - Valida que el plan no contenga alérgenos del usuario
+     */
+    @GetMapping("/catalogo/{id}")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Ver detalle de plan (Cliente)", 
+               description = "US-17: Obtiene detalle del plan validando alérgenos del usuario. RN16: 🚨SEGURIDAD SALUD")
+    public ResponseEntity<ApiResponse<PlanResponse>> verDetallePlan(
+            @Parameter(description = "ID del plan") @PathVariable Long id,
+            @Parameter(description = "ID del perfil usuario") @RequestParam Long perfilUsuarioId
+    ) {
+        PlanResponse plan = planService.verDetallePlan(id, perfilUsuarioId);
+        return ResponseEntity.ok(ApiResponse.success(plan, "Detalle del plan obtenido"));
+    }
+
+    /**
      * Buscar planes por nombre
      */
     @GetMapping("/buscar")

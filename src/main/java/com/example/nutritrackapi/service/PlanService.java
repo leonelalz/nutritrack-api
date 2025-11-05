@@ -35,6 +35,7 @@ public class PlanService {
     private final PlanDiaRepository planDiaRepository;
     private final EtiquetaRepository etiquetaRepository;
     private final ComidaRepository comidaRepository;
+    private final PerfilUsuarioRepository perfilUsuarioRepository;
 
     /**
      * US-11: Crea un nuevo plan nutricional.
@@ -294,4 +295,53 @@ public class PlanService {
 
         planDiaRepository.delete(planDia);
     }
+
+    /**
+     * US-16: Ver Catálogo de Planes (CLIENTE)
+     * RN15: Sugiere planes según objetivo del perfil de salud
+     * TODO RN16: 🚨CRÍTICO - Implementar filtrado de alérgenos cuando se cree relación usuario_etiquetas_salud
+     */
+    public Page<PlanResponse> verCatalogo(Long perfilUsuarioId, boolean sugeridos, Pageable pageable) {
+        PerfilUsuario perfil = perfilUsuarioRepository.findById(perfilUsuarioId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Perfil de usuario no encontrado con ID: " + perfilUsuarioId));
+
+        Page<Plan> planes;
+        
+        if (sugeridos && perfil.getPerfilSalud() != null && perfil.getPerfilSalud().getObjetivoActual() != null) {
+            // RN15: Filtrar por objetivo actual del perfil de salud
+            String objetivoActual = perfil.getPerfilSalud().getObjetivoActual().name();
+            planes = planRepository.findByActivoTrueAndEtiquetasNombre(objetivoActual, pageable);
+        } else {
+            // Sin filtro de objetivo
+            planes = planRepository.findByActivoTrue(pageable);
+        }
+
+        // TODO RN16: Agregar filtrado de alérgenos cuando se implemente usuario_etiquetas_salud
+        return planes.map(PlanResponse::fromEntity);
+    }
+
+    /**
+     * US-17: Ver Detalle del Plan (CLIENTE)
+     * TODO RN16: 🚨CRÍTICO - Implementar validación de alérgenos cuando se cree usuario_etiquetas_salud
+     */
+    public PlanResponse verDetallePlan(Long planId, Long perfilUsuarioId) {
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Plan no encontrado con ID: " + planId));
+
+        if (!plan.getActivo()) {
+            throw new IllegalStateException("El plan no está disponible");
+        }
+
+        // Verificar que el perfil existe
+        perfilUsuarioRepository.findById(perfilUsuarioId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Perfil de usuario no encontrado con ID: " + perfilUsuarioId));
+
+        // TODO RN16: Agregar validación de alérgenos cuando se implemente usuario_etiquetas_salud
+
+        return PlanResponse.fromEntity(plan);
+    }
+
 }

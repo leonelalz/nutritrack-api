@@ -109,6 +109,40 @@ public class RutinaController {
     }
 
     /**
+     * US-16: Ver Catálogo de Rutinas (CLIENTE)
+     * RN15: Muestra rutinas sugeridas según objetivo
+     * RN16: 🚨CRÍTICO - Filtra rutinas con ejercicios alérgenos
+     */
+    @GetMapping("/catalogo")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Ver catálogo de rutinas (Cliente)", 
+               description = "US-16: Obtiene rutinas disponibles. RN15: Sugiere según objetivo. RN16: 🚨FILTRA ALÉRGENOS.")
+    public ResponseEntity<ApiResponse<Page<RutinaResponse>>> verCatalogo(
+            @Parameter(description = "ID del perfil usuario") @RequestParam Long perfilUsuarioId,
+            @Parameter(description = "Filtrar solo rutinas sugeridas según objetivo") @RequestParam(required = false, defaultValue = "false") boolean sugeridos,
+            @PageableDefault(size = 20, sort = "id") Pageable pageable
+    ) {
+        Page<RutinaResponse> rutinas = rutinaService.verCatalogo(perfilUsuarioId, sugeridos, pageable);
+        return ResponseEntity.ok(ApiResponse.success(rutinas, "Catálogo de rutinas obtenido"));
+    }
+
+    /**
+     * US-17: Ver Detalle de Rutina (CLIENTE)
+     * RN16: 🚨CRÍTICO - Valida que la rutina no contenga alérgenos del usuario
+     */
+    @GetMapping("/catalogo/{id}")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Ver detalle de rutina (Cliente)", 
+               description = "US-17: Obtiene detalle de rutina validando alérgenos. RN16: 🚨SEGURIDAD SALUD")
+    public ResponseEntity<ApiResponse<RutinaResponse>> verDetalleRutina(
+            @Parameter(description = "ID de la rutina") @PathVariable Long id,
+            @Parameter(description = "ID del perfil usuario") @RequestParam Long perfilUsuarioId
+    ) {
+        RutinaResponse rutina = rutinaService.verDetalleRutina(id, perfilUsuarioId);
+        return ResponseEntity.ok(ApiResponse.success(rutina, "Detalle de rutina obtenido"));
+    }
+
+    /**
      * Buscar rutinas por nombre
      */
     @GetMapping("/buscar")

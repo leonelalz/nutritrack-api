@@ -63,6 +63,15 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
     Page<Plan> findByEtiquetaIdAndActivoTrue(@Param("etiquetaId") Long etiquetaId, Pageable pageable);
 
     /**
+     * RN15: Busca planes por nombre de etiqueta (objetivo)
+     */
+    @Query("""
+        SELECT DISTINCT p FROM Plan p JOIN p.etiquetas e
+        WHERE LOWER(e.nombre) = LOWER(:nombreEtiqueta) AND p.activo = true
+    """)
+    Page<Plan> findByActivoTrueAndEtiquetasNombre(@Param("nombreEtiqueta") String nombreEtiqueta, Pageable pageable);
+
+    /**
      * Busca planes por múltiples etiquetas (recomendaciones personalizadas)
      */
     @Query("""

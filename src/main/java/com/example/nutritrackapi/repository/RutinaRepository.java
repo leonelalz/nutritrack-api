@@ -63,6 +63,15 @@ public interface RutinaRepository extends JpaRepository<Rutina, Long> {
     Page<Rutina> findByEtiquetaIdAndActivoTrue(@Param("etiquetaId") Long etiquetaId, Pageable pageable);
 
     /**
+     * RN15: Busca rutinas por nombre de etiqueta (objetivo)
+     */
+    @Query("""
+        SELECT DISTINCT r FROM Rutina r JOIN r.etiquetas e
+        WHERE LOWER(e.nombre) = LOWER(:nombreEtiqueta) AND r.activo = true
+    """)
+    Page<Rutina> findByActivoTrueAndEtiquetasNombre(@Param("nombreEtiqueta") String nombreEtiqueta, Pageable pageable);
+
+    /**
      * Busca rutinas por múltiples etiquetas (recomendaciones personalizadas)
      */
     @Query("""

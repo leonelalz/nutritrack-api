@@ -36,6 +36,7 @@ public class RutinaService {
     private final RutinaEjercicioRepository rutinaEjercicioRepository;
     private final EtiquetaRepository etiquetaRepository;
     private final EjercicioRepository ejercicioRepository;
+    private final PerfilUsuarioRepository perfilUsuarioRepository;
 
     /**
      * US-11: Crea una nueva rutina de ejercicio.
@@ -299,4 +300,53 @@ public class RutinaService {
 
         rutinaEjercicioRepository.delete(rutinaEjercicio);
     }
+
+    /**
+     * US-16: Ver Catálogo de Rutinas (CLIENTE)
+     * RN15: Sugiere rutinas según objetivo del perfil de salud
+     * TODO RN16: 🚨CRÍTICO - Implementar filtrado de alérgenos cuando se cree usuario_etiquetas_salud
+     */
+    public Page<RutinaResponse> verCatalogo(Long perfilUsuarioId, boolean sugeridos, Pageable pageable) {
+        PerfilUsuario perfil = perfilUsuarioRepository.findById(perfilUsuarioId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Perfil de usuario no encontrado con ID: " + perfilUsuarioId));
+
+        Page<Rutina> rutinas;
+        
+        if (sugeridos && perfil.getPerfilSalud() != null && perfil.getPerfilSalud().getObjetivoActual() != null) {
+            // RN15: Filtrar por objetivo actual del perfil de salud
+            String objetivoActual = perfil.getPerfilSalud().getObjetivoActual().name();
+            rutinas = rutinaRepository.findByActivoTrueAndEtiquetasNombre(objetivoActual, pageable);
+        } else {
+            // Sin filtro de objetivo
+            rutinas = rutinaRepository.findByActivoTrue(pageable);
+        }
+
+        // TODO RN16: Agregar filtrado de alérgenos cuando se implemente usuario_etiquetas_salud
+        return rutinas.map(RutinaResponse::fromEntity);
+    }
+
+    /**
+     * US-17: Ver Detalle de Rutina (CLIENTE)
+     * TODO RN16: 🚨CRÍTICO - Implementar validación de alérgenos cuando se cree usuario_etiquetas_salud
+     */
+    public RutinaResponse verDetalleRutina(Long rutinaId, Long perfilUsuarioId) {
+        Rutina rutina = rutinaRepository.findById(rutinaId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Rutina no encontrada con ID: " + rutinaId));
+
+        if (!rutina.getActivo()) {
+            throw new IllegalStateException("La rutina no está disponible");
+        }
+
+        // Verificar que el perfil existe
+        perfilUsuarioRepository.findById(perfilUsuarioId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Perfil de usuario no encontrado con ID: " + perfilUsuarioId));
+
+        // TODO RN16: Agregar validación de alérgenos cuando se implemente usuario_etiquetas_salud
+
+        return RutinaResponse.fromEntity(rutina);
+    }
+
 }
