@@ -53,6 +53,12 @@ class UsuarioPlanServiceTest {
     @Mock
     private PerfilUsuarioRepository perfilUsuarioRepository;
 
+    @Mock
+    private com.example.nutritrackapi.repository.UsuarioEtiquetasSaludRepository etiquetasSaludRepository;
+
+    @Mock
+    private com.example.nutritrackapi.repository.EtiquetaRepository etiquetaRepository;
+
     @InjectMocks
     private UsuarioPlanService usuarioPlanService;
 
@@ -98,6 +104,10 @@ class UsuarioPlanServiceTest {
                 .diaActual(1)
                 .estado(UsuarioPlan.EstadoAsignacion.ACTIVO)
                 .build();
+
+        // Mock RN32: Por defecto, usuario sin alergias (lenient para tests que no activan planes)
+        lenient().when(etiquetasSaludRepository.findEtiquetasAlergenosByPerfilUsuarioId(anyLong()))
+                .thenReturn(new ArrayList<>());
     }
 
     // ============================================================

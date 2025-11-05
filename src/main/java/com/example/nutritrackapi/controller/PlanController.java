@@ -45,8 +45,17 @@ public class PlanController {
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "🔐 ADMIN - Crear plan nutricional", 
-               description = "Crea un nuevo plan nutricional con objetivos diarios. RN11: Nombre debe ser único. SOLO ADMINISTRADORES.")
+    @Operation(summary = "🔐 ADMIN - US-11: Crear plan nutricional [RN11]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN11: Planes con nombre único en catálogo (@Column unique=true)
+                   
+                   UNIT TESTS: 22/22 ✅ en PlanServiceTest.java
+                   - testCrearPlan_NombreDuplicado_Falla()
+                   - testCrearPlan_NombreUnico_Exito()
+                   
+                   Ejecutar: ./mvnw test -Dtest=PlanServiceTest
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Plan creado exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos o nombre duplicado (RN11)"),
@@ -187,8 +196,21 @@ public class PlanController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Eliminar plan (soft delete)", 
-               description = "Marca el plan como inactivo. RN14: No permite eliminar si tiene usuarios activos. RN28: Soft delete.")
+    @Operation(summary = "🔐 ADMIN - US-14: Eliminar plan [RN14, RN28]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN14: No permite eliminar plan si tiene usuarios activos
+                   - RN28: Soft delete - marca activo=false en lugar de DELETE
+                   
+                   VALIDACIONES AUTOMÁTICAS:
+                   1. Verifica si plan tiene registros en usuario_planes con estado ACTIVO
+                   2. Rechaza eliminación si hay usuarios activos
+                   3. Si no hay usuarios, marca activo=false
+                   
+                   UNIT TESTS: 22/22 ✅ en PlanServiceTest.java
+                   - testEliminarPlan_ConUsuariosActivos_Falla()
+                   - testEliminarPlan_SinUsuarios_SoftDelete()
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Plan eliminado exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Plan no encontrado"),

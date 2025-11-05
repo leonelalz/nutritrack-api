@@ -27,12 +27,18 @@ public class RegisterRequest {
     private String apellido;
 
     @NotBlank(message = "El email es obligatorio")
-    @Email(message = "El email debe ser válido")
-    @Schema(description = "Email del usuario (debe ser único)", example = "carlos.martinez@email.com")
+    @Email(message = "El email debe ser válido",
+           regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")
+    @Schema(description = "Email del usuario (debe ser único y tener formato válido RFC 5322)", example = "carlos.martinez@email.com")
     private String email;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
-    @Schema(description = "Contraseña (mínimo 8 caracteres)", example = "MiPassword123!")
+    @Size(min = 12, message = "La contraseña debe tener al menos 12 caracteres")
+    @jakarta.validation.constraints.Pattern(
+        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{12,}$",
+        message = "La contraseña debe incluir mayúsculas, minúsculas, números y símbolos especiales"
+    )
+    @Schema(description = "Contraseña robusta (mínimo 12 caracteres con mayúsculas, minúsculas, números y símbolos)", 
+            example = "MiPassword123!Segura")
     private String password;
 }

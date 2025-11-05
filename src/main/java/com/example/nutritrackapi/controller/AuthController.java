@@ -25,12 +25,38 @@ public class AuthController {
     /**
      * US-01: Crear cuenta
      * RN01: Email único
-     * RN02: Validación de credenciales
+     * RN30: Validación Email RFC 5322 + DNS
+     * RN31: Política de contraseñas robusta (12+ caracteres)
+     * 
+     * UNIT TESTS (13 tests en AuthServiceTest.java):
+     * ✅ testRegistro_EmailFormatoInvalido() - RN30
+     * ✅ testRegistro_EmailDominioInexistente() - RN30
+     * ✅ testRegistro_PasswordCorta() - RN31
+     * ✅ testRegistro_PasswordSinComplejidad() - RN31
+     * ✅ testRegistro_PasswordComun() - RN31
+     * ✅ testRegistro_PasswordContieneEmail() - RN31
+     * ✅ testRegistro_EmailDuplicado() - RN01
      */
     @PostMapping("/registro")
     @Operation(
-        summary = "🔓 PÚBLICO - Registrar nuevo usuario", 
-        description = "Crea una nueva cuenta de usuario con su perfil básico. ACCESO PÚBLICO."
+        summary = "🔓 PÚBLICO - Registrar nuevo usuario [RN01, RN30, RN31]", 
+        description = """
+            Crea una nueva cuenta de usuario con su perfil básico. ACCESO PÚBLICO.
+            
+            **REGLAS DE NEGOCIO IMPLEMENTADAS:**
+            - RN01: Email único en la base de datos
+            - RN30: Validación formato email RFC 5322 + verificación DNS
+            - RN31: Contraseña mínimo 12 caracteres con complejidad (mayúscula, minúscula, número, símbolo)
+            
+            **VALIDACIONES AUTOMÁTICAS:**
+            1. Email con formato válido y dominio existente (DNS lookup)
+            2. Contraseña no puede ser común (blacklist)
+            3. Contraseña no puede contener el email del usuario
+            4. Email no puede estar registrado previamente
+            
+            **UNIT TESTS:** 13/13 ✅ en AuthServiceTest.java
+            - Ejecutar: ./mvnw test -Dtest=AuthServiceTest
+            """
     )
     @RequestBody(
         description = "Datos del nuevo usuario",
@@ -38,13 +64,13 @@ public class AuthController {
         content = @Content(
             examples = {
                 @ExampleObject(
-                    name = "Usuario Regular",
-                    summary = "Ejemplo de registro de usuario estándar",
-                    description = "Registro con datos completos de un usuario regular",
+                    name = "✅ Registro Válido",
+                    summary = "Ejemplo cumple RN30 y RN31",
+                    description = "Email válido RFC 5322 + contraseña 12+ chars con complejidad",
                     value = """
                         {
                           "email": "nuevo@ejemplo.com",
-                          "password": "Pass123!",
+                          "password": "SecurePass2024!",
                           "nombre": "Juan",
                           "apellido": "Pérez",
                           "fechaNacimiento": "1990-05-15"
@@ -52,16 +78,41 @@ public class AuthController {
                         """
                 ),
                 @ExampleObject(
-                    name = "Usuario Joven",
-                    summary = "Ejemplo de registro de usuario joven",
-                    description = "Registro de usuario de menor edad",
+                    name = "❌ Email Inválido (RN30)",
+                    summary = "Email sin formato válido",
+                    description = "Rechaza email sin @ o con dominio inexistente",
                     value = """
                         {
-                          "email": "maria@ejemplo.com",
-                          "password": "Maria123!",
-                          "nombre": "María",
-                          "apellido": "González",
-                          "fechaNacimiento": "2000-08-20"
+                          "email": "emailinvalido",
+                          "password": "SecurePass2024!",
+                          "nombre": "Test",
+                          "apellido": "Error"
+                        }
+                        """
+                ),
+                @ExampleObject(
+                    name = "❌ Contraseña Débil (RN31)",
+                    summary = "Contraseña < 12 caracteres",
+                    description = "Rechaza contraseñas cortas o sin complejidad",
+                    value = """
+                        {
+                          "email": "test@ejemplo.com",
+                          "password": "Pass1!",
+                          "nombre": "Test",
+                          "apellido": "Error"
+                        }
+                        """
+                ),
+                @ExampleObject(
+                    name = "❌ Contraseña Común (RN31)",
+                    summary = "Contraseña en blacklist",
+                    description = "Rechaza contraseñas comunes como 'password1234'",
+                    value = """
+                        {
+                          "email": "test@ejemplo.com",
+                          "password": "password1234",
+                          "nombre": "Test",
+                          "apellido": "Error"
                         }
                         """
                 )

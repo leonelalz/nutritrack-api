@@ -44,8 +44,26 @@ public class UsuarioAsignacionController {
     @PostMapping("/planes/activar")
     @PreAuthorize("hasRole('USER')")
     @Operation(
-        summary = "👤 USER - US-18: Activar plan nutricional",
-        description = "Activa un plan nutricional para el usuario autenticado. RN17: No permite duplicados activos. RN18: Propone reemplazo si existe. SOLO USUARIOS REGULARES."
+        summary = "👤 USER - US-18: Activar plan nutricional [RN17, RN32]",
+        description = """
+            Activa un plan nutricional para el usuario autenticado.
+            
+            **REGLAS DE NEGOCIO IMPLEMENTADAS:**
+            - RN17: No permite duplicar el mismo plan si ya está activo
+            - RN32: Validación cruzada de alérgenos (bloquea si plan contiene alérgenos del usuario)
+            
+            **VALIDACIONES AUTOMÁTICAS:**
+            1. Query 5-join: Plan → PlanDia → Comida → ComidaIngrediente → Ingrediente → Etiqueta
+            2. Intersección de alergias del usuario vs etiquetas de ingredientes del plan
+            3. Si hay coincidencia, rechaza activación con mensaje específico de alérgenos
+            
+            **UNIT TESTS:** 37/37 ✅ en UsuarioPlanServiceTest.java
+            - testActivarPlan_ConAlergenosIncompatibles() - RN32
+            - testActivarPlan_MismoPlanActivo() - RN17
+            - testActivarPlan_ExitoCuandoNoHayAlergias() - RN32
+            
+            SOLO USUARIOS REGULARES.
+            """
     )
     public ResponseEntity<ApiResponse<UsuarioPlanResponse>> activarPlan(
             Authentication authentication,

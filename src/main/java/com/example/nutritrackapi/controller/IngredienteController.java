@@ -37,7 +37,18 @@ public class IngredienteController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "🔐 ADMIN - Crear ingrediente", description = "Crea un nuevo ingrediente con información nutricional. SOLO ADMINISTRADORES.")
+    @Operation(summary = "🔐 ADMIN - US-07: Crear ingrediente [RN07, RN12]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN07: Ingredientes con nombre único (@Column unique=true)
+                   - RN12: Solo permite asignar etiquetas existentes (FK constraint)
+                   
+                   UNIT TESTS: 9/9 ✅ en IngredienteServiceTest.java
+                   - testCrearIngrediente_NombreDuplicado_Falla()
+                   - testCrearIngrediente_EtiquetaInexistente_Falla()
+                   
+                   Ejecutar: ./mvnw test -Dtest=IngredienteServiceTest
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Ingrediente creado exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos o nombre duplicado"),
@@ -117,7 +128,19 @@ public class IngredienteController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Eliminar ingrediente", description = "Elimina un ingrediente. RN09: No permite eliminar si está en uso en recetas.")
+    @Operation(summary = "🔐 ADMIN - US-07: Eliminar ingrediente [RN09]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN09: No permite eliminar ingredientes en uso en recetas
+                   
+                   VALIDACIONES AUTOMÁTICAS:
+                   1. Verifica si ingrediente está en tabla comida_ingredientes
+                   2. Rechaza eliminación si hay comidas que lo usan
+                   
+                   UNIT TESTS: 9/9 ✅ en IngredienteServiceTest.java
+                   - testEliminarIngrediente_EnUsoEnComida_Falla()
+                   - testEliminarIngrediente_SinUso_Exito()
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ingrediente eliminado exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Ingrediente no encontrado"),

@@ -38,6 +38,17 @@ public interface UsuarioEtiquetasSaludRepository extends JpaRepository<UsuarioEt
     List<Etiqueta> findEtiquetasByPerfilId(Long perfilUsuarioId);
 
     /**
+     * RN32: Obtener IDs de etiquetas de alergias del usuario
+     */
+    @Query("""
+        SELECT e.id FROM Etiqueta e
+        INNER JOIN UsuarioEtiquetasSalud ues ON e.id = ues.etiqueta.id
+        WHERE ues.perfilUsuario.id = :perfilUsuarioId
+        AND e.tipoEtiqueta = 'ALERGIA'
+        """)
+    List<Long> findEtiquetasAlergenosByPerfilUsuarioId(Long perfilUsuarioId);
+
+    /**
      * Verificar si usuario tiene una etiqueta específica
      */
     boolean existsByPerfilUsuarioIdAndEtiquetaId(Long perfilUsuarioId, Long etiquetaId);

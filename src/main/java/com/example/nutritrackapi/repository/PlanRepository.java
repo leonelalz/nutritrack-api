@@ -109,10 +109,24 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
         SELECT p FROM Plan p
         WHERE p.duracionDias BETWEEN :minDias AND :maxDias
         AND p.activo = true
-    """)
+        """)
     Page<Plan> findByDuracionRange(
         @Param("minDias") Integer minDias,
         @Param("maxDias") Integer maxDias,
         Pageable pageable
     );
+
+    /**
+     * RN32: Obtener etiquetas de ingredientes de un plan
+     */
+    @Query("""
+        SELECT DISTINCT ie.id FROM Plan p
+        INNER JOIN p.dias pd
+        INNER JOIN pd.comida c
+        INNER JOIN c.comidaIngredientes ci
+        INNER JOIN ci.ingrediente i
+        INNER JOIN i.etiquetas ie
+        WHERE p.id = :planId
+        """)
+    List<Long> findEtiquetasIngredientesByPlanId(@Param("planId") Long planId);
 }

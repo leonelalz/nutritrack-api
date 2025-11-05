@@ -88,4 +88,13 @@ public interface EtiquetaRepository extends JpaRepository<Etiqueta, Long> {
         WHERE ce.id = :etiquetaId
     """)
     boolean estaEnUsoEnComidas(@Param("etiquetaId") Long etiquetaId);
+
+    /**
+     * RN32: Obtener nombres de etiquetas por IDs
+     */
+    @Query("""
+        SELECT e.nombre FROM Etiqueta e
+        WHERE e.id IN :etiquetaIds
+        """)
+    List<String> findNombresByIds(@Param("etiquetaIds") java.util.Set<Long> etiquetaIds);
 }

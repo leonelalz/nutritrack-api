@@ -30,6 +30,8 @@ public class UsuarioPlanService {
     private final UsuarioPlanRepository usuarioPlanRepository;
     private final PlanRepository planRepository;
     private final PerfilUsuarioRepository perfilUsuarioRepository;
+    private final UsuarioEtiquetasSaludRepository etiquetasSaludRepository;
+    private final EtiquetaRepository etiquetaRepository;
 
     /**
      * US-18: Activa un plan nutricional para un usuario.
@@ -53,6 +55,9 @@ public class UsuarioPlanService {
         if (!plan.getActivo()) {
             throw new BusinessException("El plan seleccionado no está disponible");
         }
+
+        // RN32: Validar que el plan no contenga alérgenos del usuario
+        validarAlergenosUsuario(perfilUsuarioId, request.getPlanId());
 
         // RN17: Verificar que no existe el MISMO plan activo
         boolean mismoPlanActivo = usuarioPlanRepository.existsByPerfilUsuarioIdAndPlanIdAndEstado(
@@ -273,5 +278,43 @@ public class UsuarioPlanService {
         }
 
         usuarioPlanRepository.saveAll(planesActivos);
+    }
+
+    /**
+     * RN32: Validar que el plan no contenga alérgenos del usuario
+     * Método privado para validación cruzada de ingredientes con alergias
+     */
+    private void validarAlergenosUsuario(Long perfilUsuarioId, Long planId) {
+        // 1. Obtener alérgenos del usuario (solo tipo ALERGIA)
+        List<Long> alergenosUsuario = etiquetasSaludRepository
+                .findEtiquetasAlergenosByPerfilUsuarioId(perfilUsuarioId);
+
+        // Si el usuario no tiene alergias registradas, no hay problema
+        if (alergenosUsuario == null || alergenosUsuario.isEmpty()) {
+            return;
+        }
+
+        // 2. Obtener etiquetas de ingredientes del plan
+        List<Long> etiquetasIngredientesPlan = planRepository
+                .findEtiquetasIngredientesByPlanId(planId);
+
+        // 3. Buscar intersección (alérgenos presentes en el plan)
+        java.util.Set<Long> alergenosEnPlan = alergenosUsuario.stream()
+                .filter(etiquetasIngredientesPlan::contains)
+                .collect(java.util.stream.Collectors.toSet());
+
+        // 4. Si hay coincidencias, RECHAZAR asignación
+        if (!alergenosEnPlan.isEmpty()) {
+            List<String> nombresAlergenos = etiquetaRepository
+                    .findNombresByIds(alergenosEnPlan);
+
+            throw new BusinessException(
+                    "❌ No puedes activar este plan. Contiene ingredientes con alérgenos que tienes registrados: "
+                            + String.join(", ", nombresAlergenos)
+                            + ". Por tu seguridad, elige otro plan."
+            );
+        }
+
+        log.info("✅ Validación de alérgenos exitosa para plan {} y usuario {}", planId, perfilUsuarioId);
     }
 }

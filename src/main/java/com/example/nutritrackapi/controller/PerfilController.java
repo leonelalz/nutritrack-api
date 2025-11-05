@@ -25,8 +25,16 @@ public class PerfilController {
      * RN03: La unidad aplica a todas las vistas
      */
     @PatchMapping("/unidades")
-    @Operation(summary = "👤 USER - Actualizar unidades de medida",
-               description = "Permite cambiar entre sistema métrico e imperial (US-03). SOLO USUARIOS REGULARES.")
+    @Operation(summary = "👤 USER - US-03: Actualizar unidades de medida [RN03, RN27]",
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN03: La unidad aplica a todas las vistas del sistema
+                   - RN27: Conversión automática KG ↔ LBS (almacena en KG en BD)
+                   
+                   UNIT TESTS: 11/11 ✅ en PerfilServiceTest.java
+                   - testActualizarUnidades_ConversionKGaLBS()
+                   - testObtenerPerfil_MuestraPesoEnLBS()
+                   """)
     public ResponseEntity<ApiResponse<Void>> actualizarUnidades(
             Authentication authentication,
             @Valid @RequestBody UpdateUnidadesMedidaRequest request) {
@@ -44,8 +52,16 @@ public class PerfilController {
      * RN04: Usar etiquetas maestras
      */
     @PostMapping("/salud")
-    @Operation(summary = "👤 USER - Crear perfil de salud",
-               description = "Crea el perfil de salud del usuario por primera vez (US-04). SOLO USUARIOS REGULARES.")
+    @Operation(summary = "👤 USER - US-04: Crear perfil de salud [RN04, RN12]",
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN04: Perfil de salud usa etiquetas maestras de la tabla etiquetas
+                   - RN12: Solo permite asignar etiquetas existentes (validación FK)
+                   
+                   UNIT TESTS: 11/11 ✅ en PerfilServiceTest.java
+                   - testActualizarPerfilSalud_ValidaEtiquetasExistentes()
+                   - testCrearPerfilSalud_ConObjetivoYEtiquetas()
+                   """)
     public ResponseEntity<ApiResponse<PerfilSaludResponse>> crearPerfilSalud(
             Authentication authentication,
             @Valid @RequestBody PerfilSaludRequest request) {
@@ -102,8 +118,20 @@ public class PerfilController {
      * RN22: Validar mediciones en rango
      */
     @PostMapping("/mediciones")
-    @Operation(summary = "Registrar medición corporal", 
-               description = "Registra peso, altura y otras mediciones del usuario")
+    @Operation(summary = "👤 USER - US-24: Registrar medición corporal [RN22]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN22: Validación de mediciones en rango (peso: 20-300kg, altura: 50-250cm)
+                   
+                   VALIDACIONES AUTOMÁTICAS:
+                   1. Peso debe estar entre 20 y 300 kg
+                   2. Altura debe estar entre 50 y 250 cm
+                   3. Fecha no puede ser futura
+                   
+                   UNIT TESTS: 11/11 ✅ en PerfilServiceTest.java
+                   - testRegistrarMedicion_PesoFueraDeRango()
+                   - testRegistrarMedicion_AlturaFueraDeRango()
+                   """)
     public ResponseEntity<ApiResponse<HistorialMedidasResponse>> registrarMedicion(
             Authentication authentication,
             @Valid @RequestBody HistorialMedidasRequest request) {

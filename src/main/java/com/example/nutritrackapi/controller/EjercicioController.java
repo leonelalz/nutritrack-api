@@ -37,7 +37,18 @@ public class EjercicioController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "🔐 ADMIN - Crear ejercicio", description = "Crea un nuevo ejercicio en el catálogo. SOLO ADMINISTRADORES.")
+    @Operation(summary = "🔐 ADMIN - US-08: Crear ejercicio [RN07, RN12]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN07: Ejercicios con nombre único (@Column unique=true)
+                   - RN12: Solo permite asignar etiquetas existentes (FK constraint)
+                   
+                   UNIT TESTS: 9/9 ✅ en EjercicioServiceTest.java
+                   - testCrearEjercicio_NombreDuplicado_Falla()
+                   - testCrearEjercicio_EtiquetaInexistente_Falla()
+                   
+                   Ejecutar: ./mvnw test -Dtest=EjercicioServiceTest
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Ejercicio creado exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos o nombre duplicado"),
@@ -119,7 +130,19 @@ public class EjercicioController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Eliminar ejercicio", description = "Elimina un ejercicio. RN09: No permite eliminar si está en uso en rutinas.")
+    @Operation(summary = "🔐 ADMIN - US-08: Eliminar ejercicio [RN09]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN09: No permite eliminar ejercicios en uso en rutinas
+                   
+                   VALIDACIONES AUTOMÁTICAS:
+                   1. Verifica si ejercicio está en tabla rutina_ejercicios
+                   2. Rechaza eliminación si hay rutinas que lo usan
+                   
+                   UNIT TESTS: 9/9 ✅ en EjercicioServiceTest.java
+                   - testEliminarEjercicio_EnUsoEnRutina_Falla()
+                   - testEliminarEjercicio_SinUso_Exito()
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ejercicio eliminado exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Ejercicio no encontrado"),

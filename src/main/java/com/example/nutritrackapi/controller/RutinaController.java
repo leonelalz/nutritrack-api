@@ -46,8 +46,17 @@ public class RutinaController {
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "🔐 ADMIN - Crear rutina de ejercicio", 
-               description = "Crea una nueva rutina de ejercicio. RN11: Nombre debe ser único. SOLO ADMINISTRADORES.")
+    @Operation(summary = "🔐 ADMIN - US-11: Crear rutina [RN11]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN11: Rutinas con nombre único en catálogo (@Column unique=true)
+                   
+                   UNIT TESTS: 17/17 ✅ en RutinaServiceTest.java
+                   - testCrearRutina_NombreDuplicado_Falla()
+                   - testCrearRutina_NombreUnico_Exito()
+                   
+                   Ejecutar: ./mvnw test -Dtest=RutinaServiceTest
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Rutina creada exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos o nombre duplicado (RN11)"),
@@ -188,8 +197,21 @@ public class RutinaController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Eliminar rutina (soft delete)", 
-               description = "Marca la rutina como inactiva. RN14: No permite eliminar si tiene usuarios activos. RN28: Soft delete.")
+    @Operation(summary = "🔐 ADMIN - US-14: Eliminar rutina [RN14, RN28]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN14: No permite eliminar rutina si tiene usuarios activos
+                   - RN28: Soft delete - marca activo=false en lugar de DELETE
+                   
+                   VALIDACIONES AUTOMÁTICAS:
+                   1. Verifica si rutina tiene registros en usuario_rutinas con estado ACTIVO
+                   2. Rechaza eliminación si hay usuarios activos
+                   3. Si no hay usuarios, marca activo=false
+                   
+                   UNIT TESTS: 17/17 ✅ en RutinaServiceTest.java
+                   - testEliminarRutina_ConUsuariosActivos_Falla()
+                   - testEliminarRutina_SinUsuarios_SoftDelete()
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Rutina eliminada exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Rutina no encontrada"),
@@ -210,8 +232,20 @@ public class RutinaController {
      */
     @PostMapping("/{id}/ejercicios")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Agregar ejercicio a rutina", 
-               description = "Agrega un ejercicio con configuración específica (series, reps, peso). RN13: Series y reps positivas.")
+    @Operation(summary = "🔐 ADMIN - US-12/US-15: Agregar ejercicio a rutina [RN13]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN13: Series y repeticiones deben ser positivas (@Min(1))
+                   
+                   VALIDACIONES AUTOMÁTICAS:
+                   1. Series >= 1
+                   2. Repeticiones >= 1
+                   3. Peso >= 0 (opcional)
+                   
+                   UNIT TESTS: 17/17 ✅ en RutinaServiceTest.java
+                   - testAgregarEjercicio_SeriesCero_Falla()
+                   - testAgregarEjercicio_RepeticionesCero_Falla()
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Ejercicio agregado exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos o series/reps no positivas (RN13)"),

@@ -35,6 +35,12 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
         log.info("Registrando nuevo usuario: {}", request.getEmail());
 
+        // RN30: Validar formato de email con DNS lookup
+        validarEmail(request.getEmail());
+        
+        // RN31: Validar política de contraseñas robusta
+        validarPasswordSegura(request.getPassword(), request.getEmail());
+
         // Validar email único
         if (cuentaAuthRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
@@ -151,5 +157,62 @@ public class AuthService {
         cuentaAuthRepository.delete(cuenta);
         
         log.info("Cuenta eliminada exitosamente: {}", email);
+    }
+
+    /**
+     * RN30: Validar formato de email con verificación DNS
+     */
+    private void validarEmail(String email) {
+        // Validación de formato RFC 5322
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        if (!email.matches(emailRegex)) {
+            throw new RuntimeException("Formato de email inválido");
+        }
+
+        // Verificar que el dominio existe (DNS lookup)
+        String domain = email.substring(email.indexOf("@") + 1);
+        try {
+            java.net.InetAddress.getByName(domain);
+        } catch (java.net.UnknownHostException e) {
+            throw new RuntimeException("El dominio de email no existe: " + domain);
+        }
+    }
+
+    /**
+     * RN31: Validar política de contraseñas robusta
+     */
+    private void validarPasswordSegura(String password, String email) {
+        // Lista de contraseñas comunes a rechazar
+        java.util.Set<String> passwordsComunes = java.util.Set.of(
+            "123456789012", "password1234", "admin1234567",
+            "qwerty123456", "letmein12345", "welcome12345",
+            "contraseña123", "password123!", "admin123456!"
+        );
+
+        if (passwordsComunes.contains(password.toLowerCase())) {
+            throw new RuntimeException("Contraseña demasiado común. Elige una más segura.");
+        }
+
+        // Verificar que no contenga el nombre del usuario del email
+        String usuarioEmail = email.split("@")[0].toLowerCase();
+        if (password.toLowerCase().contains(usuarioEmail)) {
+            throw new RuntimeException("La contraseña no puede contener tu email");
+        }
+
+        // Validación adicional: mínimo 12 caracteres con complejidad
+        if (password.length() < 12) {
+            throw new RuntimeException("La contraseña debe tener al menos 12 caracteres");
+        }
+
+        boolean tieneMayuscula = password.chars().anyMatch(Character::isUpperCase);
+        boolean tieneMinuscula = password.chars().anyMatch(Character::isLowerCase);
+        boolean tieneNumero = password.chars().anyMatch(Character::isDigit);
+        boolean tieneSimbolo = password.matches(".*[@$!%*?&].*");
+
+        if (!tieneMayuscula || !tieneMinuscula || !tieneNumero || !tieneSimbolo) {
+            throw new RuntimeException(
+                "La contraseña debe incluir al menos: 1 mayúscula, 1 minúscula, 1 número y 1 símbolo (@$!%*?&)"
+            );
+        }
     }
 }

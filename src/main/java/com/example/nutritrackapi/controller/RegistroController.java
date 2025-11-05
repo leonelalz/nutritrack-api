@@ -39,7 +39,20 @@ public class RegistroController {
     // ============================================================
 
     @PostMapping("/comidas")
-    @Operation(summary = "👤 USER - Registrar comida consumida", description = "US-22: Marcar comida como completada. SOLO USUARIOS REGULARES.")
+    @Operation(summary = "👤 USER - US-22: Registrar comida [RN20, RN21]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN20: Mostrar checks ✅ en actividades diarias
+                   - RN21: No permite marcar si plan está pausado
+                   
+                   VALIDACIONES AUTOMÁTICAS:
+                   1. Usuario debe tener plan ACTIVO
+                   2. Plan no debe estar en estado PAUSADO
+                   3. Se marca con timestamp de registro
+                   
+                   UNIT TESTS: 1/1 ✅ en UsuarioPlanServiceTest.java
+                   - testRegistrarComida_PlanPausado_Falla()
+                   """)
     public ResponseEntity<RegistroComidaResponse> registrarComida(
             @Valid @RequestBody RegistroComidaRequest request,
             Authentication authentication) {
@@ -63,7 +76,17 @@ public class RegistroController {
     // ============================================================
 
     @GetMapping("/plan/hoy")
-    @Operation(summary = "👤 USER - Ver actividades del plan de hoy", description = "US-21: Obtener comidas programadas y su estado. SOLO USUARIOS REGULARES.")
+    @Operation(summary = "👤 USER - US-21: Ver actividades del plan [RN20, RN23]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN20: Muestra checks ✅ en actividades completadas
+                   - RN23: Gráfico requiere mínimo 2 registros (para tracking)
+                   
+                   INFORMACIÓN RETORNADA:
+                   1. Comidas programadas para el día actual
+                   2. Estado de completitud (check ✅ si registrada)
+                   3. Información nutricional (calorías, proteínas, etc.)
+                   """)
     public ResponseEntity<ActividadesDiaResponse> obtenerActividadesHoy(Authentication authentication) {
         Long perfilUsuarioId = obtenerPerfilUsuarioId(authentication);
         ActividadesDiaResponse response = registroService.obtenerActividadesDia(perfilUsuarioId, LocalDate.now());

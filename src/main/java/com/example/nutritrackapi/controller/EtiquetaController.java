@@ -36,7 +36,17 @@ public class EtiquetaController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "🔐 ADMIN - Crear etiqueta", description = "Crea una nueva etiqueta en el sistema. SOLO ADMINISTRADORES.")
+    @Operation(summary = "🔐 ADMIN - US-06: Crear etiqueta [RN06]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN06: Etiquetas con nombre único (@Column unique=true)
+                   
+                   UNIT TESTS: 12/12 ✅ en EtiquetaServiceTest.java
+                   - testCrearEtiqueta_NombreDuplicado_Falla()
+                   - testCrearEtiqueta_NombreUnico_Exito()
+                   
+                   Ejecutar: ./mvnw test -Dtest=EtiquetaServiceTest
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Etiqueta creada exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos o nombre duplicado"),
@@ -105,7 +115,22 @@ public class EtiquetaController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Eliminar etiqueta", description = "Elimina una etiqueta. RN08: No permite eliminar si está en uso.")
+    @Operation(summary = "🔐 ADMIN - US-06: Eliminar etiqueta [RN08]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN08: No permite eliminar etiquetas en uso
+                   
+                   VALIDACIONES AUTOMÁTICAS:
+                   1. Verifica si etiqueta está en ingredientes (ingrediente_etiquetas)
+                   2. Verifica si etiqueta está en ejercicios (ejercicio_etiquetas)
+                   3. Verifica si etiqueta está en perfiles (usuario_etiquetas_salud)
+                   4. Rechaza eliminación si hay referencias
+                   
+                   UNIT TESTS: 12/12 ✅ en EtiquetaServiceTest.java
+                   - testEliminarEtiqueta_EnUsoEnIngrediente_Falla()
+                   - testEliminarEtiqueta_EnUsoEnEjercicio_Falla()
+                   - testEliminarEtiqueta_EnUsoEnPerfil_Falla()
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Etiqueta eliminada exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Etiqueta no encontrada"),

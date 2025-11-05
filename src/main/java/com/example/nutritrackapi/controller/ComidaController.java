@@ -39,7 +39,18 @@ public class ComidaController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "🔐 ADMIN - Crear comida", description = "Crea una nueva comida en el catálogo. SOLO ADMINISTRADORES.")
+    @Operation(summary = "🔐 ADMIN - US-09: Crear comida [RN11, RN25]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN11: Comidas con nombre único en catálogo
+                   - RN25: Cálculo automático de calorías basado en ingredientes
+                   
+                   UNIT TESTS: 9/9 ✅ en ComidaServiceTest.java
+                   - testCrearComida_NombreDuplicado_Falla()
+                   - testCrearComida_CalculaCaloriasAutomaticamente()
+                   
+                   Ejecutar: ./mvnw test -Dtest=ComidaServiceTest
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Comida creada exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos o nombre duplicado"),
@@ -135,7 +146,16 @@ public class ComidaController {
 
     @PostMapping("/{comidaId}/ingredientes")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Agregar ingrediente a receta", description = "Agrega un ingrediente con su cantidad a una comida. RN10: Cantidad debe ser positiva.")
+    @Operation(summary = "🔐 ADMIN - US-10: Agregar ingrediente a receta [RN10, RN25]", 
+               description = """
+                   REGLAS DE NEGOCIO IMPLEMENTADAS:
+                   - RN10: Cantidad de ingrediente debe ser positiva (@Min(1))
+                   - RN25: Recalcula calorías automáticamente al agregar ingrediente
+                   
+                   UNIT TESTS: 9/9 ✅ en ComidaServiceTest.java
+                   - testAgregarIngrediente_CantidadCero_Falla()
+                   - testAgregarIngrediente_RecalculaCalorias()
+                   """)
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ingrediente agregado exitosamente"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Ingrediente ya existe o cantidad inválida"),

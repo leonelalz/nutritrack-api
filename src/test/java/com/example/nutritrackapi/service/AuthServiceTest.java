@@ -98,7 +98,7 @@ class AuthServiceTest {
         request.setNombre("Carlos");
         request.setApellido("Martinez");
         request.setEmail("carlos.martinez@test.com");
-        request.setPassword("Test1234!");
+        request.setPassword("TestPass123!");
 
         when(cuentaAuthRepository.existsByEmail(anyString())).thenReturn(false);
         when(roleRepository.findByTipoRol(Role.TipoRol.ROLE_USER)).thenReturn(Optional.of(roleUser));
@@ -117,7 +117,7 @@ class AuthServiceTest {
         assertEquals("TOKEN_PENDIENTE_JWT", response.getToken());
 
         verify(cuentaAuthRepository).existsByEmail("carlos.martinez@test.com");
-        verify(passwordEncoder).encode("Test1234!");
+        verify(passwordEncoder).encode("TestPass123!");
         verify(cuentaAuthRepository).save(any(CuentaAuth.class));
         verify(perfilUsuarioRepository).save(any(PerfilUsuario.class));
     }
@@ -173,7 +173,7 @@ class AuthServiceTest {
         request.setNombre("Test");
         request.setApellido("User");
         request.setEmail("duplicado@test.com");
-        request.setPassword("Test1234!");
+        request.setPassword("TestPass123!");
 
         when(cuentaAuthRepository.existsByEmail("duplicado@test.com")).thenReturn(true);
 
@@ -199,11 +199,11 @@ class AuthServiceTest {
         // Given
         LoginRequest request = new LoginRequest();
         request.setEmail("test@example.com");
-        request.setPassword("Test1234!");
+        request.setPassword("TestPass123!");
 
         when(cuentaAuthRepository.findByEmail("test@example.com"))
             .thenReturn(Optional.of(cuentaAuth));
-        when(passwordEncoder.matches("Test1234!", cuentaAuth.getPassword()))
+        when(passwordEncoder.matches("TestPass123!", cuentaAuth.getPassword()))
             .thenReturn(true);
         when(perfilUsuarioRepository.findByCuentaId(1L))
             .thenReturn(Optional.of(perfilUsuario));
@@ -221,7 +221,7 @@ class AuthServiceTest {
         assertEquals("TOKEN_PENDIENTE_JWT", response.getToken());
 
         verify(cuentaAuthRepository).findByEmail("test@example.com");
-        verify(passwordEncoder).matches("Test1234!", cuentaAuth.getPassword());
+        verify(passwordEncoder).matches("TestPass123!", cuentaAuth.getPassword());
     }
 
     @Test
@@ -230,7 +230,7 @@ class AuthServiceTest {
         // Given
         LoginRequest request = new LoginRequest();
         request.setEmail("noexiste@test.com");
-        request.setPassword("Test1234!");
+        request.setPassword("TestPass123!");
 
         when(cuentaAuthRepository.findByEmail("noexiste@test.com"))
             .thenReturn(Optional.empty());
@@ -278,13 +278,13 @@ class AuthServiceTest {
         // Given
         LoginRequest request = new LoginRequest();
         request.setEmail("test@example.com");
-        request.setPassword("Test1234!");
+        request.setPassword("TestPass123!");
 
         cuentaAuth.setActive(false);
 
         when(cuentaAuthRepository.findByEmail("test@example.com"))
             .thenReturn(Optional.of(cuentaAuth));
-        when(passwordEncoder.matches("Test1234!", cuentaAuth.getPassword()))
+        when(passwordEncoder.matches("TestPass123!", cuentaAuth.getPassword()))
             .thenReturn(true);
 
         // When/Then
