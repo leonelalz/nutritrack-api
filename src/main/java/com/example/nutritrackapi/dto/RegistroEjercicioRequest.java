@@ -21,7 +21,7 @@ import java.time.LocalTime;
 public class RegistroEjercicioRequest {
 
     @NotNull(message = "El ID del ejercicio es obligatorio")
-    @Schema(description = "ID del ejercicio del catálogo", example = "1", required = true)
+    @Schema(description = "ID del ejercicio del catálogo (Sentadillas)", example = "9", required = true)
     private Long ejercicioId;
 
     @Schema(description = "ID de la rutina activa (opcional)", example = "1")

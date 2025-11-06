@@ -23,7 +23,7 @@ public class AgregarIngredienteRequest {
 
     @NotNull(message = "El ID del ingrediente es obligatorio")
     @Positive(message = "El ID del ingrediente debe ser positivo")
-    @Schema(description = "ID del ingrediente a agregar", example = "1", required = true)
+    @Schema(description = "ID del ingrediente a agregar (ID 1 = Pollo)", example = "1", required = true)
     private Long ingredienteId;
 
     @NotNull(message = "La cantidad es obligatoria")

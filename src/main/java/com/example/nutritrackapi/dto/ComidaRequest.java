@@ -23,7 +23,7 @@ public class ComidaRequest {
 
     @NotBlank(message = "El nombre es obligatorio")
     @Size(min = 2, max = 255, message = "El nombre debe tener entre 2 y 255 caracteres")
-    @Schema(description = "Nombre de la comida", example = "Ensalada César con pollo", required = true)
+    @Schema(description = "Nombre de la comida", example = "Ensalada de pollo", required = true)
     private String nombre;
 
     @NotNull(message = "El tipo de comida es obligatorio")

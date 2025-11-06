@@ -25,7 +25,7 @@ public class IngredienteRequest {
 
     @NotBlank(message = "El nombre es obligatorio")
     @Size(min = 2, max = 255, message = "El nombre debe tener entre 2 y 255 caracteres")
-    @Schema(description = "Nombre del ingrediente", example = "Pechuga de pollo", required = true)
+    @Schema(description = "Nombre del ingrediente", example = "Pollo", required = true)
     private String nombre;
 
     @NotNull(message = "Las proteínas son obligatorias")

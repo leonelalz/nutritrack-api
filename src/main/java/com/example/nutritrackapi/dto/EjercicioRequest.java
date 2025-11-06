@@ -25,7 +25,7 @@ public class EjercicioRequest {
 
     @NotBlank(message = "El nombre es obligatorio")
     @Size(min = 2, max = 150, message = "El nombre debe tener entre 2 y 150 caracteres")
-    @Schema(description = "Nombre del ejercicio", example = "Sentadillas", required = true)
+    @Schema(description = "Nombre del ejercicio (ID 9 = Sentadillas)", example = "Sentadillas", required = true)
     private String nombre;
 
     @Size(max = 1000, message = "La descripción no puede exceder 1000 caracteres")

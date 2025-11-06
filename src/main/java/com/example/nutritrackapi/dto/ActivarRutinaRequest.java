@@ -26,12 +26,12 @@ import java.time.LocalDate;
 public class ActivarRutinaRequest {
     
     @NotNull(message = "El ID de la rutina es obligatorio")
-    @Schema(description = "ID de la rutina a activar (debe existir y estar activa)", example = "1", required = true)
+    @Schema(description = "ID de la rutina a activar (Rutina Principiante - 4 semanas)", example = "1", required = true)
     private Long rutinaId;
 
     @Schema(description = "Fecha de inicio de la rutina (opcional, por defecto hoy)", example = "2025-11-05")
     private LocalDate fechaInicio;
     
-    @Schema(description = "Notas opcionales sobre la activación", example = "Iniciando rutina de fuerza")
+    @Schema(description = "Notas opcionales sobre la activación", example = "Iniciando rutina principiante - 4 semanas")
     private String notas;
 }

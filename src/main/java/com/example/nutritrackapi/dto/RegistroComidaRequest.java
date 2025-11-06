@@ -22,7 +22,7 @@ import java.time.LocalTime;
 public class RegistroComidaRequest {
 
     @NotNull(message = "El ID de la comida es obligatorio")
-    @Schema(description = "ID de la comida del catálogo", example = "1", required = true)
+    @Schema(description = "ID de la comida del catálogo (Ensalada de pollo)", example = "5", required = true)
     private Long comidaId;
 
     @Schema(description = "ID del plan activo (opcional)", example = "1")

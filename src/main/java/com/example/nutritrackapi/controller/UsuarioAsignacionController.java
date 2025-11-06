@@ -151,38 +151,38 @@ public class UsuarioAsignacionController {
             mediaType = "application/json",
             examples = {
                 @ExampleObject(
-                    name = "✅ Activar Plan 1",
-                    summary = "Activar plan de pérdida de peso",
-                    description = "Test: testActivarPlan_Success() - Plan sin alérgenos, usuario sin alergias",
+                    name = "✅ Activar Plan 1 (Perdida Peso)",
+                    summary = "Plan Perdida Peso - 7 dias",
+                    description = "Test: testActivarPlan_Success() - Plan sin alérgenos incompatibles con usuario demo",
                     value = """
                         {
                           "planId": 1,
                           "fechaInicio": "2025-11-05",
-                          "notas": "Iniciando plan de pérdida de peso"
+                          "notas": "Iniciando Plan Perdida Peso - 7 dias"
                         }
                         """
                 ),
                 @ExampleObject(
                     name = "❌ Duplicar Plan (RN17)",
                     summary = "Intentar activar el mismo plan activo",
-                    description = "Test: testActivarPlan_RN17_MismoPlanActivoLanzaExcepcion()",
+                    description = "Test: testActivarPlan_RN17_MismoPlanActivoLanzaExcepcion() - Usuario demo ya tiene Plan 1 activo (dia 7/7)",
                     value = """
                         {
                           "planId": 1,
                           "fechaInicio": "2025-11-05",
-                          "notas": "Esto fallará si ya tienes el plan 1 activo"
+                          "notas": "Esto fallará - Usuario demo ya tiene Plan Perdida Peso activo"
                         }
                         """
                 ),
                 @ExampleObject(
                     name = "❌ Alérgenos (RN32)",
                     summary = "Plan con ingredientes alérgenos",
-                    description = "Test: testActivarPlan_RN32_ConAlergenosIncompatibles() - Usuario con alergia a Nueces, Plan contiene almendras",
+                    description = "Test: testActivarPlan_RN32_ConAlergenosIncompatibles() - Usuario demo tiene alergia a Nueces. Plan 1 contiene 'Avena con frutas y almendras'",
                     value = """
                         {
-                          "planId": 2,
+                          "planId": 1,
                           "fechaInicio": "2025-11-05",
-                          "notas": "Fallará si eres alérgico a ingredientes del plan"
+                          "notas": "Fallará para usuarios con alergia a Nueces - El plan contiene almendras"
                         }
                         """
                 )

@@ -26,12 +26,12 @@ import java.time.LocalDate;
 public class ActivarPlanRequest {
     
     @NotNull(message = "El ID del plan es obligatorio")
-    @Schema(description = "ID del plan a activar (debe existir y estar activo)", example = "1", required = true)
+    @Schema(description = "ID del plan a activar (Plan Perdida Peso - 7 dias)", example = "1", required = true)
     private Long planId;
 
     @Schema(description = "Fecha de inicio del plan (opcional, por defecto hoy)", example = "2025-11-05")
     private LocalDate fechaInicio;
     
-    @Schema(description = "Notas opcionales sobre la activación", example = "Iniciando plan de pérdida de peso")
+    @Schema(description = "Notas opcionales sobre la activación", example = "Iniciando plan de pérdida de peso - 7 días")
     private String notas;
 }
