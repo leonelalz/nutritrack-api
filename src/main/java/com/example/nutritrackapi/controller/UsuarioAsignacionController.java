@@ -5,6 +5,8 @@ import com.example.nutritrackapi.service.UsuarioPlanService;
 import com.example.nutritrackapi.service.UsuarioRutinaService;
 import com.example.nutritrackapi.service.PlanService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -65,6 +67,128 @@ public class UsuarioAsignacionController {
             SOLO USUARIOS REGULARES.
             """
     )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "201",
+            description = "✅ Plan activado exitosamente",
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name = "Plan Activado",
+                    value = """
+                        {
+                          "success": true,
+                          "message": "Plan activado exitosamente",
+                          "data": {
+                            "id": 1,
+                            "planId": 1,
+                            "planNombre": "Plan Pérdida Peso - 7 días",
+                            "estado": "ACTIVO",
+                            "fechaInicio": "2025-11-05",
+                            "fechaFin": "2025-11-11",
+                            "diaActual": 1
+                          }
+                        }
+                        """
+                )
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "❌ Error: Plan duplicado (RN17) o Alérgenos incompatibles (RN32)",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "RN17: Plan Duplicado",
+                        summary = "Ya tienes este mismo plan activo",
+                        description = "Test: testActivarPlan_RN17_MismoPlanActivoLanzaExcepcion()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "Ya tienes este plan activo. Para activarlo nuevamente, debes pausarlo o cancelarlo primero",
+                              "data": null
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "RN32: Alérgenos Incompatibles",
+                        summary = "Plan contiene ingredientes a los que eres alérgico",
+                        description = "Test: testActivarPlan_RN32_ConAlergenosIncompatibles()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "No puedes activar este plan porque contiene ingredientes a los que eres alérgico: Nueces",
+                              "data": null
+                            }
+                            """
+                    )
+                }
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "❌ Error: Plan no encontrado o inactivo",
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name = "Plan No Encontrado",
+                    value = """
+                        {
+                          "success": false,
+                          "message": "Plan no encontrado con ID: 999",
+                          "data": null
+                        }
+                        """
+                )
+            )
+        )
+    })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Datos para activar el plan",
+        required = true,
+        content = @Content(
+            mediaType = "application/json",
+            examples = {
+                @ExampleObject(
+                    name = "✅ Activar Plan 1",
+                    summary = "Activar plan de pérdida de peso",
+                    description = "Test: testActivarPlan_Success() - Plan sin alérgenos, usuario sin alergias",
+                    value = """
+                        {
+                          "planId": 1,
+                          "fechaInicio": "2025-11-05",
+                          "notas": "Iniciando plan de pérdida de peso"
+                        }
+                        """
+                ),
+                @ExampleObject(
+                    name = "❌ Duplicar Plan (RN17)",
+                    summary = "Intentar activar el mismo plan activo",
+                    description = "Test: testActivarPlan_RN17_MismoPlanActivoLanzaExcepcion()",
+                    value = """
+                        {
+                          "planId": 1,
+                          "fechaInicio": "2025-11-05",
+                          "notas": "Esto fallará si ya tienes el plan 1 activo"
+                        }
+                        """
+                ),
+                @ExampleObject(
+                    name = "❌ Alérgenos (RN32)",
+                    summary = "Plan con ingredientes alérgenos",
+                    description = "Test: testActivarPlan_RN32_ConAlergenosIncompatibles() - Usuario con alergia a Nueces, Plan contiene almendras",
+                    value = """
+                        {
+                          "planId": 2,
+                          "fechaInicio": "2025-11-05",
+                          "notas": "Fallará si eres alérgico a ingredientes del plan"
+                        }
+                        """
+                )
+            }
+        )
+    )
     public ResponseEntity<ApiResponse<UsuarioPlanResponse>> activarPlan(
             Authentication authentication,
             @Valid @RequestBody ActivarPlanRequest request) {
@@ -79,9 +203,42 @@ public class UsuarioAsignacionController {
     @PatchMapping("/planes/{usuarioPlanId}/pausar")
     @PreAuthorize("hasRole('USER')")
     @Operation(
-        summary = "👤 USER - US-19: Pausar plan nutricional",
-        description = "Pausa un plan activo del usuario autenticado. RN19: No permite pausar si está completado/cancelado. SOLO USUARIOS REGULARES."
+        summary = "👤 USER - US-19: Pausar plan nutricional [RN19, RN26]",
+        description = """
+            Pausa un plan activo del usuario autenticado.
+            
+            **REGLAS DE NEGOCIO:**
+            - RN19: No permite pausar si está completado/cancelado
+            - RN26: Solo permite transición ACTIVO → PAUSADO
+            
+            **UNIT TESTS:** testPausarPlan_RN19_CompletadoLanzaExcepcion()
+            """
     )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "✅ Plan pausado exitosamente"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "❌ Error: Plan completado/cancelado (RN19) o no está activo",
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name = "RN19: Plan Completado",
+                    summary = "No se puede pausar plan completado",
+                    description = "Test: testPausarPlan_RN19_CompletadoLanzaExcepcion()",
+                    value = """
+                        {
+                          "success": false,
+                          "message": "No puedes pausar un plan que ya está completado o cancelado",
+                          "data": null
+                        }
+                        """
+                )
+            )
+        )
+    })
     public ResponseEntity<ApiResponse<UsuarioPlanResponse>> pausarPlan(
             Authentication authentication,
             @PathVariable Long usuarioPlanId) {
@@ -96,9 +253,56 @@ public class UsuarioAsignacionController {
     @PatchMapping("/planes/{usuarioPlanId}/reanudar")
     @PreAuthorize("hasRole('USER')")
     @Operation(
-        summary = "👤 USER - US-19: Reanudar plan nutricional",
-        description = "Reanuda un plan pausado del usuario autenticado. RN19: Solo permite reanudar planes pausados. SOLO USUARIOS REGULARES."
+        summary = "👤 USER - US-19: Reanudar plan nutricional [RN19, RN26]",
+        description = """
+            Reanuda un plan pausado del usuario autenticado.
+            
+            **REGLAS DE NEGOCIO:**
+            - RN19: No permite reanudar si está completado/cancelado
+            - RN26: Solo permite transición PAUSADO → ACTIVO
+            
+            **UNIT TESTS:** testReanudarPlan_RN19_CompletadoLanzaExcepcion()
+            """
     )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "✅ Plan reanudado exitosamente"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "❌ Error: Plan no pausado (RN19) o completado/cancelado",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "RN19: Plan Activo",
+                        summary = "Solo se pueden reanudar planes pausados",
+                        description = "Test: testReanudarPlan_RN19_ActivoLanzaExcepcion()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "Solo puedes reanudar planes que están pausados",
+                              "data": null
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "RN19: Plan Completado",
+                        summary = "No se puede reanudar plan completado",
+                        description = "Test: testReanudarPlan_RN19_CompletadoLanzaExcepcion()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "No puedes reanudar un plan que ya está completado o cancelado",
+                              "data": null
+                            }
+                            """
+                    )
+                }
+            )
+        )
+    })
     public ResponseEntity<ApiResponse<UsuarioPlanResponse>> reanudarPlan(
             Authentication authentication,
             @PathVariable Long usuarioPlanId) {

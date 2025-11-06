@@ -58,6 +58,100 @@ public class AuthController {
             - Ejecutar: ./mvnw test -Dtest=AuthServiceTest
             """
     )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "201",
+            description = "✅ Usuario registrado exitosamente",
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name = "Registro Exitoso",
+                    value = """
+                        {
+                          "success": true,
+                          "message": "Usuario registrado exitosamente",
+                          "data": {
+                            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                            "email": "nuevo@ejemplo.com",
+                            "nombre": "Juan",
+                            "apellido": "Pérez",
+                            "role": "ROLE_USER"
+                          }
+                        }
+                        """
+                )
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "❌ Error de validación (RN01, RN30, RN31)",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "RN01: Email Duplicado",
+                        summary = "Email ya registrado",
+                        description = "Test: testRegistro_EmailDuplicado()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "El email ya está registrado",
+                              "data": null
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "RN30: Email Inválido",
+                        summary = "Formato de email inválido",
+                        description = "Test: testRegistro_EmailFormatoInvalido()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "Email con formato inválido o dominio inexistente",
+                              "data": null
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "RN31: Contraseña Corta",
+                        summary = "Contraseña < 12 caracteres",
+                        description = "Test: testRegistro_PasswordCorta()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "La contraseña debe tener mínimo 12 caracteres",
+                              "data": null
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "RN31: Contraseña Sin Complejidad",
+                        summary = "Falta mayúscula/número/símbolo",
+                        description = "Test: testRegistro_PasswordSinComplejidad()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "La contraseña debe contener al menos una mayúscula, un número y un carácter especial",
+                              "data": null
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "RN31: Contraseña Común",
+                        summary = "Contraseña en blacklist",
+                        description = "Test: testRegistro_PasswordComun()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "Contraseña demasiado común, elige una más segura",
+                              "data": null
+                            }
+                            """
+                    )
+                }
+            )
+        )
+    })
     @RequestBody(
         description = "Datos del nuevo usuario",
         required = true,
@@ -136,9 +230,86 @@ public class AuthController {
      */
     @PostMapping("/login")
     @Operation(
-        summary = "🔓 PÚBLICO - Iniciar sesión", 
-        description = "Autentica un usuario y retorna un token JWT. ACCESO PÚBLICO."
+        summary = "🔓 PÚBLICO - Iniciar sesión [RN03]", 
+        description = """
+            Autentica un usuario y retorna un token JWT. ACCESO PÚBLICO.
+            
+            **REGLAS DE NEGOCIO:**
+            - RN03: Login falla si credenciales incorrectas o cuenta inactiva
+            
+            **UNIT TESTS:** testLogin_PasswordIncorrecto(), testLogin_CuentaInactiva()
+            """
     )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "✅ Login exitoso",
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name = "Login Exitoso",
+                    value = """
+                        {
+                          "success": true,
+                          "message": "Login exitoso",
+                          "data": {
+                            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                            "email": "demo@nutritrack.com",
+                            "nombre": "Demo",
+                            "apellido": "Usuario",
+                            "role": "ROLE_USER"
+                          }
+                        }
+                        """
+                )
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "❌ Credenciales inválidas o cuenta inactiva (RN03)",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "RN03: Email No Registrado",
+                        summary = "Usuario no existe",
+                        description = "Test: testLogin_EmailNoRegistrado()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "Credenciales inválidas",
+                              "data": null
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "RN03: Contraseña Incorrecta",
+                        summary = "Password no coincide",
+                        description = "Test: testLogin_PasswordIncorrecto()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "Credenciales inválidas",
+                              "data": null
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "RN03: Cuenta Inactiva",
+                        summary = "Cuenta desactivada",
+                        description = "Test: testLogin_CuentaInactiva()",
+                        value = """
+                            {
+                              "success": false,
+                              "message": "Cuenta inactiva o desactivada",
+                              "data": null
+                            }
+                            """
+                    )
+                }
+            )
+        )
+    })
     @RequestBody(
         description = "Credenciales de acceso",
         required = true,
