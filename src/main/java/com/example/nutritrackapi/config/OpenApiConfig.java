@@ -144,7 +144,7 @@ public class OpenApiConfig {
 
         return new OpenAPI()
                 .info(info)
-                .servers(List.of(prodServer, devServer))
+                .servers(List.of(devServer, prodServer))
                 .addSecurityItem(securityRequirement)
                 .components(new Components()
                         .addSecuritySchemes(SECURITY_SCHEME_NAME, securityScheme));
