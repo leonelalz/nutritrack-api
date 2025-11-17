@@ -91,7 +91,7 @@ spring.jpa.defer-datasource-initialization=true
 ## 🚀 Uso
 
 ### Primera Vez (Setup Inicial)
-```bash
+```powershell
 # 1. Levantar base de datos
 docker-compose up -d
 
@@ -100,7 +100,11 @@ docker-compose up -d
 # Espera a ver: ✅ Aplicación lista!
 
 # 3. Cargar catálogo manualmente (SOLO PRIMERA VEZ)
-docker exec -i nutritrack-db psql -U postgres -d nutritrack_db < SQL/CARGA_COMPLETA_RENDER.sql
+# PowerShell (Windows):
+Get-Content SQL\CARGA_COMPLETA_RENDER.sql | docker exec -i nutritrack-postgres psql -U postgres -d nutritrack_db
+
+# Bash/WSL (Linux/Mac):
+# cat SQL/CARGA_COMPLETA_RENDER.sql | docker exec -i nutritrack-postgres psql -U postgres -d nutritrack_db
 ```
 
 ### Arranques Posteriores

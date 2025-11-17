@@ -82,7 +82,7 @@ INSERT INTO ingredientes (nombre, proteinas, carbohidratos, grasas, energia, fib
 ('Almendras', 21.20, 21.60, 49.90, 579.00, 12.50, 'FRUTOS_SECOS', 'Almendras naturales - CONTIENE NUECES'),
 ('Nueces', 15.20, 13.70, 65.20, 654.00, 6.70, 'FRUTOS_SECOS', 'Nueces sin sal - CONTIENE NUECES'),
 ('Aguacate', 2.00, 8.50, 14.70, 160.00, 6.70, 'FRUTAS', 'Aguacate Hass'),
-('Aceite de oliva', 0.00, 0.00, 100.00, 884.00, 0.00, 'ACEITES', 'Aceite de oliva extra virgen'),
+('Aceite de oliva', 0.00, 0.00, 100.00, 884.00, 0.00, 'GRASAS_SALUDABLES', 'Aceite de oliva extra virgen'),
 
 -- Lácteos
 ('Yogur', 3.50, 4.70, 3.30, 59.00, 0.00, 'LACTEOS', 'Yogur griego natural - CONTIENE LÁCTEOS'),
@@ -187,96 +187,96 @@ ON CONFLICT (nombre) DO NOTHING;
 \echo '📝 [6/9] Cargando recetas (ingredientes por comida)...'
 
 -- Avena con frutas y almendras (CON NUECES - para test RN16)
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 50.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Avena con frutas y almendras' AND i.nombre = 'Avena'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 100.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Avena con frutas y almendras' AND i.nombre = 'Plátano'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 20.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Avena con frutas y almendras' AND i.nombre = 'Almendras'
 ON CONFLICT DO NOTHING;
 
 -- Ensalada de pollo a la parrilla (SIN alérgenos)
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 150.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Ensalada de pollo a la parrilla' AND i.nombre = 'Pollo'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 200.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Ensalada de pollo a la parrilla' AND i.nombre = 'Verduras mix'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 10.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Ensalada de pollo a la parrilla' AND i.nombre = 'Aceite de oliva'
 ON CONFLICT DO NOTHING;
 
 -- Pescado al horno con verduras (SIN alérgenos)
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 180.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Pescado al horno con verduras' AND i.nombre = 'Pescado'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 150.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Pescado al horno con verduras' AND i.nombre = 'Brócoli'
 ON CONFLICT DO NOTHING;
 
 -- Yogur griego con nueces (CON LÁCTEOS Y NUECES)
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 150.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Yogur griego con nueces' AND i.nombre = 'Yogur'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 30.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Yogur griego con nueces' AND i.nombre = 'Nueces'
 ON CONFLICT DO NOTHING;
 
 -- Arroz integral con pollo y vegetales (SIN alérgenos)
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 80.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Arroz integral con pollo y vegetales' AND i.nombre = 'Arroz integral'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 150.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Arroz integral con pollo y vegetales' AND i.nombre = 'Pollo'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 100.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Arroz integral con pollo y vegetales' AND i.nombre = 'Verduras mix'
 ON CONFLICT DO NOTHING;
 
 -- Batido de proteína con plátano (SIN alérgenos)
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 30.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Batido de proteína con plátano' AND i.nombre = 'Proteína en polvo'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_ingrediente)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 120.00
 FROM comidas c, ingredientes i
 WHERE c.nombre = 'Batido de proteína con plátano' AND i.nombre = 'Plátano'
@@ -316,7 +316,7 @@ WHERE p.nombre = 'Plan Mantenimiento - 7 días' AND e.nombre = 'Mantener Forma'
 ON CONFLICT DO NOTHING;
 
 -- Crear días del Plan Pérdida de Peso (US-12)
-INSERT INTO plan_dias (id_plan, num_dia, id_comida_desayuno, id_comida_snack_manana, id_comida_almuerzo, id_comida_snack_tarde, id_comida_cena)
+INSERT INTO plan_dias (id_plan, numero_dia, id_comida_desayuno, id_comida_snack_manana, id_comida_almuerzo, id_comida_snack_tarde, id_comida_cena)
 SELECT 
     p.id,
     1,
@@ -329,7 +329,7 @@ FROM planes p
 WHERE p.nombre = 'Plan Pérdida de Peso - 7 días';
 
 -- Días 2-7 del plan (con variaciones)
-INSERT INTO plan_dias (id_plan, num_dia, id_comida_desayuno, id_comida_almuerzo, id_comida_cena)
+INSERT INTO plan_dias (id_plan, numero_dia, id_comida_desayuno, id_comida_almuerzo, id_comida_cena)
 SELECT 
     p.id,
     d.num,
@@ -368,12 +368,11 @@ WHERE r.nombre = 'Rutina Intermedia - 6 semanas' AND e.nombre = 'Ganar Masa Musc
 ON CONFLICT DO NOTHING;
 
 -- Crear ejercicios de la Rutina Principiante (US-15, RN13)
-INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, num_semana, num_dia, series, repeticiones, tiempo_descanso_segundos, notas_tecnica)
+INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, orden, series, repeticiones, descanso_segundos, notas)
 SELECT 
     r.id,
     e.id,
-    1, -- Semana 1
-    1, -- Lunes
+    1, -- orden
     3, -- 3 series
     10, -- 10 repeticiones
     60, -- 60 segundos descanso
@@ -381,12 +380,11 @@ SELECT
 FROM rutinas r, ejercicios e
 WHERE r.nombre = 'Rutina Principiante - 4 semanas' AND e.nombre = 'Sentadillas';
 
-INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, num_semana, num_dia, series, repeticiones, tiempo_descanso_segundos, notas_tecnica)
+INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, orden, series, repeticiones, descanso_segundos, notas)
 SELECT 
     r.id,
     e.id,
-    1,
-    1,
+    2,
     3,
     8,
     60,
@@ -394,14 +392,13 @@ SELECT
 FROM rutinas r, ejercicios e
 WHERE r.nombre = 'Rutina Principiante - 4 semanas' AND e.nombre = 'Flexiones de pecho';
 
-INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, num_semana, num_dia, series, repeticiones_tiempo, tiempo_descanso_segundos, notas_tecnica)
+INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, orden, series, duracion_minutos, descanso_segundos, notas)
 SELECT 
     r.id,
     e.id,
-    1,
-    1,
     3,
-    '30 segundos', -- Ejercicio isométrico
+    3,
+    1, -- 1 minuto (ejercicio isométrico)
     60,
     'Mantener cuerpo alineado'
 FROM rutinas r, ejercicios e
@@ -511,7 +508,7 @@ ON CONFLICT DO NOTHING;
 \echo '✅ Cargando registros de actividades...'
 
 -- Registros de comidas del usuario DEMO (últimos 3 días)
-INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha_registro, hora_registro, notas)
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, notas)
 SELECT 
     2,
     c.id,
@@ -521,7 +518,7 @@ SELECT
 FROM comidas c
 WHERE c.nombre = 'Avena con frutas y almendras';
 
-INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha_registro, hora_registro, notas)
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, notas)
 SELECT 
     2,
     c.id,
@@ -532,7 +529,7 @@ FROM comidas c
 WHERE c.nombre = 'Ensalada de pollo a la parrilla';
 
 -- Registros de ejercicios del usuario DEMO
-INSERT INTO registros_ejercicios (id_perfil_usuario, id_ejercicio, fecha_registro, hora_registro, series_completadas, repeticiones_completadas, tiempo_total_minutos, notas)
+INSERT INTO registros_ejercicios (id_perfil_usuario, id_ejercicio, fecha, hora, series_realizadas, repeticiones_realizadas, duracion_minutos, notas)
 SELECT 
     2,
     e.id,
