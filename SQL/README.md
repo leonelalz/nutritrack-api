@@ -1,6 +1,18 @@
 # 📊 Scripts de Datos de Demostración - NutriTrack API
 
-Este directorio contiene scripts SQL para poblar la base de datos con datos de demostración para pruebas y desarrollo.
+Este directorio contiene scripts SQL para poblar la base de datos con datos de demostración.
+
+## 📁 Archivos Principales
+
+### `CARGA_DATOS_COMPLETA.sql` ✅ USAR ESTE
+Archivo consolidado con TODOS los datos de prueba. Compatible con modelos JPA.
+- Módulo 2: Catálogo (ingredientes, comidas, ejercicios, etiquetas)
+- Módulo 3: Planes y rutinas
+- Módulo 4: Asignaciones a usuarios
+- Módulo 5: Registros de actividades
+
+### `NutriDB.sql`
+Esquema de base de datos (tablas, constraints). Solo referencia, Hibernate lo genera automáticamente.
 
 ## 📋 Orden de Ejecución
 

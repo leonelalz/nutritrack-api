@@ -19,12 +19,12 @@ Ejecuta al iniciar la aplicación (`CommandLineRunner`):
 ### 2. **data.sql** (SQL - Módulos 2-5)
 Carga datos del catálogo y asignaciones:
 - ✅ **Módulo 2:** Etiquetas, ingredientes, comidas, ejercicios
-- ✅ **Módulo 3:** Planes nutricionales (4) y rutinas (6)
+- ✅ **Módulo 3:** Planes nutricionales (3) y rutinas (3)
 - ✅ **Módulo 4:** Asignaciones de planes y rutinas a usuarios
-- ✅ **Módulo 5:** Registros de comidas y ejercicios (últimos 5 días)
+- ✅ **Módulo 5:** Registros de comidas y ejercicios
 
 **Ubicación:** `src/main/resources/data.sql`  
-**Fuente original:** `SQL/CARGA_COMPLETA_RENDER.sql`
+**Fuente original:** `SQL/CARGA_DATOS_COMPLETA.sql`
 
 ## 📋 Tablas con Modelos JPA Mapeados
 
@@ -101,10 +101,10 @@ docker-compose up -d
 
 # 3. Cargar catálogo manualmente (SOLO PRIMERA VEZ)
 # PowerShell (Windows):
-Get-Content SQL\CARGA_COMPLETA_RENDER.sql | docker exec -i nutritrack-postgres psql -U postgres -d nutritrack_db
+Get-Content SQL\CARGA_DATOS_COMPLETA.sql | docker exec -i nutritrack-postgres psql -U postgres -d nutritrack_db
 
 # Bash/WSL (Linux/Mac):
-# cat SQL/CARGA_COMPLETA_RENDER.sql | docker exec -i nutritrack-postgres psql -U postgres -d nutritrack_db
+# cat SQL/CARGA_DATOS_COMPLETA.sql | docker exec -i nutritrack-postgres psql -U postgres -d nutritrack_db
 ```
 
 ### Arranques Posteriores
@@ -122,12 +122,12 @@ La aplicación:
 ### Carga Manual (Opcional)
 Si necesitas recargar solo datos:
 
-```bash
-# Conectar a la base de datos
-psql -U postgres -d nutritrack_db
+```powershell
+# PowerShell (recomendado):
+Get-Content SQL\CARGA_DATOS_COMPLETA.sql | docker exec -i nutritrack-postgres psql -U postgres -d nutritrack_db
 
-# Cargar datos
-\i SQL/CARGA_COMPLETA_RENDER.sql
+# O usando psql directo:
+# psql -U postgres -d nutritrack_db -f SQL/CARGA_DATOS_COMPLETA.sql
 ```
 
 ## 📊 Datos Incluidos
@@ -192,16 +192,13 @@ docker exec -it nutritrack-db psql -U postgres -d nutritrack_db -c "DROP SCHEMA 
 
 ## 📝 Mantener data.sql Actualizado
 
-Si modificas `SQL/CARGA_COMPLETA_RENDER.sql`, sincroniza:
+Si modificas `SQL/CARGA_DATOS_COMPLETA.sql`, sincroniza:
 
 ```powershell
 # Copiar cambios a data.sql
-Copy-Item "SQL\CARGA_COMPLETA_RENDER.sql" -Destination "src\main\resources\data.sql" -Force
+Copy-Item "SQL\CARGA_DATOS_COMPLETA.sql" -Destination "src\main\resources\data.sql" -Force
 
-# Limpiar comandos \echo de psql
-$content = Get-Content "src\main\resources\data.sql" -Raw
-$content = $content -replace "\\\\echo[^\r\n]*[\r\n]+", ""
-$content | Set-Content "src\main\resources\data.sql" -NoNewline
+# Nota: Los comandos \echo ya están eliminados en CARGA_DATOS_COMPLETA.sql
 ```
 
 ## 🔒 Producción
