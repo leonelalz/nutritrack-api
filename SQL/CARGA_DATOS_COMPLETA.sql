@@ -28,6 +28,7 @@ INSERT INTO etiquetas (nombre, tipo_etiqueta, descripcion) VALUES
 ('Diabetes Tipo 2', 'CONDICION_MEDICA', 'Control de glucosa en sangre'),
 ('Hipertensión', 'CONDICION_MEDICA', 'Presión arterial elevada'),
 ('Colesterol Alto', 'CONDICION_MEDICA', 'Niveles elevados de colesterol LDL'),
+('Bajo en sodio', 'CONDICION_MEDICA', 'Dieta baja en sodio para hipertensión'),
 
 -- Objetivos (US-07, US-09 - filtrado por objetivo)
 ('Perder Peso', 'OBJETIVO', 'Reducción de peso corporal'),
@@ -142,7 +143,34 @@ INSERT INTO ejercicios (nombre, descripcion, tipo_ejercicio, grupo_muscular, niv
 ('Plancha', 'Ejercicio isométrico para core', 'FUERZA', 'CORE', 'PRINCIPIANTE', 5.00, 5, 'Colchoneta'),
 ('Abdominales', 'Ejercicio para abdomen superior', 'FUERZA', 'ABDOMINALES', 'PRINCIPIANTE', 4.00, 10, 'Colchoneta'),
 ('Giros rusos', 'Ejercicio para oblicuos', 'FUERZA', 'ABDOMINALES', 'INTERMEDIO', 5.00, 10, 'Disco o mancuerna'),
-('Elevación de piernas', 'Ejercicio para abdomen bajo', 'FUERZA', 'ABDOMINALES', 'INTERMEDIO', 4.50, 10, 'Colchoneta')
+('Elevación de piernas', 'Ejercicio para abdomen bajo', 'FUERZA', 'ABDOMINALES', 'INTERMEDIO', 4.50, 10, 'Colchoneta'),
+
+-- Ejercicios de FLEXIBILIDAD
+('Estiramiento de isquiotibiales', 'Flexibilidad para parte posterior de piernas', 'FLEXIBILIDAD', 'ISQUIOTIBIALES', 'PRINCIPIANTE', 2.00, 3, 'Colchoneta'),
+('Estiramiento de cuádriceps', 'Flexibilidad para parte frontal de piernas', 'FLEXIBILIDAD', 'CUADRICEPS', 'PRINCIPIANTE', 2.00, 3, 'Ninguno'),
+
+-- Ejercicios de YOGA
+('Postura del perro boca abajo', 'Postura fundamental de yoga', 'YOGA', 'CUERPO_COMPLETO', 'PRINCIPIANTE', 3.00, 5, 'Colchoneta de yoga'),
+('Saludo al sol', 'Secuencia de yoga completa', 'YOGA', 'CUERPO_COMPLETO', 'INTERMEDIO', 5.00, 5, 'Colchoneta de yoga'),
+
+-- Ejercicios de PILATES
+('Hundred Pilates', 'Ejercicio clásico de pilates para core', 'PILATES', 'CORE', 'INTERMEDIO', 4.00, 10, 'Colchoneta'),
+
+-- Ejercicios de EQUILIBRIO
+('Equilibrio en una pierna', 'Mejora estabilidad y propiocepción', 'EQUILIBRIO', 'PIERNAS', 'PRINCIPIANTE', 2.00, 5, 'Ninguno'),
+
+-- Ejercicios DEPORTIVOS
+('Sprint intervalos', 'Carrera de alta intensidad', 'DEPORTIVO', 'CARDIO', 'AVANZADO', 12.00, 10, 'Pista o calle'),
+
+-- Ejercicios de REHABILITACION
+('Rotación de hombro suave', 'Movilidad para rehabilitación de hombro', 'REHABILITACION', 'HOMBROS', 'PRINCIPIANTE', 1.50, 10, 'Banda elástica'),
+
+-- Ejercicios para grupos musculares faltantes
+('Press militar con mancuernas', 'Desarrollo de hombros', 'FUERZA', 'HOMBROS', 'INTERMEDIO', 6.00, 10, 'Mancuernas'),
+('Elevaciones laterales', 'Aislamiento de hombros', 'FUERZA', 'HOMBROS', 'PRINCIPIANTE', 4.00, 12, 'Mancuernas'),
+('Peso muerto rumano', 'Fortalecimiento de isquiotibiales y glúteos', 'FUERZA', 'ISQUIOTIBIALES', 'INTERMEDIO', 8.00, 10, 'Barra o mancuernas'),
+('Hip thrust', 'Ejercicio principal para glúteos', 'FUERZA', 'GLUTEOS', 'INTERMEDIO', 7.00, 12, 'Barra y banco'),
+('Elevaciones de gemelos', 'Fortalecimiento de pantorrillas', 'FUERZA', 'GEMELOS', 'PRINCIPIANTE', 3.00, 15, 'Escalón o step')
 ON CONFLICT (nombre) DO NOTHING;
 
 \echo '  ✅ Ejercicios cargados'
@@ -175,7 +203,13 @@ INSERT INTO comidas (nombre, tipo_comida, tiempo_elaboracion) VALUES
 ('Yogur griego con nueces', 'SNACK', 5),
 ('Batido de proteína con plátano', 'PRE_ENTRENAMIENTO', 5),
 ('Frutos secos mix', 'COLACION', 2),
-('Manzana con mantequilla de almendras', 'SNACK', 3)
+('Manzana con mantequilla de almendras', 'SNACK', 3),
+
+-- Comidas adicionales para POST_ENTRENAMIENTO y SNACK
+('Batido recuperación con proteína', 'POST_ENTRENAMIENTO', 10),
+('Sándwich de pavo con aguacate', 'POST_ENTRENAMIENTO', 15),
+('Té verde con galletas integrales', 'SNACK', 5),
+('Smoothie de frutas tropicales', 'SNACK', 8)
 ON CONFLICT (nombre) DO NOTHING;
 
 \echo '  ✅ Comidas cargadas'
@@ -250,6 +284,52 @@ FROM comidas c, ingredientes i
 WHERE c.nombre = 'Yogur griego con nueces' AND i.nombre = 'Nueces'
 ON CONFLICT DO NOTHING;
 
+-- Batido recuperación con proteína (POST_ENTRENAMIENTO)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
+SELECT c.id, i.id, 200.00
+FROM comidas c, ingredientes i
+WHERE c.nombre = 'Batido recuperación con proteína' AND i.nombre = 'Leche'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
+SELECT c.id, i.id, 100.00
+FROM comidas c, ingredientes i
+WHERE c.nombre = 'Batido recuperación con proteína' AND i.nombre = 'Plátano'
+ON CONFLICT DO NOTHING;
+
+-- Sándwich de pavo con aguacate (POST_ENTRENAMIENTO)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
+SELECT c.id, i.id, 60.00
+FROM comidas c, ingredientes i
+WHERE c.nombre = 'Sándwich de pavo con aguacate' AND i.nombre = 'Pan integral'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
+SELECT c.id, i.id, 50.00
+FROM comidas c, ingredientes i
+WHERE c.nombre = 'Sándwich de pavo con aguacate' AND i.nombre = 'Aguacate'
+ON CONFLICT DO NOTHING;
+
+-- Té verde con galletas integrales (MERIENDA)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
+SELECT c.id, i.id, 40.00
+FROM comidas c, ingredientes i
+WHERE c.nombre = 'Té verde con galletas integrales' AND i.nombre = 'Avena'
+ON CONFLICT DO NOTHING;
+
+-- Smoothie de frutas tropicales (MERIENDA)
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
+SELECT c.id, i.id, 100.00
+FROM comidas c, ingredientes i
+WHERE c.nombre = 'Smoothie de frutas tropicales' AND i.nombre = 'Mango'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
+SELECT c.id, i.id, 80.00
+FROM comidas c, ingredientes i
+WHERE c.nombre = 'Smoothie de frutas tropicales' AND i.nombre = 'Frutillas'
+ON CONFLICT DO NOTHING;
+
 -- Arroz integral con pollo y vegetales (SIN alérgenos)
 INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
 SELECT c.id, i.id, 80.00
@@ -316,29 +396,8 @@ WHERE p.nombre = 'Plan Mantenimiento - 7 días' AND e.nombre = 'Mantener Forma'
 ON CONFLICT DO NOTHING;
 
 -- Crear días del Plan Pérdida de Peso (US-12)
-INSERT INTO plan_dias (id_plan, numero_dia, id_comida_desayuno, id_comida_snack_manana, id_comida_almuerzo, id_comida_snack_tarde, id_comida_cena)
-SELECT 
-    p.id,
-    1,
-    (SELECT id FROM comidas WHERE nombre = 'Avena con frutas y almendras'),
-    (SELECT id FROM comidas WHERE nombre = 'Manzana con mantequilla de almendras'),
-    (SELECT id FROM comidas WHERE nombre = 'Ensalada de pollo a la parrilla'),
-    (SELECT id FROM comidas WHERE nombre = 'Yogur griego con frutillas'),
-    (SELECT id FROM comidas WHERE nombre = 'Pescado al horno con verduras')
-FROM planes p
-WHERE p.nombre = 'Plan Pérdida de Peso - 7 días';
 
 -- Días 2-7 del plan (con variaciones)
-INSERT INTO plan_dias (id_plan, numero_dia, id_comida_desayuno, id_comida_almuerzo, id_comida_cena)
-SELECT 
-    p.id,
-    d.num,
-    (SELECT id FROM comidas WHERE nombre = 'Huevos revueltos con pan integral'),
-    (SELECT id FROM comidas WHERE nombre = 'Arroz integral con pollo y vegetales'),
-    (SELECT id FROM comidas WHERE nombre = 'Ensalada verde con huevo')
-FROM planes p
-CROSS JOIN (SELECT generate_series(2, 7) AS num) d
-WHERE p.nombre = 'Plan Pérdida de Peso - 7 días';
 
 \echo '  ✅ Planes nutricionales cargados'
 \echo ''
@@ -392,12 +451,13 @@ SELECT
 FROM rutinas r, ejercicios e
 WHERE r.nombre = 'Rutina Principiante - 4 semanas' AND e.nombre = 'Flexiones de pecho';
 
-INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, orden, series, duracion_minutos, descanso_segundos, notas)
+INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, orden, series, repeticiones, duracion_minutos, descanso_segundos, notas)
 SELECT 
     r.id,
     e.id,
     3,
     3,
+    1, -- 1 repetición (mantener posición)
     1, -- 1 minuto (ejercicio isométrico)
     60,
     'Mantener cuerpo alineado'
@@ -427,6 +487,11 @@ ON CONFLICT (id_perfil) DO UPDATE
 SET objetivo_actual = 'PERDER_PESO', 
     nivel_actividad_actual = 'MODERADO',
     fecha_actualizacion = '2025-11-05';
+
+-- Etiquetas de salud para ADMIN (condición: bajo en sodio)
+INSERT INTO usuario_etiquetas_salud (id_perfil, id_etiqueta)
+SELECT 1, e.id FROM etiquetas e WHERE e.nombre = 'Bajo en sodio'
+ON CONFLICT DO NOTHING;
 
 -- Usuario DEMO tiene alergia a NUECES (para test RN16)
 INSERT INTO usuario_etiquetas_salud (id_perfil, id_etiqueta)
@@ -484,7 +549,7 @@ SELECT
     CURRENT_TIMESTAMP
 FROM planes p
 WHERE p.nombre = 'Plan Pérdida de Peso - 7 días'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (id_perfil_usuario, id_plan, estado) DO NOTHING;
 
 -- DEMO tiene rutina activa (Rutina Principiante)
 INSERT INTO usuarios_rutinas (id_perfil_usuario, id_rutina, fecha_inicio, semana_actual, estado, created_at)
@@ -497,7 +562,7 @@ SELECT
     CURRENT_TIMESTAMP
 FROM rutinas r
 WHERE r.nombre = 'Rutina Principiante - 4 semanas'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (id_perfil_usuario, id_rutina, estado) DO NOTHING;
 
 \echo '  ✅ Asignaciones cargadas'
 \echo ''
@@ -506,120 +571,6 @@ ON CONFLICT DO NOTHING;
 -- MÓDULO 5: REGISTROS DE ACTIVIDADES (US-21, US-22, US-23)
 -- ============================================================================
 \echo '✅ Cargando registros de actividades...'
-
--- Registros de comidas del usuario DEMO (últimos 3 días)
-INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, notas)
-SELECT 
-    2,
-    c.id,
-    '2025-11-03',
-    '08:00:00',
-    'Desayuno nutritivo'
-FROM comidas c
-WHERE c.nombre = 'Avena con frutas y almendras';
-
-INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, notas)
-SELECT 
-    2,
-    c.id,
-    '2025-11-03',
-    '13:00:00',
-    NULL
-FROM comidas c
-WHERE c.nombre = 'Ensalada de pollo a la parrilla';
-
--- Registros de ejercicios del usuario DEMO
-INSERT INTO registros_ejercicios (id_perfil_usuario, id_ejercicio, fecha, hora, series_realizadas, repeticiones_realizadas, duracion_minutos, notas)
-SELECT 
-    2,
-    e.id,
-    '2025-11-03',
-    '18:00:00',
-    3,
-    10,
-    15,
-    'Buen entrenamiento'
-FROM ejercicios e
-WHERE e.nombre = 'Sentadillas';
-
-\echo '  ✅ Registros de actividades cargados'
-\echo ''
-
--- ============================================================================
--- VERIFICACIÓN FINAL
--- ============================================================================
-\echo '========================================='
-\echo '  VERIFICACIÓN DE DATOS CARGADOS'
-\echo '========================================='
-\echo ''
-
-SELECT 'Usuarios' as tabla, COUNT(*) as cantidad FROM cuentas_auth
-UNION ALL
-SELECT 'Perfiles', COUNT(*) FROM perfiles_usuario
-UNION ALL
-SELECT 'Etiquetas', COUNT(*) FROM etiquetas
-UNION ALL
-SELECT 'Ingredientes', COUNT(*) FROM ingredientes
-UNION ALL
-SELECT 'Ejercicios', COUNT(*) FROM ejercicios
-UNION ALL
-SELECT 'Comidas', COUNT(*) FROM comidas
-UNION ALL
-SELECT 'Recetas', COUNT(*) FROM comida_ingredientes
-UNION ALL
-SELECT 'Planes', COUNT(*) FROM planes
-UNION ALL
-SELECT 'Rutinas', COUNT(*) FROM rutinas
-UNION ALL
-SELECT 'Asignaciones Planes', COUNT(*) FROM usuarios_planes
-UNION ALL
-SELECT 'Asignaciones Rutinas', COUNT(*) FROM usuarios_rutinas
-UNION ALL
-SELECT 'Registros Comidas', COUNT(*) FROM registros_comidas
-UNION ALL
-SELECT 'Registros Ejercicios', COUNT(*) FROM registros_ejercicios
-UNION ALL
-SELECT 'Mediciones', COUNT(*) FROM usuario_historial_medidas
-ORDER BY tabla;
-
-\echo ''
-\echo '========================================='
-\echo '  ✅ CARGA COMPLETADA EXITOSAMENTE'
-\echo '========================================='
-\echo ''
-\echo 'Credenciales para pruebas:'
-\echo '  👨‍💼 Admin: admin@nutritrack.com / Admin123!'
-\echo '  👤 Demo:  demo@nutritrack.com / Demo123!'
-\echo ''
-\echo 'Usuario DEMO tiene:'
-\echo '  - Alergia: Nueces (para test RN16)'
-\echo '  - Plan activo: Pérdida de Peso (día 7/7)'
-\echo '  - Rutina activa: Principiante (semana 4/4)'
-\echo '  - 11 mediciones (78kg → 72.5kg, -5.5kg)'
-\echo ''
-\echo 'Próximos pasos:'
-\echo '  1. Swagger: https://nutritrack-api-wt8b.onrender.com/swagger-ui.html'
-\echo '  2. Postman: Usar environment "Render Production"'
-\echo '  3. Test RN16: Intentar activar plan con nueces (debe fallar)'
-\echo '  4. Test US-21: Ver actividades del día de usuario DEMO'
-\echo ''
-
-
--- ============================================================================
--- PATCH: Corregir plan_dias, rutina_ejercicios y registros según modelos JPA
--- ============================================================================
-
--- ============================================================================
--- PLAN_DIAS: Una fila por comida (no múltiples comidas por día)
--- Columnas: id_plan, numero_dia, tipo_comida, id_comida, notas
--- ============================================================================
-
--- Día 1 del Plan Pérdida de Peso
-INSERT INTO plan_dias (id_plan, numero_dia, tipo_comida, id_comida, notas)
-SELECT p.id, 1, 'DESAYUNO', c.id, 'Desayuno rico en fibra'
-FROM planes p, comidas c
-WHERE p.nombre = 'Plan Pérdida de Peso - 7 días' AND c.nombre = 'Avena con frutas y almendras'
-ON CONFLICT DO NOTHING;
 
 INSERT INTO plan_dias (id_plan, numero_dia, tipo_comida, id_comida, notas)
 SELECT p.id, 1, 'SNACK', c.id, 'Media mañana'
@@ -699,6 +650,105 @@ INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, tipo_c
 SELECT p.id, c.id, CURRENT_DATE - INTERVAL '3 days', '13:00:00', 'ALMUERZO'
 FROM perfiles_usuario p, comidas c, cuentas_auth ca
 WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Ensalada de pollo a la parrilla'
+ON CONFLICT DO NOTHING;
+
+-- Registros adicionales para historial completo (últimos 30 días - DEMO)
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, tipo_comida, porciones, calorias_consumidas)
+SELECT p.id, c.id, CURRENT_DATE - INTERVAL '7 days', '08:30:00', 'DESAYUNO', 1.0, 350.00
+FROM perfiles_usuario p, comidas c, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Huevos revueltos con pan integral'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, tipo_comida, porciones, calorias_consumidas)
+SELECT p.id, c.id, CURRENT_DATE - INTERVAL '7 days', '14:00:00', 'ALMUERZO', 1.0, 450.00
+FROM perfiles_usuario p, comidas c, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Arroz integral con pollo y vegetales'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, tipo_comida, porciones, calorias_consumidas)
+SELECT p.id, c.id, CURRENT_DATE - INTERVAL '7 days', '20:00:00', 'CENA', 1.0, 400.00
+FROM perfiles_usuario p, comidas c, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Pescado al horno con verduras'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, tipo_comida, porciones, calorias_consumidas)
+SELECT p.id, c.id, CURRENT_DATE - INTERVAL '14 days', '09:00:00', 'DESAYUNO', 1.0, 320.00
+FROM perfiles_usuario p, comidas c, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Avena con frutas y almendras'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, tipo_comida, porciones, calorias_consumidas)
+SELECT p.id, c.id, CURRENT_DATE - INTERVAL '14 days', '16:00:00', 'SNACK', 1.0, 180.00
+FROM perfiles_usuario p, comidas c, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Té verde con galletas integrales'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, tipo_comida, porciones, calorias_consumidas)
+SELECT p.id, c.id, CURRENT_DATE - INTERVAL '21 days', '07:30:00', 'DESAYUNO', 1.0, 280.00
+FROM perfiles_usuario p, comidas c, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Yogur griego con frutillas'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, tipo_comida, porciones, calorias_consumidas)
+SELECT p.id, c.id, CURRENT_DATE - INTERVAL '21 days', '18:00:00', 'POST_ENTRENAMIENTO', 1.0, 350.00
+FROM perfiles_usuario p, comidas c, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Batido recuperación con proteína'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, tipo_comida, porciones, calorias_consumidas)
+SELECT p.id, c.id, CURRENT_DATE - INTERVAL '28 days', '12:30:00', 'ALMUERZO', 1.0, 420.00
+FROM perfiles_usuario p, comidas c, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Wrap de atún con verduras'
+ON CONFLICT DO NOTHING;
+
+-- Registros de ejercicios adicionales (últimos 30 días - DEMO)
+INSERT INTO registros_ejercicios (id_perfil_usuario, id_ejercicio, fecha, hora, series_realizadas, repeticiones_realizadas, duracion_minutos, calorias_quemadas)
+SELECT p.id, e.id, CURRENT_DATE - INTERVAL '5 days', '07:00:00', 3, 15, 10, 80.00
+FROM perfiles_usuario p, ejercicios e, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND e.nombre = 'Sentadillas'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_ejercicios (id_perfil_usuario, id_ejercicio, fecha, hora, series_realizadas, repeticiones_realizadas, duracion_minutos, calorias_quemadas)
+SELECT p.id, e.id, CURRENT_DATE - INTERVAL '5 days', '07:15:00', 3, 10, 8, 60.00
+FROM perfiles_usuario p, ejercicios e, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND e.nombre = 'Flexiones de pecho'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_ejercicios (id_perfil_usuario, id_ejercicio, fecha, hora, series_realizadas, repeticiones_realizadas, duracion_minutos, calorias_quemadas)
+SELECT p.id, e.id, CURRENT_DATE - INTERVAL '10 days', '18:30:00', NULL, NULL, 20, 180.00
+FROM perfiles_usuario p, ejercicios e, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND e.nombre = 'Trote en el lugar'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_ejercicios (id_perfil_usuario, id_ejercicio, fecha, hora, series_realizadas, repeticiones_realizadas, duracion_minutos, calorias_quemadas)
+SELECT p.id, e.id, CURRENT_DATE - INTERVAL '12 days', '19:00:00', 3, 12, 10, 70.00
+FROM perfiles_usuario p, ejercicios e, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND e.nombre = 'Zancadas'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_ejercicios (id_perfil_usuario, id_ejercicio, fecha, hora, series_realizadas, repeticiones_realizadas, duracion_minutos, calorias_quemadas)
+SELECT p.id, e.id, CURRENT_DATE - INTERVAL '20 days', '06:30:00', 4, NULL, 5, 50.00
+FROM perfiles_usuario p, ejercicios e, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND e.nombre = 'Saludo al sol'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_ejercicios (id_perfil_usuario, id_ejercicio, fecha, hora, series_realizadas, repeticiones_realizadas, duracion_minutos, calorias_quemadas)
+SELECT p.id, e.id, CURRENT_DATE - INTERVAL '25 days', '17:00:00', 3, 10, 6, 40.00
+FROM perfiles_usuario p, ejercicios e, cuentas_auth ca
+WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND e.nombre = 'Abdominales'
+ON CONFLICT DO NOTHING;
+
+-- Registros para usuario ADMIN (para pruebas de múltiples usuarios)
+INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, tipo_comida, porciones, calorias_consumidas)
+SELECT p.id, c.id, CURRENT_DATE - INTERVAL '1 day', '08:00:00', 'DESAYUNO', 1.0, 300.00
+FROM perfiles_usuario p, comidas c, cuentas_auth ca
+WHERE ca.email = 'admin@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Tortilla de claras con espinaca'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registros_ejercicios (id_perfil_usuario, id_ejercicio, fecha, hora, series_realizadas, repeticiones_realizadas, duracion_minutos, calorias_quemadas)
+SELECT p.id, e.id, CURRENT_DATE - INTERVAL '2 days', '06:00:00', NULL, NULL, 30, 300.00
+FROM perfiles_usuario p, ejercicios e, cuentas_auth ca
+WHERE ca.email = 'admin@nutritrack.com' AND p.id_usuario = ca.id AND e.nombre = 'Sprint intervalos'
 ON CONFLICT DO NOTHING;
 
 \echo '✅ Patch aplicado correctamente'

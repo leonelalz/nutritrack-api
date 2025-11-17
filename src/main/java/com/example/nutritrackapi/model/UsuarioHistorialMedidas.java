@@ -12,7 +12,12 @@ import java.time.LocalDate;
  * Permite tracking de progreso físico en el tiempo
  */
 @Entity
-@Table(name = "usuario_historial_medidas")
+@Table(name = "usuario_historial_medidas",
+    uniqueConstraints = @UniqueConstraint(
+        columnNames = {"id_cliente", "fecha_medicion"},
+        name = "uk_historial_cliente_fecha"
+    )
+)
 @Getter
 @Setter
 @NoArgsConstructor

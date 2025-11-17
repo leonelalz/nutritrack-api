@@ -15,7 +15,12 @@ import java.time.LocalDateTime;
  * Módulo 4: Exploración y Activación (Cliente)
  */
 @Entity
-@Table(name = "usuarios_planes")
+@Table(name = "usuarios_planes",
+    uniqueConstraints = @UniqueConstraint(
+        columnNames = {"id_perfil_usuario", "id_plan", "estado"},
+        name = "uk_usuario_plan_estado"
+    )
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
