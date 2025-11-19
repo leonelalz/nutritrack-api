@@ -2,8 +2,10 @@ package com.example.nutritrackapi.controller;
 
 import com.example.nutritrackapi.dto.*;
 import com.example.nutritrackapi.model.CuentaAuth;
+import com.example.nutritrackapi.model.RegistroComida;
 import com.example.nutritrackapi.repository.CuentaAuthRepository;
 import com.example.nutritrackapi.repository.PerfilUsuarioRepository;
+import com.example.nutritrackapi.repository.RegistroComidaRepository;
 import com.example.nutritrackapi.service.RegistroService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -34,7 +36,7 @@ public class RegistroController {
     private final RegistroService registroService;
     private final CuentaAuthRepository cuentaAuthRepository;
     private final PerfilUsuarioRepository perfilUsuarioRepository;
-
+    private final RegistroComidaRepository registroComidaRepository;
     // ============================================================
     // US-22: Registrar Comidas y Ejercicios
     // ============================================================
@@ -61,6 +63,51 @@ public class RegistroController {
         Long perfilUsuarioId = obtenerPerfilUsuarioId(authentication);
         RegistroComidaResponse response = registroService.registrarComida(perfilUsuarioId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/comidas/hoy")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<RegistroComidaResponse>> obtenerRegistrosHoy(
+            Authentication authentication) {
+
+        Long perfilUsuarioId = obtenerPerfilUsuarioId(authentication);
+        LocalDate hoy = LocalDate.now();
+
+        // Obtener registros reales del día
+
+        List<RegistroComida> registros = registroComidaRepository
+                .findByPerfilUsuarioIdAndFecha(perfilUsuarioId, hoy);
+
+        // Mapear a DTO (puedes usar mapper si ya lo tienes)
+        List<RegistroComidaResponse> resp = registros.stream()
+                .map(r -> RegistroComidaResponse.builder()
+                        .id(r.getId())
+                        .comidaId(r.getComida().getId())
+                        .tipoComida(r.getTipoComida())
+                        .porciones(r.getPorciones())
+                        .fecha(r.getFecha())
+                        .hora(r.getHora())
+                        .notas(r.getNotas())
+                        .build())
+                .toList();
+
+        return ResponseEntity.ok(resp);
+    }
+
+
+    @PutMapping("/comidas/{registroId}")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "👤 USER - Actualizar registro de comida")
+    public ResponseEntity<RegistroComidaResponse> actualizarRegistroComida(
+            @PathVariable Long registroId,
+            @Valid @RequestBody RegistroComidaRequest request,
+            Authentication authentication
+    ) {
+        Long perfilUsuarioId = obtenerPerfilUsuarioId(authentication);
+        RegistroComidaResponse response = registroService.actualizarRegistroComida(
+                perfilUsuarioId, registroId, request
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/ejercicios")

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,25 @@ public class RegistroService {
         return RegistroComidaResponse.fromEntity(registro);
     }
 
+    public RegistroComidaResponse actualizarRegistroComida(
+            Long perfilUsuarioId,
+            Long registroId,
+            RegistroComidaRequest request
+    ) {
+        RegistroComida registro = registroComidaRepository.findByIdAndPerfilId(registroId, perfilUsuarioId)
+                .orElseThrow(() -> new RuntimeException("Registro no encontrado"));
+
+        registro.setFecha(request.getFecha());
+        registro.setHora(request.getHora());
+        registro.setPorciones(request.getPorciones());
+        registro.setNotas(request.getNotas());
+        registro.setTipoComida(request.getTipoComida());
+
+        registroComidaRepository.save(registro);
+
+        return RegistroComidaResponse.fromEntity(registro);
+    }
+
     // ============================================================
     // US-22: Registrar Ejercicio
     // ============================================================
@@ -156,21 +176,35 @@ public class RegistroService {
     public ActividadesDiaResponse obtenerActividadesDia(Long perfilUsuarioId, LocalDate fecha) {
         log.info("Obteniendo actividades del día {} para usuario {}", fecha, perfilUsuarioId);
 
-        // Obtener plan activo del usuario
-        UsuarioPlan planActivo = usuarioPlanRepository.findPlanActivoActual(perfilUsuarioId)
-                .orElseThrow(() -> new EntityNotFoundException("No hay plan activo"));
+        // Intentar obtener plan activo
+        var optionalPlan = usuarioPlanRepository.findPlanActivoActual(perfilUsuarioId);
+
+        if (optionalPlan.isEmpty()) {
+            // 👉 No hay plan activo: devolvemos respuesta "vacía", SIN lanzar 404
+            return ActividadesDiaResponse.builder()
+                    .fecha(fecha)
+                    .diaActual(0)
+                    .caloriasObjetivo(BigDecimal.ZERO)
+                    .caloriasConsumidas(BigDecimal.ZERO)
+                    .comidas(Collections.emptyList())
+                    .build();
+        }
+
+        UsuarioPlan planActivo = optionalPlan.get();
 
         // Calcular día actual del plan
-        long diasDesdeInicio = java.time.temporal.ChronoUnit.DAYS.between(planActivo.getFechaInicio(), fecha);
+        long diasDesdeInicio = java.time.temporal.ChronoUnit.DAYS
+                .between(planActivo.getFechaInicio(), fecha);
         int diaActual = (int) diasDesdeInicio + 1;
 
         // Obtener comidas programadas para ese día
-        List<PlanDia> comidasDelDia = planDiaRepository.findByPlanIdAndNumeroDia(planActivo.getPlan().getId(), diaActual);
+        List<PlanDia> comidasDelDia = planDiaRepository
+                .findByPlanIdAndNumeroDia(planActivo.getPlan().getId(), diaActual);
 
         // Obtener registros de comidas del día
-        List<RegistroComida> registros = registroComidaRepository.findByPerfilUsuarioIdAndFecha(perfilUsuarioId, fecha);
+        List<RegistroComida> registros = registroComidaRepository
+                .findByPerfilUsuarioIdAndFecha(perfilUsuarioId, fecha);
 
-        // Mapear comidas con su estado de registro
         List<ActividadesDiaResponse.ComidaDiaInfo> comidas = comidasDelDia.stream()
                 .map(planDia -> {
                     RegistroComida registro = registros.stream()
@@ -178,8 +212,7 @@ public class RegistroService {
                             .findFirst()
                             .orElse(null);
 
-                    // TODO: Calcular calorías desde ingredientes de la comida
-                    BigDecimal caloriasComida = BigDecimal.ZERO;
+                    BigDecimal caloriasComida = BigDecimal.ZERO; // TODO
 
                     return new ActividadesDiaResponse.ComidaDiaInfo(
                             planDia.getComida().getId(),
@@ -192,7 +225,6 @@ public class RegistroService {
                 })
                 .collect(Collectors.toList());
 
-        // Calcular calorías consumidas
         BigDecimal caloriasConsumidas = registros.stream()
                 .map(RegistroComida::getCaloriasConsumidas)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

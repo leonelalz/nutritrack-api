@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repositorio para gestión de registros de comidas.
@@ -27,6 +28,16 @@ public interface RegistroComidaRepository extends JpaRepository<RegistroComida, 
             @Param("perfilUsuarioId") Long perfilUsuarioId,
             @Param("fecha") LocalDate fecha);
 
+    @Query("""
+    SELECT r
+    FROM RegistroComida r
+    WHERE r.id = :registroId
+      AND r.perfilUsuario.id = :perfilId
+    """)
+    Optional<RegistroComida> findByIdAndPerfilId(
+            @Param("registroId") Long registroId,
+            @Param("perfilId") Long perfilId
+    );
     /**
      * US-21: Obtener registros de comidas de un plan específico en una fecha
      */

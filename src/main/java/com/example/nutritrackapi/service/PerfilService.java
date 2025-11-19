@@ -150,6 +150,60 @@ public class PerfilService {
             .map(m -> convertirAResponse(m, perfil.getUnidadesMedida()))
             .collect(Collectors.toList());
     }
+    @Transactional
+    public HistorialMedidasResponse actualizarMedicion(String email, Long idMedicion, HistorialMedidasRequest request) {
+
+        PerfilUsuario perfil = obtenerPerfilPorEmail(email);
+
+        UsuarioHistorialMedidas medicion = historialMedidasRepository.findById(idMedicion)
+                .orElseThrow(() -> new RuntimeException("Medición no encontrada"));
+
+        // Validar que la medición pertenece al usuario
+        if (!medicion.getPerfilUsuario().getId().equals(perfil.getId())) {
+            throw new RuntimeException("No tienes permiso para modificar esta medición");
+        }
+
+        // Validar duplicado por fecha
+        if (historialMedidasRepository.existsByPerfilUsuarioIdAndFechaMedicion(perfil.getId(), request.getFechaMedicion())
+                && !medicion.getFechaMedicion().equals(request.getFechaMedicion())) {
+            throw new RuntimeException("Ya existe una medición registrada en la misma fecha");
+        }
+
+        // Convertir peso a KG
+        var unidadEntrada = request.getUnidadPeso() != null ?
+                request.getUnidadPeso() : PerfilUsuario.UnidadesMedida.KG;
+
+        var pesoKg = UnidadesUtil.convertirAKg(request.getPeso(), unidadEntrada);
+
+        // Actualizar campos
+        medicion.setPeso(pesoKg);
+        medicion.setAltura(request.getAltura());
+        medicion.setFechaMedicion(request.getFechaMedicion());
+
+        // IMC se recalcula automáticamente (preupdate)
+        medicion = historialMedidasRepository.save(medicion);
+
+        return convertirAResponse(medicion, perfil.getUnidadesMedida());
+    }
+
+    /**
+     * US-24: Eliminar medición corporal
+     */
+    @Transactional
+    public void eliminarMedicion(String email, Long idMedicion) {
+
+        PerfilUsuario perfil = obtenerPerfilPorEmail(email);
+
+        UsuarioHistorialMedidas medicion = historialMedidasRepository.findById(idMedicion)
+                .orElseThrow(() -> new RuntimeException("Medición no encontrada"));
+
+        // Verificar que pertenece al usuario
+        if (!medicion.getPerfilUsuario().getId().equals(perfil.getId())) {
+            throw new RuntimeException("No tienes permiso para eliminar esta medición");
+        }
+
+        historialMedidasRepository.delete(medicion);
+    }
 
     /**
      * Obtener perfil de usuario por email

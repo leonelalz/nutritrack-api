@@ -162,4 +162,38 @@ public class PerfilController {
                     .body(ApiResponse.error(e.getMessage()));
         }
     }
+    @PutMapping("/mediciones/{id}")
+    @Operation(summary = "Actualizar medición corporal",
+            description = "Actualiza una medición existente del usuario (US-24)")
+    public ResponseEntity<ApiResponse<HistorialMedidasResponse>> actualizarMedicion(
+            Authentication authentication,
+            @PathVariable Long id,
+            @Valid @RequestBody HistorialMedidasRequest request) {
+        try {
+            String email = (authentication != null) ? authentication.getName() : "admin@nutritrack.com";
+            HistorialMedidasResponse response = perfilService.actualizarMedicion(email, id, request);
+            return ResponseEntity.ok(ApiResponse.success(response, "Medición actualizada exitosamente"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    // US-24: Eliminar medición corporal
+    @DeleteMapping("/mediciones/{id}")
+    @Operation(summary = "Eliminar medición corporal",
+            description = "Elimina una medición existente del usuario (US-24)")
+    public ResponseEntity<ApiResponse<Void>> eliminarMedicion(
+            Authentication authentication,
+            @PathVariable Long id) {
+        try {
+            String email = (authentication != null) ? authentication.getName() : "admin@nutritrack.com";
+            perfilService.eliminarMedicion(email, id);
+            return ResponseEntity.ok(ApiResponse.success(null, "Medición eliminada exitosamente"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
 }

@@ -67,7 +67,7 @@ public class ComidaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Operation(summary = "🔐 ADMIN - Obtener comida por ID", description = "Obtiene los detalles de una comida con su información nutricional calculada. SOLO ADMINISTRADORES.")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Comida encontrada"),
@@ -81,7 +81,7 @@ public class ComidaController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Operation(summary = "Listar todas las comidas", description = "Obtiene una lista paginada de todas las comidas")
     public ResponseEntity<ApiResponse<Page<ComidaResponse>>> listarComidas(
             @ParameterObject @PageableDefault(size = 20) Pageable pageable
@@ -91,7 +91,7 @@ public class ComidaController {
     }
 
     @GetMapping("/buscar")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Operation(summary = "Buscar comidas por nombre", description = "Busca comidas que contengan el texto especificado (case-insensitive)")
     public ResponseEntity<ApiResponse<Page<ComidaResponse>>> buscarPorNombre(
             @Parameter(description = "Texto a buscar en el nombre") @RequestParam String nombre,
@@ -102,7 +102,7 @@ public class ComidaController {
     }
 
     @GetMapping("/tipo/{tipo}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Operation(summary = "Filtrar por tipo", description = "Obtiene comidas de un tipo específico (DESAYUNO, ALMUERZO, etc.)")
     public ResponseEntity<ApiResponse<Page<ComidaResponse>>> filtrarPorTipo(
             @Parameter(description = "Tipo de comida") @PathVariable Comida.TipoComida tipo,
