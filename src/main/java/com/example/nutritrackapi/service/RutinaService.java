@@ -178,6 +178,28 @@ public class RutinaService {
     }
 
     /**
+     * Reactiva una rutina marcada como inactiva.
+     * Permite reutilizar rutinas previamente eliminadas (soft delete).
+     */
+    @Transactional
+    public RutinaResponse reactivarRutina(Long id) {
+        Rutina rutina = rutinaRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Rutina no encontrada con ID: " + id
+            ));
+
+        if (rutina.getActivo()) {
+            throw new IllegalStateException(
+                "La rutina ya está activa"
+            );
+        }
+
+        rutina.setActivo(true);
+        Rutina actualizada = rutinaRepository.save(rutina);
+        return RutinaResponse.fromEntity(actualizada);
+    }
+
+    /**
      * US-12, US-15: Agrega un ejercicio a la rutina.
      * RN13: Valida que series y repeticiones sean positivas (ya validado en DTO).
      */

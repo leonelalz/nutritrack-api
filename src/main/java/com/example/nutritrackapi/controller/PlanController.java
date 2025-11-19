@@ -223,6 +223,37 @@ public class PlanController {
         return ResponseEntity.ok(ApiResponse.success(null, "Plan eliminado exitosamente"));
     }
 
+    /**
+     * Reactivar plan inactivo
+     */
+    @PatchMapping("/{id}/reactivar")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "🔐 ADMIN: Reactivar plan eliminado", 
+               description = """
+                   Reactiva un plan previamente marcado como inactivo (soft delete).
+                   Permite reutilizar planes eliminados en lugar de crear duplicados.
+                   
+                   ✅ BENEFICIOS:
+                   - Reutiliza configuraciones existentes
+                   - Preserva historial y relaciones
+                   - Evita duplicación de datos
+                   
+                   ⚠️ RESTRICCIONES:
+                   - Solo funciona con planes inactivos (activo=false)
+                   - Si el plan ya está activo → error 400 Bad Request
+                   """)
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Plan reactivado exitosamente"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Plan no encontrado"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "El plan ya está activo")
+    })
+    public ResponseEntity<ApiResponse<PlanResponse>> reactivarPlan(
+            @Parameter(description = "ID del plan a reactivar") @PathVariable Long id
+    ) {
+        PlanResponse plan = planService.reactivarPlan(id);
+        return ResponseEntity.ok(ApiResponse.success(plan, "Plan reactivado exitosamente"));
+    }
+
     // ========== GESTIÓN DE DÍAS DEL PLAN (US-12) ==========
 
     /**

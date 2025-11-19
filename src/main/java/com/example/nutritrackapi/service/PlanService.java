@@ -203,6 +203,28 @@ public class PlanService {
     }
 
     /**
+     * Reactiva un plan marcado como inactivo.
+     * Permite reutilizar planes previamente eliminados (soft delete).
+     */
+    @Transactional
+    public PlanResponse reactivarPlan(Long id) {
+        Plan plan = planRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Plan no encontrado con ID: " + id
+            ));
+
+        if (plan.getActivo()) {
+            throw new IllegalStateException(
+                "El plan ya está activo"
+            );
+        }
+
+        plan.setActivo(true);
+        Plan actualizado = planRepository.save(plan);
+        return PlanResponse.fromEntity(actualizado);
+    }
+
+    /**
      * US-12: Agrega una actividad diaria al plan.
      */
     @Transactional

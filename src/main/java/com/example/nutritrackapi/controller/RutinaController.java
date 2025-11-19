@@ -224,6 +224,37 @@ public class RutinaController {
         return ResponseEntity.ok(ApiResponse.success(null, "Rutina eliminada exitosamente"));
     }
 
+    /**
+     * Reactivar rutina inactiva
+     */
+    @PatchMapping("/{id}/reactivar")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "🔐 ADMIN: Reactivar rutina eliminada", 
+               description = """
+                   Reactiva una rutina previamente marcada como inactiva (soft delete).
+                   Permite reutilizar rutinas eliminadas en lugar de crear duplicadas.
+                   
+                   ✅ BENEFICIOS:
+                   - Reutiliza configuraciones existentes
+                   - Preserva historial y ejercicios
+                   - Evita duplicación de datos
+                   
+                   ⚠️ RESTRICCIONES:
+                   - Solo funciona con rutinas inactivas (activo=false)
+                   - Si la rutina ya está activa → error 400 Bad Request
+                   """)
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Rutina reactivada exitosamente"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Rutina no encontrada"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "La rutina ya está activa")
+    })
+    public ResponseEntity<ApiResponse<RutinaResponse>> reactivarRutina(
+            @Parameter(description = "ID de la rutina a reactivar") @PathVariable Long id
+    ) {
+        RutinaResponse rutina = rutinaService.reactivarRutina(id);
+        return ResponseEntity.ok(ApiResponse.success(rutina, "Rutina reactivada exitosamente"));
+    }
+
     // ========== ENSAMBLAR RUTINAS (US-12, US-15) ==========
 
     /**
