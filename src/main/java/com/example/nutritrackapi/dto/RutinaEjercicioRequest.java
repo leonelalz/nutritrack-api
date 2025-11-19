@@ -26,9 +26,22 @@ public class RutinaEjercicioRequest {
     @Schema(description = "ID del ejercicio del catálogo", example = "5", required = true)
     private Long ejercicioId;
 
+    @NotNull(message = "La semana base es obligatoria")
+    @Min(value = 1, message = "La semana base debe ser al menos 1")
+    @Schema(description = "Semana base del patrón (debe ser <= patronSemanas de la rutina)", 
+            example = "1", required = true)
+    private Integer semanaBase;
+
+    @NotNull(message = "El día de la semana es obligatorio")
+    @Min(value = 1, message = "El día debe ser entre 1 (Lunes) y 7 (Domingo)")
+    @Max(value = 7, message = "El día debe ser entre 1 (Lunes) y 7 (Domingo)")
+    @Schema(description = "Día de la semana (1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado, 7=Domingo)", 
+            example = "1", required = true)
+    private Integer diaSemana;
+
     @NotNull(message = "El orden es obligatorio")
     @Min(value = 1, message = "El orden debe ser al menos 1")
-    @Schema(description = "Orden de ejecución (1, 2, 3...)", example = "1", required = true)
+    @Schema(description = "Orden de ejecución dentro del mismo día (1, 2, 3...)", example = "1", required = true)
     private Integer orden;
 
     @NotNull(message = "El número de series es obligatorio")

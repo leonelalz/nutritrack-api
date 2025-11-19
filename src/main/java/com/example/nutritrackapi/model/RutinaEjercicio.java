@@ -27,7 +27,22 @@ public class RutinaEjercicio {
     private Long id;
 
     /**
-     * Orden de ejecución del ejercicio (1, 2, 3...)
+     * Semana base del patrón (1, 2, 3...)
+     * Debe ser <= rutina.patronSemanas
+     * Ej: Si patronSemanas=2, semanaBase puede ser 1 o 2
+     */
+    @Column(name = "semana_base", nullable = false)
+    private Integer semanaBase;
+
+    /**
+     * Día de la semana (1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado, 7=Domingo)
+     */
+    @Column(name = "dia_semana", nullable = false)
+    private Integer diaSemana;
+
+    /**
+     * Orden de ejecución del ejercicio dentro del mismo día (1, 2, 3...)
+     * Para determinar la secuencia cuando hay múltiples ejercicios en un mismo día
      */
     @Column(nullable = false)
     private Integer orden;

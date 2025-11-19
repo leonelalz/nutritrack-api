@@ -26,7 +26,13 @@ public class RutinaEjercicioResponse {
     @Schema(description = "ID del registro", example = "1")
     private Long id;
 
-    @Schema(description = "Orden de ejecución", example = "1")
+    @Schema(description = "Semana base del patrón", example = "1")
+    private Integer semanaBase;
+
+    @Schema(description = "Día de la semana (1=Lunes, 7=Domingo)", example = "1")
+    private Integer diaSemana;
+
+    @Schema(description = "Orden de ejecución dentro del día", example = "1")
     private Integer orden;
 
     @Schema(description = "Número de series", example = "4")
@@ -56,6 +62,8 @@ public class RutinaEjercicioResponse {
     public static RutinaEjercicioResponse fromEntity(RutinaEjercicio rutinaEjercicio) {
         return RutinaEjercicioResponse.builder()
                 .id(rutinaEjercicio.getId())
+                .semanaBase(rutinaEjercicio.getSemanaBase())
+                .diaSemana(rutinaEjercicio.getDiaSemana())
                 .orden(rutinaEjercicio.getOrden())
                 .series(rutinaEjercicio.getSeries())
                 .repeticiones(rutinaEjercicio.getRepeticiones())

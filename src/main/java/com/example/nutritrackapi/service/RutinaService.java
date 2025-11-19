@@ -52,11 +52,20 @@ public class RutinaService {
             );
         }
 
+        // Validar que patronSemanas no exceda duracionSemanas
+        if (request.getPatronSemanas() > request.getDuracionSemanas()) {
+            throw new IllegalArgumentException(
+                "El patrón de semanas (" + request.getPatronSemanas() + 
+                ") no puede ser mayor que la duración total (" + request.getDuracionSemanas() + " semanas)"
+            );
+        }
+
         // Crear rutina
         Rutina rutina = Rutina.builder()
                 .nombre(request.getNombre())
                 .descripcion(request.getDescripcion())
                 .duracionSemanas(request.getDuracionSemanas())
+                .patronSemanas(request.getPatronSemanas())
                 .nivelDificultad(request.getNivelDificultad())
                 .activo(true)
                 .build();
@@ -130,9 +139,18 @@ public class RutinaService {
             );
         }
 
+        // Validar que patronSemanas no exceda duracionSemanas
+        if (request.getPatronSemanas() > request.getDuracionSemanas()) {
+            throw new IllegalArgumentException(
+                "El patrón de semanas (" + request.getPatronSemanas() + 
+                ") no puede ser mayor que la duración total (" + request.getDuracionSemanas() + " semanas)"
+            );
+        }
+
         rutina.setNombre(request.getNombre());
         rutina.setDescripcion(request.getDescripcion());
         rutina.setDuracionSemanas(request.getDuracionSemanas());
+        rutina.setPatronSemanas(request.getPatronSemanas());
         rutina.setNivelDificultad(request.getNivelDificultad());
 
         // Actualizar etiquetas
@@ -210,16 +228,26 @@ public class RutinaService {
                 "Rutina no encontrada con ID: " + rutinaId
             ));
 
+        // Validar que semanaBase no exceda patronSemanas
+        if (request.getSemanaBase() > rutina.getPatronSemanas()) {
+            throw new IllegalArgumentException(
+                "La semana base (" + request.getSemanaBase() + 
+                ") no puede ser mayor que el patrón de semanas de la rutina (" + 
+                rutina.getPatronSemanas() + ")"
+            );
+        }
+
         // Verificar que el ejercicio existe
         Ejercicio ejercicio = ejercicioRepository.findById(request.getEjercicioId())
             .orElseThrow(() -> new EntityNotFoundException(
                 "Ejercicio no encontrado con ID: " + request.getEjercicioId()
             ));
 
-        // Verificar si ya existe un ejercicio en ese orden
+        // Verificar si ya existe un ejercicio en ese orden para ese día y semana
         if (rutinaEjercicioRepository.existsByRutinaIdAndOrden(rutinaId, request.getOrden())) {
             throw new IllegalStateException(
                 "Ya existe un ejercicio en el orden " + request.getOrden() +
+                " para la semana " + request.getSemanaBase() + ", día " + request.getDiaSemana() +
                 ". Por favor, elija otro orden o modifique el ejercicio existente."
             );
         }
@@ -227,6 +255,8 @@ public class RutinaService {
         RutinaEjercicio rutinaEjercicio = RutinaEjercicio.builder()
                 .rutina(rutina)
                 .ejercicio(ejercicio)
+                .semanaBase(request.getSemanaBase())
+                .diaSemana(request.getDiaSemana())
                 .orden(request.getOrden())
                 .series(request.getSeries())
                 .repeticiones(request.getRepeticiones())
@@ -248,7 +278,7 @@ public class RutinaService {
             throw new EntityNotFoundException("Rutina no encontrada con ID: " + rutinaId);
         }
 
-        return rutinaEjercicioRepository.findByRutinaIdOrderByOrdenAsc(rutinaId)
+        return rutinaEjercicioRepository.findByRutinaIdOrderBySemanaBaseAscDiaSemanaAscOrdenAsc(rutinaId)
             .stream()
             .map(RutinaEjercicioResponse::fromEntity)
             .collect(Collectors.toList());
@@ -275,6 +305,15 @@ public class RutinaService {
             );
         }
 
+        // Validar que semanaBase no exceda patronSemanas
+        if (request.getSemanaBase() > rutinaEjercicio.getRutina().getPatronSemanas()) {
+            throw new IllegalArgumentException(
+                "La semana base (" + request.getSemanaBase() + 
+                ") no puede ser mayor que el patrón de semanas de la rutina (" + 
+                rutinaEjercicio.getRutina().getPatronSemanas() + ")"
+            );
+        }
+
         // Si se cambia el orden, verificar que no exista otro ejercicio en ese orden
         if (!rutinaEjercicio.getOrden().equals(request.getOrden())) {
             if (rutinaEjercicioRepository.existsByRutinaIdAndOrden(rutinaId, request.getOrden())) {
@@ -294,6 +333,8 @@ public class RutinaService {
             rutinaEjercicio.setEjercicio(nuevoEjercicio);
         }
 
+        rutinaEjercicio.setSemanaBase(request.getSemanaBase());
+        rutinaEjercicio.setDiaSemana(request.getDiaSemana());
         rutinaEjercicio.setOrden(request.getOrden());
         rutinaEjercicio.setSeries(request.getSeries());
         rutinaEjercicio.setRepeticiones(request.getRepeticiones());

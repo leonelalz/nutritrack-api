@@ -18,9 +18,9 @@ import java.util.List;
 public interface RutinaEjercicioRepository extends JpaRepository<RutinaEjercicio, Long> {
 
     /**
-     * Busca todos los ejercicios de una rutina ordenados por orden
+     * Busca todos los ejercicios de una rutina ordenados por semanaBase, diaSemana y orden
      */
-    List<RutinaEjercicio> findByRutinaIdOrderByOrdenAsc(Long rutinaId);
+    List<RutinaEjercicio> findByRutinaIdOrderBySemanaBaseAscDiaSemanaAscOrdenAsc(Long rutinaId);
 
     /**
      * Cuenta cuántos ejercicios tiene una rutina

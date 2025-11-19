@@ -53,6 +53,15 @@ public class Rutina {
     private Integer duracionSemanas;
 
     /**
+     * Patrón de semanas base que se repite cíclicamente
+     * Ej: patronSemanas=2 significa que las primeras 2 semanas se repiten hasta completar duracionSemanas
+     * Si duracionSemanas=12 y patronSemanas=2, el patrón se repite 6 veces
+     */
+    @Column(name = "patron_semanas", nullable = false)
+    @Builder.Default
+    private Integer patronSemanas = 1;
+
+    /**
      * Nivel de dificultad de la rutina completa
      */
     @Enumerated(EnumType.STRING)

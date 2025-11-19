@@ -407,10 +407,10 @@ ON CONFLICT DO NOTHING;
 -- ============================================================================
 \echo '🏋️  [8/9] Cargando rutinas de ejercicio...'
 
-INSERT INTO rutinas (nombre, descripcion, duracion_semanas, nivel_dificultad, activo) VALUES
-('Rutina Principiante - 4 semanas', 'Rutina de inicio para personas sedentarias. 3 días por semana con ejercicios básicos.', 4, 'PRINCIPIANTE', true),
-('Rutina Intermedia - 6 semanas', 'Rutina de nivel medio con mayor intensidad. 4 días por semana.', 6, 'INTERMEDIO', true),
-('Rutina Avanzada - 8 semanas', 'Rutina de alta intensidad para personas con experiencia. 5 días por semana.', 8, 'AVANZADO', true)
+INSERT INTO rutinas (nombre, descripcion, duracion_semanas, patron_semanas, nivel_dificultad, activo) VALUES
+('Rutina Principiante - 4 semanas', 'Rutina de inicio para personas sedentarias. Patrón de 1 semana que se repite 4 veces. 3 días por semana con ejercicios básicos.', 4, 1, 'PRINCIPIANTE', true),
+('Rutina Intermedia - 6 semanas', 'Rutina de nivel medio con mayor intensidad. Patrón de 2 semanas que se repite 3 veces. 4 días por semana.', 6, 2, 'INTERMEDIO', true),
+('Rutina Avanzada - 8 semanas', 'Rutina de alta intensidad para personas con experiencia. Patrón de 2 semanas que se repite 4 veces. 5 días por semana.', 8, 2, 'AVANZADO', true)
 ON CONFLICT (nombre) DO NOTHING;
 
 -- Asignar etiquetas a rutinas
@@ -427,10 +427,14 @@ WHERE r.nombre = 'Rutina Intermedia - 6 semanas' AND e.nombre = 'Ganar Masa Musc
 ON CONFLICT DO NOTHING;
 
 -- Crear ejercicios de la Rutina Principiante (US-15, RN13)
-INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, orden, series, repeticiones, descanso_segundos, notas)
+-- Patrón de 1 semana: Lunes (1), Miércoles (3), Viernes (5)
+-- Día 1 (Lunes): Piernas y Core
+INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, semana_base, dia_semana, orden, series, repeticiones, descanso_segundos, notas)
 SELECT 
     r.id,
     e.id,
+    1, -- semana base 1
+    1, -- Lunes
     1, -- orden
     3, -- 3 series
     10, -- 10 repeticiones
@@ -439,11 +443,14 @@ SELECT
 FROM rutinas r, ejercicios e
 WHERE r.nombre = 'Rutina Principiante - 4 semanas' AND e.nombre = 'Sentadillas';
 
-INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, orden, series, repeticiones, descanso_segundos, notas)
+-- Día 3 (Miércoles): Pecho y brazos
+INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, semana_base, dia_semana, orden, series, repeticiones, descanso_segundos, notas)
 SELECT 
     r.id,
     e.id,
-    2,
+    1, -- semana base 1
+    3, -- Miércoles
+    1,
     3,
     8,
     60,
@@ -451,11 +458,14 @@ SELECT
 FROM rutinas r, ejercicios e
 WHERE r.nombre = 'Rutina Principiante - 4 semanas' AND e.nombre = 'Flexiones de pecho';
 
-INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, orden, series, repeticiones, duracion_minutos, descanso_segundos, notas)
+-- Día 5 (Viernes): Core
+INSERT INTO rutina_ejercicios (id_rutina, id_ejercicio, semana_base, dia_semana, orden, series, repeticiones, duracion_minutos, descanso_segundos, notas)
 SELECT 
     r.id,
     e.id,
-    3,
+    1, -- semana base 1
+    5, -- Viernes
+    1,
     3,
     1, -- 1 repetición (mantener posición)
     1, -- 1 minuto (ejercicio isométrico)

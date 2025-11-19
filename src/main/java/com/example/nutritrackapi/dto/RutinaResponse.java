@@ -37,6 +37,9 @@ public class RutinaResponse {
     @Schema(description = "Duración en semanas", example = "12")
     private Integer duracionSemanas;
 
+    @Schema(description = "Patrón de semanas que se repite", example = "2")
+    private Integer patronSemanas;
+
     @Schema(description = "Nivel de dificultad", example = "INTERMEDIO")
     private Ejercicio.NivelDificultad nivelDificultad;
 
@@ -64,6 +67,7 @@ public class RutinaResponse {
                 .nombre(rutina.getNombre())
                 .descripcion(rutina.getDescripcion())
                 .duracionSemanas(rutina.getDuracionSemanas())
+                .patronSemanas(rutina.getPatronSemanas())
                 .nivelDificultad(rutina.getNivelDificultad())
                 .activo(rutina.getActivo())
                 .etiquetas(rutina.getEtiquetas().stream()

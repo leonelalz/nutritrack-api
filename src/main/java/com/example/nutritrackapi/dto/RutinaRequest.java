@@ -39,6 +39,12 @@ public class RutinaRequest {
     @Schema(description = "Duración de la rutina en semanas", example = "12", required = true)
     private Integer duracionSemanas;
 
+    @NotNull(message = "El patrón de semanas es obligatorio")
+    @Min(value = 1, message = "El patrón debe ser al menos 1 semana")
+    @Schema(description = "Número de semanas base que se repiten (ej: 2 = patrón de 2 semanas que se repite)", 
+            example = "2", required = true)
+    private Integer patronSemanas;
+
     @Schema(description = "Nivel de dificultad de la rutina", example = "INTERMEDIO",
             allowableValues = {"PRINCIPIANTE", "INTERMEDIO", "AVANZADO", "EXPERTO"})
     private Ejercicio.NivelDificultad nivelDificultad;
