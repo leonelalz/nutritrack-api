@@ -6,15 +6,10 @@
 -- Credenciales: admin@nutritrack.com / Admin123!, demo@nutritrack.com / Demo123!
 -- ============================================================================
 
-\echo '========================================='
-\echo '  CARGA DE DATOS A RENDER - NUTRITRACK'
-\echo '========================================='
-\echo ''
 
 -- ============================================================================
 -- MÓDULO 2: ETIQUETAS (Tags para categorización)
 -- ============================================================================
-\echo '📌 [1/9] Cargando etiquetas...'
 
 INSERT INTO etiquetas (nombre, tipo_etiqueta, descripcion) VALUES
 -- Alergias (RN16 - validación cruzada)
@@ -43,13 +38,10 @@ INSERT INTO etiquetas (nombre, tipo_etiqueta, descripcion) VALUES
 ('Baja en Carbohidratos', 'DIETA', 'Reducción de carbohidratos procesados')
 ON CONFLICT (nombre) DO NOTHING;
 
-\echo '  ✅ Etiquetas cargadas'
-\echo ''
 
 -- ============================================================================
 -- MÓDULO 2: INGREDIENTES (RN07, RN09, RN10)
 -- ============================================================================
-\echo '🥗 [2/9] Cargando ingredientes...'
 
 INSERT INTO ingredientes (nombre, proteinas, carbohidratos, grasas, energia, fibra, categoria_alimento, descripcion) VALUES
 -- Proteínas
@@ -90,13 +82,10 @@ INSERT INTO ingredientes (nombre, proteinas, carbohidratos, grasas, energia, fib
 ('Queso cottage', 11.10, 3.40, 4.30, 98.00, 0.00, 'LACTEOS', 'Queso cottage bajo en grasa - CONTIENE LÁCTEOS')
 ON CONFLICT (nombre) DO NOTHING;
 
-\echo '  ✅ Ingredientes cargados'
-\echo ''
 
 -- ============================================================================
 -- ASIGNAR ETIQUETAS A INGREDIENTES (RN16 - validación de alérgenos)
 -- ============================================================================
-\echo '🏷️  [3/9] Asignando etiquetas a ingredientes...'
 
 -- Ingredientes con nueces
 INSERT INTO ingrediente_etiquetas (id_ingrediente, id_etiqueta)
@@ -112,13 +101,10 @@ FROM ingredientes i, etiquetas e
 WHERE i.nombre IN ('Yogur', 'Leche descremada', 'Queso cottage') AND e.nombre = 'Lácteos'
 ON CONFLICT DO NOTHING;
 
-\echo '  ✅ Etiquetas asignadas a ingredientes'
-\echo ''
 
 -- ============================================================================
 -- MÓDULO 2: EJERCICIOS (RN13 - series y repeticiones positivas)
 -- ============================================================================
-\echo '🏃 [4/9] Cargando ejercicios...'
 
 INSERT INTO ejercicios (nombre, descripcion, tipo_ejercicio, grupo_muscular, nivel_dificultad, calorias_quemadas_por_minuto, duracion_estimada_minutos, equipo_necesario) VALUES
 -- Cardio
@@ -145,13 +131,10 @@ INSERT INTO ejercicios (nombre, descripcion, tipo_ejercicio, grupo_muscular, niv
 ('Elevación de piernas', 'Ejercicio para abdomen bajo', 'FUERZA', 'ABDOMINALES', 'INTERMEDIO', 4.50, 10, 'Colchoneta')
 ON CONFLICT (nombre) DO NOTHING;
 
-\echo '  ✅ Ejercicios cargados'
-\echo ''
 
 -- ============================================================================
 -- MÓDULO 2: COMIDAS (RN10 - cantidad positiva)
 -- ============================================================================
-\echo '🍽️  [5/9] Cargando comidas...'
 
 INSERT INTO comidas (nombre, tipo_comida, tiempo_elaboracion) VALUES
 -- Desayunos
@@ -178,13 +161,10 @@ INSERT INTO comidas (nombre, tipo_comida, tiempo_elaboracion) VALUES
 ('Manzana con mantequilla de almendras', 'SNACK', 3)
 ON CONFLICT (nombre) DO NOTHING;
 
-\echo '  ✅ Comidas cargadas'
-\echo ''
 
 -- ============================================================================
 -- RECETAS (Ingredientes por comida) - RN10: Cantidad positiva
 -- ============================================================================
-\echo '📝 [6/9] Cargando recetas (ingredientes por comida)...'
 
 -- Avena con frutas y almendras (CON NUECES - para test RN16)
 INSERT INTO comida_ingredientes (id_comida, id_ingrediente, cantidad_gramos)
@@ -282,13 +262,10 @@ FROM comidas c, ingredientes i
 WHERE c.nombre = 'Batido de proteína con plátano' AND i.nombre = 'Plátano'
 ON CONFLICT DO NOTHING;
 
-\echo '  ✅ Recetas cargadas'
-\echo ''
 
 -- ============================================================================
 -- MÓDULO 3: PLANES NUTRICIONALES (US-11, US-12, RN11, RN14, RN28)
 -- ============================================================================
-\echo '📋 [7/9] Cargando planes nutricionales...'
 
 INSERT INTO planes (nombre, descripcion, duracion_dias, activo) VALUES
 ('Plan Pérdida de Peso - 7 días', 'Plan nutricional balanceado para perder peso de forma saludable. Déficit calórico moderado con alta proteína.', 7, true),
@@ -340,13 +317,10 @@ FROM planes p
 CROSS JOIN (SELECT generate_series(2, 7) AS num) d
 WHERE p.nombre = 'Plan Pérdida de Peso - 7 días';
 
-\echo '  ✅ Planes nutricionales cargados'
-\echo ''
 
 -- ============================================================================
 -- MÓDULO 3: RUTINAS DE EJERCICIO (US-11, US-15, RN11, RN14, RN28)
 -- ============================================================================
-\echo '🏋️  [8/9] Cargando rutinas de ejercicio...'
 
 INSERT INTO rutinas (nombre, descripcion, duracion_semanas, nivel_dificultad, activo) VALUES
 ('Rutina Principiante - 4 semanas', 'Rutina de inicio para personas sedentarias. 3 días por semana con ejercicios básicos.', 4, 'PRINCIPIANTE', true),
@@ -404,13 +378,10 @@ SELECT
 FROM rutinas r, ejercicios e
 WHERE r.nombre = 'Rutina Principiante - 4 semanas' AND e.nombre = 'Plancha';
 
-\echo '  ✅ Rutinas de ejercicio cargadas'
-\echo ''
 
 -- ============================================================================
 -- MÓDULO 1 y 2: PERFILES DE USUARIOS (admin y demo)
 -- ============================================================================
-\echo '👤 [9/9] Cargando perfiles y mediciones...'
 
 -- Perfil de salud - ADMIN (objetivo: mantener forma)
 INSERT INTO usuario_perfil_salud (id_perfil, objetivo_actual, nivel_actividad_actual, fecha_actualizacion) 
@@ -465,13 +436,10 @@ INSERT INTO usuario_historial_medidas (id_cliente, fecha_medicion, peso, altura)
 (2, '2025-11-05', 72.5, 168)
 ON CONFLICT (id_cliente, fecha_medicion) DO NOTHING;
 
-\echo '  ✅ Perfiles y mediciones cargados'
-\echo ''
 
 -- ============================================================================
 -- MÓDULO 4: ASIGNACIONES DE PLANES Y RUTINAS (US-18, US-19, US-20, RN17)
 -- ============================================================================
-\echo '🎯 Cargando asignaciones activas...'
 
 -- DEMO tiene plan activo (Plan Pérdida de Peso)
 INSERT INTO usuarios_planes (id_perfil_usuario, id_plan, fecha_inicio, dia_actual, estado, created_at)
@@ -499,13 +467,10 @@ FROM rutinas r
 WHERE r.nombre = 'Rutina Principiante - 4 semanas'
 ON CONFLICT DO NOTHING;
 
-\echo '  ✅ Asignaciones cargadas'
-\echo ''
 
 -- ============================================================================
 -- MÓDULO 5: REGISTROS DE ACTIVIDADES (US-21, US-22, US-23)
 -- ============================================================================
-\echo '✅ Cargando registros de actividades...'
 
 -- Registros de comidas del usuario DEMO (últimos 3 días)
 INSERT INTO registros_comidas (id_perfil_usuario, id_comida, fecha, hora, notas)
@@ -542,16 +507,10 @@ SELECT
 FROM ejercicios e
 WHERE e.nombre = 'Sentadillas';
 
-\echo '  ✅ Registros de actividades cargados'
-\echo ''
 
 -- ============================================================================
 -- VERIFICACIÓN FINAL
 -- ============================================================================
-\echo '========================================='
-\echo '  VERIFICACIÓN DE DATOS CARGADOS'
-\echo '========================================='
-\echo ''
 
 SELECT 'Usuarios' as tabla, COUNT(*) as cantidad FROM cuentas_auth
 UNION ALL
@@ -582,27 +541,6 @@ UNION ALL
 SELECT 'Mediciones', COUNT(*) FROM usuario_historial_medidas
 ORDER BY tabla;
 
-\echo ''
-\echo '========================================='
-\echo '  ✅ CARGA COMPLETADA EXITOSAMENTE'
-\echo '========================================='
-\echo ''
-\echo 'Credenciales para pruebas:'
-\echo '  👨‍💼 Admin: admin@nutritrack.com / Admin123!'
-\echo '  👤 Demo:  demo@nutritrack.com / Demo123!'
-\echo ''
-\echo 'Usuario DEMO tiene:'
-\echo '  - Alergia: Nueces (para test RN16)'
-\echo '  - Plan activo: Pérdida de Peso (día 7/7)'
-\echo '  - Rutina activa: Principiante (semana 4/4)'
-\echo '  - 11 mediciones (78kg → 72.5kg, -5.5kg)'
-\echo ''
-\echo 'Próximos pasos:'
-\echo '  1. Swagger: https://nutritrack-api-wt8b.onrender.com/swagger-ui.html'
-\echo '  2. Postman: Usar environment "Render Production"'
-\echo '  3. Test RN16: Intentar activar plan con nueces (debe fallar)'
-\echo '  4. Test US-21: Ver actividades del día de usuario DEMO'
-\echo ''
 
 
 -- ============================================================================
@@ -701,5 +639,4 @@ FROM perfiles_usuario p, comidas c, cuentas_auth ca
 WHERE ca.email = 'demo@nutritrack.com' AND p.id_usuario = ca.id AND c.nombre = 'Ensalada de pollo a la parrilla'
 ON CONFLICT DO NOTHING;
 
-\echo '✅ Patch aplicado correctamente'
 
