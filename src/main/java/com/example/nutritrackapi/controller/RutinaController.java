@@ -297,7 +297,7 @@ public class RutinaController {
      * US-17: Obtener todos los ejercicios de la rutina
      */
     @GetMapping("/{id}/ejercicios")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @Operation(summary = "Obtener ejercicios de rutina", 
                description = "Lista todos los ejercicios programados en la rutina ordenados por orden de ejecución")
     public ResponseEntity<ApiResponse<List<RutinaEjercicioResponse>>> obtenerEjerciciosDeRutina(
