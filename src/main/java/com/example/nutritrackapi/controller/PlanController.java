@@ -283,9 +283,9 @@ public class PlanController {
      * US-17: Obtener todas las actividades del plan
      */
     @GetMapping("/{id}/dias")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Obtener días del plan", 
-               description = "Lista todas las actividades programadas del plan ordenadas por día y tipo")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @Operation(summary = "🔐 ADMIN/USER - Obtener días del plan", 
+               description = "Lista todas las actividades programadas del plan ordenadas por día y tipo. Accesible para administradores y usuarios.")
     public ResponseEntity<ApiResponse<List<PlanDiaResponse>>> obtenerDiasDePlan(
             @Parameter(description = "ID del plan") @PathVariable Long id
     ) {
@@ -297,9 +297,9 @@ public class PlanController {
      * US-21: Obtener actividades de un día específico
      */
     @GetMapping("/{id}/dias/{numeroDia}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Obtener actividades de un día", 
-               description = "Lista las comidas programadas para un día específico del plan")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @Operation(summary = "🔐 ADMIN/USER - Obtener actividades de un día", 
+               description = "Lista las comidas programadas para un día específico del plan. Accesible para administradores y usuarios.")
     public ResponseEntity<ApiResponse<List<PlanDiaResponse>>> obtenerActividadesDia(
             @Parameter(description = "ID del plan") @PathVariable Long id,
             @Parameter(description = "Número de día (1, 2, 3...)") @PathVariable Integer numeroDia
