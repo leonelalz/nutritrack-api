@@ -77,7 +77,7 @@ public class EtiquetaController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @Operation(summary = "Listar todas las etiquetas", description = "Obtiene una lista paginada de todas las etiquetas")
     public ResponseEntity<ApiResponse<Page<EtiquetaResponse>>> listarEtiquetas(
             @ParameterObject @PageableDefault(size = 20) Pageable pageable

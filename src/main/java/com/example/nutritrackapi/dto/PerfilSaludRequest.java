@@ -23,11 +23,11 @@ import java.util.List;
 @Schema(description = "Perfil de salud del usuario (objetivos, actividad, restricciones)")
 public class PerfilSaludRequest {
 
-    @NotNull(message = "El objetivo de salud es obligatorio")
+
     @Schema(description = "Objetivo principal de salud", example = "PERDER_PESO", allowableValues = {"PERDER_PESO", "MANTENER_PESO", "GANAR_MASA_MUSCULAR", "MEJORAR_SALUD"})
     private UsuarioPerfilSalud.ObjetivoSalud objetivoActual;
 
-    @NotNull(message = "El nivel de actividad es obligatorio")
+
     @Schema(description = "Nivel de actividad física semanal", example = "MODERADO", allowableValues = {"SEDENTARIO", "LIGERO", "MODERADO", "ACTIVO", "MUY_ACTIVO"})
     private UsuarioPerfilSalud.NivelActividad nivelActividadActual;
 

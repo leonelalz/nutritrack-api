@@ -361,7 +361,7 @@ public class PlanService {
         }
 
         // RN16: Filtrar planes que contengan alérgenos del usuario
-        java.util.Set<Etiqueta> alergiasUsuario = perfil.getEtiquetasSalud();
+        java.util.Set<Etiqueta> alergiasUsuario = perfil.getEtiquetas();
         if (alergiasUsuario != null && !alergiasUsuario.isEmpty()) {
             java.util.List<Plan> planesFiltrados = planes.getContent().stream()
                     .filter(plan -> !contieneAlergenos(plan, alergiasUsuario))
@@ -392,7 +392,7 @@ public class PlanService {
                         "Perfil de usuario no encontrado con ID: " + perfilUsuarioId));
 
         // RN16: Validar si el plan contiene alérgenos
-        if (contieneAlergenos(plan, perfil.getEtiquetasSalud())) {
+        if (contieneAlergenos(plan, perfil.getEtiquetas())) {
             throw new com.example.nutritrackapi.exception.BusinessException(
                     "ADVERTENCIA: Este plan contiene ingredientes que coinciden con tus alergias o restricciones alimentarias. Consulta con un profesional de la salud antes de activarlo.");
         }

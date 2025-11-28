@@ -368,15 +368,15 @@ public class RutinaService {
     /**
      * RN16: Verifica si una rutina contiene ejercicios con contraindicaciones para el usuario
      */
-    private boolean contieneContraindicaciones(Rutina rutina, java.util.Set<Etiqueta> condicionesUsuario) {
+    private boolean contieneContraindicaciones(Rutina rutina, Set<UsuarioEtiquetasSalud> condicionesUsuario) {
         if (condicionesUsuario == null || condicionesUsuario.isEmpty()) {
             return false;
         }
 
         // Obtener condiciones médicas del usuario
         java.util.Set<String> nombresCondiciones = condicionesUsuario.stream()
-                .filter(e -> e.getTipoEtiqueta() == Etiqueta.TipoEtiqueta.CONDICION_MEDICA)
-                .map(Etiqueta::getNombre)
+                .filter(e -> e.getEtiqueta().getTipoEtiqueta() == Etiqueta.TipoEtiqueta.CONDICION_MEDICA)
+                .map(e->e.getEtiqueta().getNombre())
                 .collect(java.util.stream.Collectors.toSet());
 
         if (nombresCondiciones.isEmpty()) {
@@ -410,7 +410,7 @@ public class RutinaService {
         }
 
         // RN16: Filtrar rutinas que contengan contraindicaciones para el usuario
-        java.util.Set<Etiqueta> condicionesUsuario = perfil.getEtiquetasSalud();
+        Set<UsuarioEtiquetasSalud> condicionesUsuario = perfil.getEtiquetasSalud();
         if (condicionesUsuario != null && !condicionesUsuario.isEmpty()) {
             java.util.List<Rutina> rutinasFiltradas = rutinas.getContent().stream()
                     .filter(rutina -> !contieneContraindicaciones(rutina, condicionesUsuario))

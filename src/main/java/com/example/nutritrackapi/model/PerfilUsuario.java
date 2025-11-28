@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Entidad PerfilUsuario - Perfil básico del usuario
@@ -46,16 +49,17 @@ public class PerfilUsuario {
     @JsonIgnore
     private UsuarioPerfilSalud perfilSalud;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "usuario_etiquetas_salud",
-        joinColumns = @JoinColumn(name = "id_perfil"),
-        inverseJoinColumns = @JoinColumn(name = "id_etiqueta")
-    )
-    @JsonIgnore
-    @Builder.Default
-    private java.util.Set<Etiqueta> etiquetasSalud = new java.util.HashSet<>();
+    @OneToMany(mappedBy = "perfilUsuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<UsuarioEtiquetasSalud> etiquetasSalud = new HashSet<>();
 
+
+    @Transient
+    public Set<Etiqueta> getEtiquetas() {
+        return etiquetasSalud.stream()
+                .map(UsuarioEtiquetasSalud::getEtiqueta)
+                .collect(Collectors.toSet());
+    }
+    
     @PrePersist
     protected void onCreate() {
         if (fechaInicioApp == null) {
