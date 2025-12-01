@@ -13,14 +13,14 @@ import java.time.LocalDateTime;
  * Entidad que representa la asignación de un plan nutricional a un usuario.
  * Tabla: usuarios_planes
  * Módulo 4: Exploración y Activación (Cliente)
+ * 
+ * Nota: No hay constraint única porque:
+ * - RN17 se valida en código (no duplicar mismo plan ACTIVO)
+ * - Un usuario SÍ puede completar un plan y volver a activarlo
+ * - Se permite historial de múltiples ejecuciones del mismo plan
  */
 @Entity
-@Table(name = "usuarios_planes",
-    uniqueConstraints = @UniqueConstraint(
-        columnNames = {"id_perfil_usuario", "id_plan", "estado"},
-        name = "uk_usuario_plan_estado"
-    )
-)
+@Table(name = "usuarios_planes")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

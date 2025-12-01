@@ -217,7 +217,7 @@ public class RegistroService {
                     return new ActividadesDiaResponse.ComidaDiaInfo(
                             planDia.getComida().getId(),
                             planDia.getComida().getNombre(),
-                            planDia.getTipoComida().name(),
+                            planDia.getTipoComida() != null ? planDia.getTipoComida().getNombre() : null,
                             caloriasComida,
                             registro != null,
                             registro != null ? registro.getId() : null

@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * Módulo 4: Exploración y Activación (Cliente)
  * 
  * User Stories: US-18, US-19, US-20
- * Reglas de Negocio: RN17, RN18, RN19, RN26
+ * Reglas de Negocio: RN17, RN18, RN19, RN26, RN33
  */
 @Service
 @RequiredArgsConstructor
@@ -35,6 +35,7 @@ public class UsuarioRutinaService {
      * US-18: Activa una rutina de ejercicio para un usuario.
      * RN17: No permite duplicar la misma rutina activa.
      * RN18: Propone reemplazo si ya existe activa.
+     * RN33: Valida contraindicaciones médicas (lesiones/condiciones del usuario vs ejercicios).
      */
     @Transactional
     public UsuarioRutinaResponse activarRutina(Long perfilUsuarioId, ActivarRutinaRequest request) {
@@ -53,6 +54,9 @@ public class UsuarioRutinaService {
         if (!rutina.getActivo()) {
             throw new BusinessException("La rutina seleccionada no está disponible");
         }
+
+        // RN33: Validar contraindicaciones médicas
+        validarContraindicacionesUsuario(perfilUsuarioId, request.getRutinaId());
 
         // RN17: Verificar que no existe la MISMA rutina activa
         boolean mismaRutinaActiva = usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
@@ -275,5 +279,29 @@ public class UsuarioRutinaService {
         }
 
         usuarioRutinaRepository.saveAll(rutinasActivas);
+    }
+
+    /**
+     * RN33: Valida que la rutina no contenga ejercicios contraindicados para el usuario.
+     * Compara las condiciones médicas/lesiones del usuario con las etiquetas de los ejercicios.
+     * 
+     * @param perfilUsuarioId ID del perfil del usuario
+     * @param rutinaId ID de la rutina a validar
+     * @throws BusinessException si hay contraindicaciones
+     */
+    private void validarContraindicacionesUsuario(Long perfilUsuarioId, Long rutinaId) {
+        List<String> contraindicaciones = rutinaRepository.findContraindicacionesUsuarioRutina(
+                perfilUsuarioId, rutinaId);
+
+        if (!contraindicaciones.isEmpty()) {
+            String listaContraindicaciones = String.join(", ", contraindicaciones);
+            log.warn("RN33: Rutina {} rechazada para usuario {} por contraindicaciones: {}",
+                    rutinaId, perfilUsuarioId, listaContraindicaciones);
+            throw new BusinessException(
+                    "Esta rutina contiene ejercicios que podrían afectar tu condición médica: " +
+                    listaContraindicaciones + 
+                    ". Por tu seguridad, te recomendamos elegir otra rutina o consultar con un profesional de la salud."
+            );
+        }
     }
 }

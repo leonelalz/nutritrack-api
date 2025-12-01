@@ -4,7 +4,6 @@ import com.example.nutritrackapi.dto.AgregarIngredienteRequest;
 import com.example.nutritrackapi.dto.ApiResponse;
 import com.example.nutritrackapi.dto.ComidaRequest;
 import com.example.nutritrackapi.dto.ComidaResponse;
-import com.example.nutritrackapi.model.Comida;
 import com.example.nutritrackapi.service.ComidaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -103,12 +102,13 @@ public class ComidaController {
 
     @GetMapping("/tipo/{tipo}")
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
-    @Operation(summary = "Filtrar por tipo", description = "Obtiene comidas de un tipo específico (DESAYUNO, ALMUERZO, etc.)")
+    @Operation(summary = "Filtrar por tipo de comida", 
+               description = "Obtiene comidas de un tipo específico (DESAYUNO, ALMUERZO, CENA, SNACK, MERIENDA, etc.)")
     public ResponseEntity<ApiResponse<Page<ComidaResponse>>> filtrarPorTipo(
-            @Parameter(description = "Tipo de comida") @PathVariable Comida.TipoComida tipo,
+            @Parameter(description = "Nombre del tipo de comida", example = "DESAYUNO") @PathVariable String tipo,
             @ParameterObject @PageableDefault(size = 20) Pageable pageable
     ) {
-        Page<ComidaResponse> comidas = comidaService.filtrarPorTipo(tipo, pageable);
+        Page<ComidaResponse> comidas = comidaService.filtrarPorTipoNombre(tipo, pageable);
         return ResponseEntity.ok(ApiResponse.success(comidas, "Comidas filtradas exitosamente"));
     }
 

@@ -5,6 +5,7 @@ import com.example.nutritrackapi.model.*;
 import com.example.nutritrackapi.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,9 +25,12 @@ import java.util.stream.Collectors;
  * RN11: Nombres únicos
  * RN14: No eliminar si tiene usuarios activos
  * RN28: Soft delete
+ * 
+ * MIGRACIÓN: TipoComida ahora es una entidad dinámica
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class PlanService {
 
@@ -37,6 +41,7 @@ public class PlanService {
     private final ComidaRepository comidaRepository;
     private final PerfilUsuarioRepository perfilUsuarioRepository;
     private final CuentaAuthRepository cuentaAuthRepository;
+    private final TipoComidaRepository tipoComidaRepository;
 
     /**
      * US-11: Crea un nuevo plan nutricional.
@@ -248,11 +253,14 @@ public class PlanService {
                 "Comida no encontrada con ID: " + request.getComidaId()
             ));
 
+        // Resolver tipo de comida
+        TipoComidaEntity tipoComida = resolverTipoComida(request.getTipoComidaId(), request.getTipoComidaNombre());
+
         // Verificar si ya existe una comida para este día y tipo
-        if (planDiaRepository.existsByPlanIdAndNumeroDiaAndTipoComida(
-                planId, request.getNumeroDia(), request.getTipoComida())) {
+        if (planDiaRepository.existsByPlanIdAndNumeroDiaAndTipoComidaId(
+                planId, request.getNumeroDia(), tipoComida.getId())) {
             throw new IllegalStateException(
-                "Ya existe una comida de tipo " + request.getTipoComida() +
+                "Ya existe una comida de tipo " + tipoComida.getNombre() +
                 " programada para el día " + request.getNumeroDia()
             );
         }
@@ -260,7 +268,7 @@ public class PlanService {
         PlanDia planDia = PlanDia.builder()
                 .plan(plan)
                 .numeroDia(request.getNumeroDia())
-                .tipoComida(request.getTipoComida())
+                .tipoComida(tipoComida)
                 .comida(comida)
                 .notas(request.getNotas())
                 .build();
@@ -314,6 +322,84 @@ public class PlanService {
         }
 
         planDiaRepository.delete(planDia);
+    }
+
+    /**
+     * Elimina TODOS los días/comidas de un plan.
+     * Útil para limpiar y reconstruir la programación.
+     */
+    @Transactional
+    public void eliminarTodosLosDiasDePlan(Long planId) {
+        if (!planRepository.existsById(planId)) {
+            throw new EntityNotFoundException("Plan no encontrado con ID: " + planId);
+        }
+        planDiaRepository.deleteByPlanId(planId);
+        log.info("Todos los días del plan {} eliminados", planId);
+    }
+
+    /**
+     * Reemplaza TODOS los días/comidas de un plan en una sola operación atómica.
+     * 1. Elimina todos los días existentes
+     * 2. Agrega los nuevos días
+     */
+    @Transactional
+    public java.util.List<PlanDiaResponse> reemplazarDiasDePlan(
+            Long planId, 
+            java.util.List<PlanDiaRequest> dias) {
+        
+        Plan plan = planRepository.findById(planId)
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Plan no encontrado con ID: " + planId
+            ));
+
+        // 1. Eliminar todos los días existentes
+        planDiaRepository.deleteByPlanId(planId);
+        log.info("Días existentes del plan {} eliminados", planId);
+
+        // 2. Si no hay días nuevos, retornar lista vacía
+        if (dias == null || dias.isEmpty()) {
+            return new java.util.ArrayList<>();
+        }
+
+        // 3. Validar y crear los nuevos días
+        java.util.List<PlanDia> nuevosDias = new java.util.ArrayList<>();
+        
+        for (PlanDiaRequest request : dias) {
+            // Validar que el número de día no exceda la duración del plan
+            if (request.getNumeroDia() > plan.getDuracionDias()) {
+                throw new IllegalArgumentException(
+                    "El día " + request.getNumeroDia() + 
+                    " excede la duración del plan (" + plan.getDuracionDias() + " días)"
+                );
+            }
+
+            // Verificar que la comida existe
+            Comida comida = comidaRepository.findById(request.getComidaId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                    "Comida no encontrada con ID: " + request.getComidaId()
+                ));
+
+            // Resolver tipo de comida
+            TipoComidaEntity tipoComida = resolverTipoComida(request.getTipoComidaId(), request.getTipoComidaNombre());
+
+            PlanDia planDia = PlanDia.builder()
+                    .plan(plan)
+                    .comida(comida)
+                    .numeroDia(request.getNumeroDia())
+                    .tipoComida(tipoComida)
+                    .notas(request.getNotas())
+                    .build();
+
+            nuevosDias.add(planDia);
+        }
+
+        // 4. Guardar todos los días nuevos
+        java.util.List<PlanDia> guardados = planDiaRepository.saveAll(nuevosDias);
+        log.info("Plan {} actualizado con {} días/comidas", planId, guardados.size());
+
+        return guardados.stream()
+                .map(PlanDiaResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -409,6 +495,29 @@ public class PlanService {
         return perfilUsuarioRepository.findByCuentaId(cuenta.getId())
                 .orElseThrow(() -> new RuntimeException("Perfil no encontrado"))
                 .getId();
+    }
+
+    /**
+     * Resuelve el tipo de comida por ID o nombre.
+     * Si ambos están presentes, el ID tiene prioridad.
+     * Si ninguno está presente, lanza excepción.
+     */
+    private TipoComidaEntity resolverTipoComida(Long tipoComidaId, String tipoComidaNombre) {
+        if (tipoComidaId != null) {
+            return tipoComidaRepository.findById(tipoComidaId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                    "Tipo de comida no encontrado con ID: " + tipoComidaId
+                ));
+        }
+        
+        if (tipoComidaNombre != null && !tipoComidaNombre.isBlank()) {
+            return tipoComidaRepository.findByNombreIgnoreCase(tipoComidaNombre.trim())
+                .orElseThrow(() -> new EntityNotFoundException(
+                    "Tipo de comida no encontrado con nombre: " + tipoComidaNombre
+                ));
+        }
+        
+        throw new IllegalArgumentException("Debe proporcionar tipoComidaId o tipoComidaNombre");
     }
 
 }

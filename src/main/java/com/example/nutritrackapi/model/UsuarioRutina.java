@@ -13,14 +13,14 @@ import java.time.LocalDateTime;
  * Entidad que representa la asignación de una rutina de ejercicio a un usuario.
  * Tabla: usuarios_rutinas
  * Módulo 4: Exploración y Activación (Cliente)
+ * 
+ * Nota: No hay constraint única porque:
+ * - RN17 se valida en código (no duplicar misma rutina ACTIVA)
+ * - Un usuario SÍ puede completar una rutina y volver a activarla
+ * - Se permite historial de múltiples ejecuciones de la misma rutina
  */
 @Entity
-@Table(name = "usuarios_rutinas",
-    uniqueConstraints = @UniqueConstraint(
-        columnNames = {"id_perfil_usuario", "id_rutina", "estado"},
-        name = "uk_usuario_rutina_estado"
-    )
-)
+@Table(name = "usuarios_rutinas")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

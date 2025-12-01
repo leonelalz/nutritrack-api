@@ -1,6 +1,5 @@
 package com.example.nutritrackapi.dto;
 
-import com.example.nutritrackapi.model.Comida;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -11,6 +10,8 @@ import lombok.NoArgsConstructor;
 /**
  * DTO para agregar actividades diarias a un plan
  * US-12: Gestionar Meta (configurar días del plan)
+ * 
+ * MIGRACIÓN: tipoComida ahora puede ser ID o nombre (String)
  */
 @Data
 @Builder
@@ -25,11 +26,14 @@ public class PlanDiaRequest {
             example = "1", required = true)
     private Integer numeroDia;
 
-    @NotNull(message = "El tipo de comida es obligatorio")
-    @Schema(description = "Tipo de comida del día", example = "DESAYUNO", required = true,
+    @Schema(description = "ID del tipo de comida (usar este o tipoComidaNombre)", example = "1")
+    private Long tipoComidaId;
+
+    @Schema(description = "Nombre del tipo de comida (usar este o tipoComidaId)", 
+            example = "DESAYUNO",
             allowableValues = {"DESAYUNO", "ALMUERZO", "CENA", "SNACK", "PRE_ENTRENAMIENTO", 
-                             "POST_ENTRENAMIENTO", "COLACION"})
-    private Comida.TipoComida tipoComida;
+                             "POST_ENTRENAMIENTO", "COLACION", "MERIENDA"})
+    private String tipoComidaNombre;
 
     @NotNull(message = "El ID de la comida es obligatorio")
     @Schema(description = "ID de la comida del catálogo a consumir", 

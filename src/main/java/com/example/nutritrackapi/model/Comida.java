@@ -16,6 +16,9 @@ import java.util.Set;
  * 
  * US-09: Gestionar Comidas
  * US-10: Gestionar Recetas (agregar ingredientes a comida)
+ * 
+ * MIGRACIÓN: tipoComida ahora es una relación @ManyToOne a TipoComidaEntity
+ * para permitir tipos de comida dinámicos.
  */
 @Entity
 @Table(name = "comidas")
@@ -34,9 +37,13 @@ public class Comida {
     @Column(nullable = false, length = 255)
     private String nombre;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_comida", length = 50, nullable = false)
-    private TipoComida tipoComida;
+    /**
+     * Tipo de comida - Relación con tabla maestra tipos_comida
+     * Permite gestionar tipos de comida dinámicamente
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tipo_comida", nullable = false)
+    private TipoComidaEntity tipoComida;
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;
@@ -78,22 +85,8 @@ public class Comida {
     @Builder.Default
     private Set<Etiqueta> etiquetas = new HashSet<>();
 
-    /**
-     * Enum para tipo de comida
-     */
-    public enum TipoComida {
-        DESAYUNO,
-        ALMUERZO,
-        CENA,
-        SNACK,
-        PRE_ENTRENAMIENTO,
-        POST_ENTRENAMIENTO,
-        COLACION,
-        MERIENDA
-    }
-
     @Override
     public String toString() {
-        return "Comida{id=" + id + ", nombre='" + nombre + "', tipo=" + tipoComida + "}";
+        return "Comida{id=" + id + ", nombre='" + nombre + "', tipoComida=" + (tipoComida != null ? tipoComida.getNombre() : "null") + "}";
     }
 }

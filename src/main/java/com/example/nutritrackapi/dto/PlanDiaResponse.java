@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
  * US-12: Gestionar Meta
  * US-17: Ver Detalle de Meta
  * US-21: Ver Actividades de mi Plan
+ * 
+ * MIGRACIÓN: tipoComida ahora devuelve id y nombre
  */
 @Data
 @Builder
@@ -27,8 +29,11 @@ public class PlanDiaResponse {
     @Schema(description = "Día del plan", example = "1")
     private Integer numeroDia;
 
-    @Schema(description = "Tipo de comida", example = "DESAYUNO")
-    private Comida.TipoComida tipoComida;
+    @Schema(description = "ID del tipo de comida", example = "1")
+    private Long tipoComidaId;
+
+    @Schema(description = "Nombre del tipo de comida", example = "DESAYUNO")
+    private String tipoComida;
 
     @Schema(description = "Información básica de la comida programada")
     private ComidaSimpleResponse comida;
@@ -43,7 +48,8 @@ public class PlanDiaResponse {
         return PlanDiaResponse.builder()
                 .id(planDia.getId())
                 .numeroDia(planDia.getNumeroDia())
-                .tipoComida(planDia.getTipoComida())
+                .tipoComidaId(planDia.getTipoComida() != null ? planDia.getTipoComida().getId() : null)
+                .tipoComida(planDia.getTipoComida() != null ? planDia.getTipoComida().getNombre() : null)
                 .comida(ComidaSimpleResponse.fromEntity(planDia.getComida()))
                 .notas(planDia.getNotas())
                 .build();
@@ -64,15 +70,19 @@ public class PlanDiaResponse {
         @Schema(description = "Nombre de la comida", example = "Avena con frutas")
         private String nombre;
 
-        @Schema(description = "Tipo de comida", example = "DESAYUNO")
-        private Comida.TipoComida tipoComida;
+        @Schema(description = "ID del tipo de comida", example = "1")
+        private Long tipoComidaId;
+
+        @Schema(description = "Nombre del tipo de comida", example = "DESAYUNO")
+        private String tipoComida;
 
         public static ComidaSimpleResponse fromEntity(Comida comida) {
             if (comida == null) return null;
             return ComidaSimpleResponse.builder()
                     .id(comida.getId())
                     .nombre(comida.getNombre())
-                    .tipoComida(comida.getTipoComida())
+                    .tipoComidaId(comida.getTipoComida() != null ? comida.getTipoComida().getId() : null)
+                    .tipoComida(comida.getTipoComida() != null ? comida.getTipoComida().getNombre() : null)
                     .build();
         }
     }

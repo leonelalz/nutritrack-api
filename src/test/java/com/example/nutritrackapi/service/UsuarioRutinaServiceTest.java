@@ -41,6 +41,7 @@ import static org.mockito.Mockito.*;
  * - RN18: Proponer reemplazo al activar nueva rutina
  * - RN19: No pausar/reanudar meta completada/cancelada
  * - RN26: Estado de Asignaciones (Transiciones válidas)
+ * - RN33: Validación de contraindicaciones médicas en rutinas
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UsuarioRutinaService - Tests unitarios Módulo 4")
@@ -816,6 +817,112 @@ class UsuarioRutinaServiceTest {
                 List<UsuarioRutina> rutinas = (List<UsuarioRutina>) list;
                 return rutinas.get(0).getEstado() == UsuarioPlan.EstadoAsignacion.COMPLETADO;
             }));
+        }
+    }
+
+    // ============================================================
+    // RN33: Validación de contraindicaciones médicas
+    // ============================================================
+
+    @Nested
+    @DisplayName("RN33: Validación de contraindicaciones médicas")
+    class RN33_ContraindicacionesMedicasTests {
+
+        @Test
+        @DisplayName("Debe lanzar excepción si rutina tiene ejercicios contraindicados para el usuario")
+        void activarRutina_RN33_ContraindicacionesLanzaExcepcion() {
+            // Given
+            ActivarRutinaRequest request = new ActivarRutinaRequest();
+            request.setRutinaId(1L);
+            request.setFechaInicio(LocalDate.now());
+
+            when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
+            when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
+            when(rutinaRepository.findContraindicacionesUsuarioRutina(1L, 1L))
+                    .thenReturn(List.of("Lesión de rodilla", "Dolor lumbar"));
+
+            // When & Then
+            BusinessException exception = assertThrows(BusinessException.class, () -> {
+                usuarioRutinaService.activarRutina(1L, request);
+            });
+            
+            String mensaje = exception.getMessage();
+            assertTrue(mensaje.contains("condición médica") || mensaje.contains("contraindicad"),
+                    "El mensaje debe indicar la contraindicación médica");
+            assertTrue(mensaje.contains("Lesión de rodilla") || mensaje.contains("Dolor lumbar"),
+                    "El mensaje debe incluir las condiciones específicas");
+            verify(usuarioRutinaRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Debe permitir activar rutina si no hay contraindicaciones")
+        void activarRutina_RN33_SinContraindicacionesPermite() {
+            // Given
+            ActivarRutinaRequest request = new ActivarRutinaRequest();
+            request.setRutinaId(1L);
+            request.setFechaInicio(LocalDate.now());
+
+            when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
+            when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
+            when(rutinaRepository.findContraindicacionesUsuarioRutina(1L, 1L))
+                    .thenReturn(List.of()); // Lista vacía = sin contraindicaciones
+            when(usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
+                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(false);
+            when(usuarioRutinaRepository.save(any(UsuarioRutina.class))).thenReturn(usuarioRutina);
+
+            // When
+            UsuarioRutinaResponse response = usuarioRutinaService.activarRutina(1L, request);
+
+            // Then
+            assertNotNull(response, "Debe permitir activar rutina sin contraindicaciones");
+            verify(usuarioRutinaRepository).save(any(UsuarioRutina.class));
+        }
+
+        @Test
+        @DisplayName("Debe validar contraindicaciones ANTES de verificar duplicados")
+        void activarRutina_RN33_ValidaContraindicacionesPrimero() {
+            // Given - Usuario con contraindicaciones para esta rutina
+            ActivarRutinaRequest request = new ActivarRutinaRequest();
+            request.setRutinaId(1L);
+
+            when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
+            when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
+            when(rutinaRepository.findContraindicacionesUsuarioRutina(1L, 1L))
+                    .thenReturn(List.of("Hipertensión"));
+
+            // When & Then
+            BusinessException exception = assertThrows(BusinessException.class, () -> {
+                usuarioRutinaService.activarRutina(1L, request);
+            });
+            
+            // Verificar que NO se llamó a verificar duplicados (orden correcto)
+            verify(usuarioRutinaRepository, never()).existsByPerfilUsuarioIdAndRutinaIdAndEstado(
+                    anyLong(), anyLong(), any());
+            assertTrue(exception.getMessage().contains("condición médica") || 
+                      exception.getMessage().contains("Hipertensión"));
+        }
+
+        @Test
+        @DisplayName("Mensaje de error debe recomendar consultar profesional de salud")
+        void activarRutina_RN33_MensajeRecomiendaProfesional() {
+            // Given
+            ActivarRutinaRequest request = new ActivarRutinaRequest();
+            request.setRutinaId(1L);
+
+            when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
+            when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
+            when(rutinaRepository.findContraindicacionesUsuarioRutina(1L, 1L))
+                    .thenReturn(List.of("Lesión de espalda"));
+
+            // When & Then
+            BusinessException exception = assertThrows(BusinessException.class, () -> {
+                usuarioRutinaService.activarRutina(1L, request);
+            });
+            
+            String mensaje = exception.getMessage().toLowerCase();
+            assertTrue(mensaje.contains("profesional") || mensaje.contains("salud") || 
+                      mensaje.contains("otra rutina"),
+                    "El mensaje debe recomendar consultar profesional o elegir otra rutina");
         }
     }
 }

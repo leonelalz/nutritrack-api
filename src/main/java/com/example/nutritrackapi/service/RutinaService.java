@@ -5,11 +5,13 @@ import com.example.nutritrackapi.model.*;
 import com.example.nutritrackapi.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class RutinaService {
 
@@ -363,6 +366,90 @@ public class RutinaService {
         }
 
         rutinaEjercicioRepository.delete(rutinaEjercicio);
+    }
+
+    /**
+     * Elimina TODOS los ejercicios de una rutina.
+     * Útil para limpiar y reconstruir la programación.
+     */
+    @Transactional
+    public void eliminarTodosLosEjerciciosDeRutina(Long rutinaId) {
+        if (!rutinaRepository.existsById(rutinaId)) {
+            throw new EntityNotFoundException("Rutina no encontrada con ID: " + rutinaId);
+        }
+        rutinaEjercicioRepository.deleteByRutinaId(rutinaId);
+        log.info("Todos los ejercicios de la rutina {} eliminados", rutinaId);
+    }
+
+    /**
+     * Reemplaza TODOS los ejercicios de una rutina en una sola operación atómica.
+     * 1. Elimina todos los ejercicios existentes
+     * 2. Agrega los nuevos ejercicios
+     * 
+     * RN13: Series y repeticiones deben ser positivas (validado en DTO)
+     */
+    @Transactional
+    public List<RutinaEjercicioResponse> reemplazarEjerciciosDeRutina(
+            Long rutinaId, 
+            List<RutinaEjercicioRequest> ejercicios) {
+        
+        Rutina rutina = rutinaRepository.findById(rutinaId)
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Rutina no encontrada con ID: " + rutinaId
+            ));
+
+        // 1. Eliminar todos los ejercicios existentes
+        rutinaEjercicioRepository.deleteByRutinaId(rutinaId);
+        log.info("Ejercicios existentes de rutina {} eliminados", rutinaId);
+
+        // 2. Si no hay ejercicios nuevos, retornar lista vacía
+        if (ejercicios == null || ejercicios.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 3. Validar y crear los nuevos ejercicios
+        List<RutinaEjercicio> nuevosEjercicios = new ArrayList<>();
+        
+        for (RutinaEjercicioRequest request : ejercicios) {
+            // Validar que semanaBase no exceda patronSemanas
+            if (request.getSemanaBase() > rutina.getPatronSemanas()) {
+                throw new IllegalArgumentException(
+                    "La semana base (" + request.getSemanaBase() + 
+                    ") no puede ser mayor que el patrón de semanas de la rutina (" + 
+                    rutina.getPatronSemanas() + ")"
+                );
+            }
+
+            // Verificar que el ejercicio existe
+            Ejercicio ejercicio = ejercicioRepository.findById(request.getEjercicioId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                    "Ejercicio no encontrado con ID: " + request.getEjercicioId()
+                ));
+
+            RutinaEjercicio rutinaEjercicio = RutinaEjercicio.builder()
+                    .rutina(rutina)
+                    .ejercicio(ejercicio)
+                    .semanaBase(request.getSemanaBase())
+                    .diaSemana(request.getDiaSemana())
+                    .orden(request.getOrden())
+                    .series(request.getSeries())
+                    .repeticiones(request.getRepeticiones())
+                    .peso(request.getPeso())
+                    .duracionMinutos(request.getDuracionMinutos())
+                    .descansoSegundos(request.getDescansoSegundos())
+                    .notas(request.getNotas())
+                    .build();
+
+            nuevosEjercicios.add(rutinaEjercicio);
+        }
+
+        // 4. Guardar todos los ejercicios nuevos
+        List<RutinaEjercicio> guardados = rutinaEjercicioRepository.saveAll(nuevosEjercicios);
+        log.info("Rutina {} actualizada con {} ejercicios", rutinaId, guardados.size());
+
+        return guardados.stream()
+                .map(RutinaEjercicioResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     /**

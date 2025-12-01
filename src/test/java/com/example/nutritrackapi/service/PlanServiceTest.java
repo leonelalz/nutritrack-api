@@ -48,6 +48,9 @@ class PlanServiceTest {
     @Mock
     private CuentaAuthRepository cuentaAuthRepository;
 
+    @Mock
+    private TipoComidaRepository tipoComidaRepository;
+
     @InjectMocks
     private PlanService planService;
 
@@ -57,9 +60,18 @@ class PlanServiceTest {
     private Etiqueta etiqueta;
     private Comida comida;
     private PlanDia planDia;
+    private TipoComidaEntity tipoComidaDesayuno;
 
     @BeforeEach
     void setUp() {
+        tipoComidaDesayuno = TipoComidaEntity.builder()
+                .id(1L)
+                .nombre("DESAYUNO")
+                .descripcion("Primera comida del día")
+                .ordenVisualizacion(1)
+                .activo(true)
+                .build();
+
         etiqueta = new Etiqueta();
         etiqueta.setId(1L);
         etiqueta.setNombre("Pérdida de peso");
@@ -99,13 +111,13 @@ class PlanServiceTest {
         comida = new Comida();
         comida.setId(1L);
         comida.setNombre("Huevos con aguacate");
-        comida.setTipoComida(Comida.TipoComida.DESAYUNO);
+        comida.setTipoComida(tipoComidaDesayuno);
 
         planDia = new PlanDia();
         planDia.setId(1L);
         planDia.setPlan(plan);
         planDia.setNumeroDia(1);
-        planDia.setTipoComida(Comida.TipoComida.DESAYUNO);
+        planDia.setTipoComida(tipoComidaDesayuno);
         planDia.setComida(comida);
         planDia.setNotas("Primera comida del día");
     }
@@ -286,13 +298,14 @@ class PlanServiceTest {
         // Given
         PlanDiaRequest diaRequest = new PlanDiaRequest();
         diaRequest.setNumeroDia(1);
-        diaRequest.setTipoComida(Comida.TipoComida.DESAYUNO);
+        diaRequest.setTipoComidaId(1L);
         diaRequest.setComidaId(1L);
         diaRequest.setNotas("Primera comida del día");
 
         when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
         when(comidaRepository.findById(1L)).thenReturn(Optional.of(comida));
-        when(planDiaRepository.existsByPlanIdAndNumeroDiaAndTipoComida(1L, 1, Comida.TipoComida.DESAYUNO))
+        when(tipoComidaRepository.findById(1L)).thenReturn(Optional.of(tipoComidaDesayuno));
+        when(planDiaRepository.existsByPlanIdAndNumeroDiaAndTipoComidaId(1L, 1, 1L))
             .thenReturn(false);
         when(planDiaRepository.save(any(PlanDia.class))).thenReturn(planDia);
 
@@ -302,7 +315,7 @@ class PlanServiceTest {
         // Then
         assertThat(response).isNotNull();
         assertThat(response.getNumeroDia()).isEqualTo(1);
-        assertThat(response.getTipoComida()).isEqualTo(Comida.TipoComida.DESAYUNO);
+        assertThat(response.getTipoComida()).isEqualTo("DESAYUNO");
         verify(planDiaRepository).save(any(PlanDia.class));
     }
 
@@ -312,7 +325,7 @@ class PlanServiceTest {
         // Given
         PlanDiaRequest diaRequest = new PlanDiaRequest();
         diaRequest.setNumeroDia(31); // Plan tiene 30 días
-        diaRequest.setTipoComida(Comida.TipoComida.DESAYUNO);
+        diaRequest.setTipoComidaId(1L);
         diaRequest.setComidaId(1L);
 
         when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
@@ -329,12 +342,13 @@ class PlanServiceTest {
         // Given
         PlanDiaRequest diaRequest = new PlanDiaRequest();
         diaRequest.setNumeroDia(1);
-        diaRequest.setTipoComida(Comida.TipoComida.DESAYUNO);
+        diaRequest.setTipoComidaId(1L);
         diaRequest.setComidaId(1L);
 
         when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
         when(comidaRepository.findById(1L)).thenReturn(Optional.of(comida));
-        when(planDiaRepository.existsByPlanIdAndNumeroDiaAndTipoComida(1L, 1, Comida.TipoComida.DESAYUNO))
+        when(tipoComidaRepository.findById(1L)).thenReturn(Optional.of(tipoComidaDesayuno));
+        when(planDiaRepository.existsByPlanIdAndNumeroDiaAndTipoComidaId(1L, 1, 1L))
             .thenReturn(true);
 
         // When & Then
@@ -374,7 +388,7 @@ class PlanServiceTest {
         // Then
         assertThat(response).isNotNull();
         assertThat(response).hasSize(1);
-        assertThat(response.get(0).getTipoComida()).isEqualTo(Comida.TipoComida.DESAYUNO);
+        assertThat(response.get(0).getTipoComida()).isEqualTo("DESAYUNO");
     }
 
     @Test

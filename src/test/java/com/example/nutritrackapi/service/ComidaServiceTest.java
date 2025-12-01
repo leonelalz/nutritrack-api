@@ -8,10 +8,12 @@ import com.example.nutritrackapi.model.ComidaIngrediente;
 import com.example.nutritrackapi.model.ComidaIngrediente.ComidaIngredienteId;
 import com.example.nutritrackapi.model.Etiqueta;
 import com.example.nutritrackapi.model.Ingrediente;
+import com.example.nutritrackapi.model.TipoComidaEntity;
 import com.example.nutritrackapi.repository.ComidaIngredienteRepository;
 import com.example.nutritrackapi.repository.ComidaRepository;
 import com.example.nutritrackapi.repository.EtiquetaRepository;
 import com.example.nutritrackapi.repository.IngredienteRepository;
+import com.example.nutritrackapi.repository.TipoComidaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,6 +49,9 @@ class ComidaServiceTest {
     @Mock
     private EtiquetaRepository etiquetaRepository;
 
+    @Mock
+    private TipoComidaRepository tipoComidaRepository;
+
     @InjectMocks
     private ComidaService comidaService;
 
@@ -55,9 +60,18 @@ class ComidaServiceTest {
     private Ingrediente ingrediente;
     private ComidaIngrediente comidaIngrediente;
     private Etiqueta etiqueta;
+    private TipoComidaEntity tipoComidaAlmuerzo;
 
     @BeforeEach
     void setUp() {
+        tipoComidaAlmuerzo = TipoComidaEntity.builder()
+                .id(2L)
+                .nombre("ALMUERZO")
+                .descripcion("Comida del mediodía")
+                .ordenVisualizacion(2)
+                .activo(true)
+                .build();
+
         etiqueta = new Etiqueta();
         etiqueta.setId(1L);
         etiqueta.setNombre("Saludable");
@@ -65,7 +79,7 @@ class ComidaServiceTest {
         comida = new Comida();
         comida.setId(1L);
         comida.setNombre("Ensalada César");
-        comida.setTipoComida(Comida.TipoComida.ALMUERZO);
+        comida.setTipoComida(tipoComidaAlmuerzo);
         comida.setDescripcion("Ensalada con pollo");
         comida.setTiempoPreparacionMinutos(20);
         comida.setPorciones(2);
@@ -74,7 +88,7 @@ class ComidaServiceTest {
 
         comidaRequest = new ComidaRequest();
         comidaRequest.setNombre("Ensalada César");
-        comidaRequest.setTipoComida(Comida.TipoComida.ALMUERZO);
+        comidaRequest.setTipoComidaId(2L);
         comidaRequest.setDescripcion("Ensalada con pollo");
         comidaRequest.setTiempoPreparacionMinutos(20);
         comidaRequest.setPorciones(2);
@@ -104,6 +118,7 @@ class ComidaServiceTest {
     void crearComida_DebeCrearExitosamente() {
         // Given
         when(comidaRepository.existsByNombre(comidaRequest.getNombre())).thenReturn(false);
+        when(tipoComidaRepository.findById(2L)).thenReturn(Optional.of(tipoComidaAlmuerzo));
         when(etiquetaRepository.findAllById(comidaRequest.getEtiquetaIds())).thenReturn(List.of(etiqueta));
         when(comidaRepository.save(any(Comida.class))).thenReturn(comida);
         when(comidaIngredienteRepository.findByComidaId(1L)).thenReturn(List.of());
@@ -114,7 +129,7 @@ class ComidaServiceTest {
         // Then
         assertThat(response).isNotNull();
         assertThat(response.getNombre()).isEqualTo("Ensalada César");
-        assertThat(response.getTipoComida()).isEqualTo(Comida.TipoComida.ALMUERZO);
+        assertThat(response.getTipoComida()).isEqualTo("ALMUERZO");
         verify(comidaRepository).existsByNombre("Ensalada César");
         verify(comidaRepository).save(any(Comida.class));
     }

@@ -322,4 +322,57 @@ public class PlanController {
         planService.eliminarDiaDePlan(planId, diaId);
         return ResponseEntity.ok(ApiResponse.success(null, "Actividad eliminada del plan"));
     }
+
+    /**
+     * Eliminar TODAS las actividades/días de un plan
+     */
+    @DeleteMapping("/{id}/dias")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "🔐 ADMIN - Eliminar todos los días de un plan", 
+               description = """
+                   Elimina TODOS los días/comidas programadas de un plan.
+                   Útil para limpiar y reconstruir la programación nutricional.
+                   """)
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Días eliminados exitosamente"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Plan no encontrado")
+    })
+    public ResponseEntity<ApiResponse<Void>> eliminarTodosLosDias(
+            @Parameter(description = "ID del plan") @PathVariable Long id
+    ) {
+        planService.eliminarTodosLosDiasDePlan(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Todos los días eliminados del plan"));
+    }
+
+    /**
+     * Reemplazar TODAS las actividades/días de un plan (operación batch)
+     */
+    @PutMapping("/{id}/dias/batch")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "🔐 ADMIN - Reemplazar todos los días de un plan", 
+               description = """
+                   Reemplaza TODOS los días/comidas de un plan en una sola operación.
+                   
+                   FUNCIONAMIENTO:
+                   1. Elimina todos los días existentes del plan
+                   2. Agrega los nuevos días proporcionados
+                   
+                   VENTAJAS:
+                   - Evita conflictos de unicidad
+                   - Operación atómica (todo o nada)
+                   - Ideal para edición completa del plan
+                   """)
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Días reemplazados exitosamente"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Plan o comida no encontrado")
+    })
+    public ResponseEntity<ApiResponse<List<PlanDiaResponse>>> reemplazarDiasDePlan(
+            @Parameter(description = "ID del plan") @PathVariable Long id,
+            @Valid @RequestBody List<PlanDiaRequest> dias
+    ) {
+        List<PlanDiaResponse> resultado = planService.reemplazarDiasDePlan(id, dias);
+        return ResponseEntity.ok(ApiResponse.success(resultado, 
+                "Días reemplazados exitosamente. Total: " + resultado.size()));
+    }
 }

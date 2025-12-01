@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 /**
  * DTO de respuesta para comidas
  * US-09: Gestionar Comidas
+ * 
+ * MIGRACIÓN: tipoComida ahora devuelve objeto con id y nombre
  */
 @Data
 @Builder
@@ -30,8 +32,11 @@ public class ComidaResponse {
     @Schema(description = "Nombre de la comida", example = "Ensalada César con pollo")
     private String nombre;
 
-    @Schema(description = "Tipo de comida", example = "ALMUERZO")
-    private Comida.TipoComida tipoComida;
+    @Schema(description = "ID del tipo de comida", example = "2")
+    private Long tipoComidaId;
+
+    @Schema(description = "Nombre del tipo de comida", example = "ALMUERZO")
+    private String tipoComida;
 
     @Schema(description = "Descripción de la comida")
     private String descripcion;
@@ -67,7 +72,8 @@ public class ComidaResponse {
         return ComidaResponse.builder()
                 .id(comida.getId())
                 .nombre(comida.getNombre())
-                .tipoComida(comida.getTipoComida())
+                .tipoComidaId(comida.getTipoComida() != null ? comida.getTipoComida().getId() : null)
+                .tipoComida(comida.getTipoComida() != null ? comida.getTipoComida().getNombre() : null)
                 .descripcion(comida.getDescripcion())
                 .tiempoPreparacionMinutos(comida.getTiempoPreparacionMinutos())
                 .porciones(comida.getPorciones())

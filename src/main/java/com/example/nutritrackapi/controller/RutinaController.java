@@ -342,4 +342,59 @@ public class RutinaController {
         rutinaService.eliminarEjercicioDeRutina(rutinaId, ejercicioId);
         return ResponseEntity.ok(ApiResponse.success(null, "Ejercicio eliminado de la rutina"));
     }
+
+    /**
+     * Eliminar TODOS los ejercicios de una rutina
+     */
+    @DeleteMapping("/{id}/ejercicios")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "🔐 ADMIN - Eliminar todos los ejercicios de una rutina", 
+               description = """
+                   Elimina TODOS los ejercicios asignados a una rutina.
+                   Útil para limpiar y reconstruir la programación de ejercicios.
+                   """)
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ejercicios eliminados exitosamente"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Rutina no encontrada")
+    })
+    public ResponseEntity<ApiResponse<Void>> eliminarTodosLosEjercicios(
+            @Parameter(description = "ID de la rutina") @PathVariable Long id
+    ) {
+        rutinaService.eliminarTodosLosEjerciciosDeRutina(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Todos los ejercicios eliminados de la rutina"));
+    }
+
+    /**
+     * Reemplazar TODOS los ejercicios de una rutina (operación batch)
+     */
+    @PutMapping("/{id}/ejercicios/batch")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "🔐 ADMIN - Reemplazar todos los ejercicios de una rutina", 
+               description = """
+                   Reemplaza TODOS los ejercicios de una rutina en una sola operación.
+                   
+                   FUNCIONAMIENTO:
+                   1. Elimina todos los ejercicios existentes de la rutina
+                   2. Agrega los nuevos ejercicios proporcionados
+                   
+                   VENTAJAS:
+                   - Evita conflictos de unicidad
+                   - Operación atómica (todo o nada)
+                   - Ideal para edición completa de la rutina
+                   
+                   RN13: Series y repeticiones deben ser positivas
+                   """)
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ejercicios reemplazados exitosamente"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Rutina o ejercicio no encontrado")
+    })
+    public ResponseEntity<ApiResponse<List<RutinaEjercicioResponse>>> reemplazarEjerciciosDeRutina(
+            @Parameter(description = "ID de la rutina") @PathVariable Long id,
+            @Valid @RequestBody List<RutinaEjercicioRequest> ejercicios
+    ) {
+        List<RutinaEjercicioResponse> resultado = rutinaService.reemplazarEjerciciosDeRutina(id, ejercicios);
+        return ResponseEntity.ok(ApiResponse.success(resultado, 
+                "Ejercicios reemplazados exitosamente. Total: " + resultado.size()));
+    }
 }

@@ -118,4 +118,41 @@ public interface RutinaRepository extends JpaRepository<Rutina, Long> {
         @Param("maxSemanas") Integer maxSemanas,
         Pageable pageable
     );
+
+    /**
+     * RN33: Obtiene todos los IDs de etiquetas de los ejercicios de una rutina
+     * Usado para validar contraindicaciones médicas del usuario
+     */
+    @Query("""
+        SELECT DISTINCT e.id FROM Rutina r
+        JOIN r.ejercicios re
+        JOIN re.ejercicio ej
+        JOIN ej.etiquetas e
+        WHERE r.id = :rutinaId
+    """)
+    List<Long> findEtiquetasEjerciciosByRutinaId(@Param("rutinaId") Long rutinaId);
+
+    /**
+     * RN33: Obtiene los nombres de etiquetas conflictivas entre usuario y rutina
+     * Retorna las etiquetas de condiciones médicas del usuario que coinciden con etiquetas de ejercicios
+     */
+    @Query("""
+        SELECT DISTINCT e.nombre FROM Etiqueta e
+        WHERE e.id IN (
+            SELECT ej_e.id FROM Rutina r
+            JOIN r.ejercicios re
+            JOIN re.ejercicio ej
+            JOIN ej.etiquetas ej_e
+            WHERE r.id = :rutinaId
+        )
+        AND e.id IN (
+            SELECT ues.etiqueta.id FROM UsuarioEtiquetasSalud ues
+            WHERE ues.perfilUsuario.id = :perfilUsuarioId
+            AND ues.etiqueta.tipoEtiqueta = 'CONDICION_MEDICA'
+        )
+    """)
+    List<String> findContraindicacionesUsuarioRutina(
+        @Param("perfilUsuarioId") Long perfilUsuarioId,
+        @Param("rutinaId") Long rutinaId
+    );
 }

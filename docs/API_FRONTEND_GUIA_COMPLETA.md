@@ -856,6 +856,11 @@ GET /rutinas/catalogo?sugeridos=true
 }
 ```
 
+### Errores Posibles:
+- **400**: Ya tienes esta rutina activa (RN17)
+- **400**: Rutina contiene ejercicios contraindicados para tu condición médica (RN33)
+- **404**: Rutina no encontrada
+
 ---
 
 ## 👤 26-30. Gestionar Rutinas
@@ -1302,7 +1307,7 @@ No Content
 Los catálogos muestran primero planes/rutinas que coinciden con el objetivo del usuario.
 
 ## RN16 - Validación de Alérgenos ⚠️
-**CRÍTICO**: Los planes/rutinas con ingredientes/ejercicios a los que el usuario es alérgico se filtran automáticamente.
+**CRÍTICO**: Los planes con ingredientes a los que el usuario es alérgico se filtran automáticamente del catálogo.
 
 ## RN17 - No Duplicados Activos
 No se puede activar un plan/rutina si ya tienes ese mismo activo.
@@ -1321,8 +1326,11 @@ No se pueden registrar actividades si el plan está pausado.
 - Altura: 50-250 cm
 - Fecha no puede ser futura
 
-## RN32 - Validación Cruzada de Alérgenos
-Al activar un plan, se valida que no contenga ingredientes alérgenos del usuario.
+## RN32 - Validación Cruzada de Alérgenos (Planes) ⚠️
+**CRÍTICO**: Al activar un plan, se valida que no contenga ingredientes alérgenos del usuario.
+
+## RN33 - Validación de Contraindicaciones Médicas (Rutinas) ⚠️
+**CRÍTICO**: Al activar una rutina, se valida que no contenga ejercicios contraindicados para las condiciones médicas/lesiones del usuario.
 
 ---
 

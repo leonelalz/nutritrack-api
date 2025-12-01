@@ -1,6 +1,5 @@
 package com.example.nutritrackapi.dto;
 
-import com.example.nutritrackapi.model.Comida;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -13,6 +12,9 @@ import java.util.Set;
 /**
  * DTO para crear o actualizar una comida
  * US-09: Gestionar Comidas
+ * 
+ * MIGRACIÓN: tipoComida ahora es String (nombre) o Long (id) 
+ * para soportar tipos de comida dinámicos.
  */
 @Data
 @Builder
@@ -26,11 +28,14 @@ public class ComidaRequest {
     @Schema(description = "Nombre de la comida", example = "Ensalada de pollo", required = true)
     private String nombre;
 
-    @NotNull(message = "El tipo de comida es obligatorio")
-    @Schema(description = "Tipo de comida", example = "ALMUERZO", required = true,
+    @Schema(description = "ID del tipo de comida (usar este o tipoComidaNombre)", example = "1")
+    private Long tipoComidaId;
+
+    @Schema(description = "Nombre del tipo de comida (usar este o tipoComidaId)", 
+            example = "ALMUERZO", 
             allowableValues = {"DESAYUNO", "ALMUERZO", "CENA", "SNACK", "PRE_ENTRENAMIENTO", 
                              "POST_ENTRENAMIENTO", "COLACION", "MERIENDA"})
-    private Comida.TipoComida tipoComida;
+    private String tipoComidaNombre;
 
     @Size(max = 2000, message = "La descripción no puede exceder 2000 caracteres")
     @Schema(description = "Descripción de la comida", 

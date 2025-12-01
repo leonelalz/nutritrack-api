@@ -15,6 +15,8 @@ import java.util.Optional;
  * Repositorio para la entidad Comida
  * US-09: Gestionar Comidas
  * US-10: Gestionar Recetas
+ * 
+ * MIGRACIÓN: TipoComida ahora es una entidad (TipoComidaEntity)
  */
 @Repository
 public interface ComidaRepository extends JpaRepository<Comida, Long> {
@@ -25,9 +27,15 @@ public interface ComidaRepository extends JpaRepository<Comida, Long> {
     Optional<Comida> findByNombre(String nombre);
 
     /**
-     * Busca comidas por tipo
+     * Busca comidas por ID de tipo de comida
      */
-    Page<Comida> findByTipoComida(Comida.TipoComida tipo, Pageable pageable);
+    Page<Comida> findByTipoComidaId(Long tipoComidaId, Pageable pageable);
+
+    /**
+     * Busca comidas por nombre de tipo de comida
+     */
+    @Query("SELECT c FROM Comida c WHERE UPPER(c.tipoComida.nombre) = UPPER(:nombre)")
+    Page<Comida> findByTipoComidaNombre(@Param("nombre") String nombre, Pageable pageable);
 
     /**
      * Busca comidas por nombre que contenga (búsqueda parcial)
@@ -63,9 +71,9 @@ public interface ComidaRepository extends JpaRepository<Comida, Long> {
     List<Comida> findByIngredienteId(@Param("ingredienteId") Long ingredienteId);
 
     /**
-     * Cuenta comidas por tipo
+     * Cuenta comidas por ID de tipo
      */
-    long countByTipoComida(Comida.TipoComida tipo);
+    long countByTipoComidaId(Long tipoComidaId);
 
     /**
      * Busca comidas sin ingredientes (para validación)

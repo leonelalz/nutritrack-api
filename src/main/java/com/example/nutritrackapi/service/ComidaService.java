@@ -10,10 +10,12 @@ import com.example.nutritrackapi.model.ComidaIngrediente;
 import com.example.nutritrackapi.model.ComidaIngrediente.ComidaIngredienteId;
 import com.example.nutritrackapi.model.Etiqueta;
 import com.example.nutritrackapi.model.Ingrediente;
+import com.example.nutritrackapi.model.TipoComidaEntity;
 import com.example.nutritrackapi.repository.ComidaIngredienteRepository;
 import com.example.nutritrackapi.repository.ComidaRepository;
 import com.example.nutritrackapi.repository.EtiquetaRepository;
 import com.example.nutritrackapi.repository.IngredienteRepository;
+import com.example.nutritrackapi.repository.TipoComidaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,6 +35,8 @@ import java.util.stream.Collectors;
  * Implementa US-09: Gestionar Comidas y US-10: Gestionar Recetas
  * RN07: Nombre único de comida
  * RN10: Cantidad positiva de ingredientes
+ * 
+ * MIGRACIÓN: TipoComida ahora es una entidad dinámica
  */
 @Service
 @RequiredArgsConstructor
@@ -43,6 +47,7 @@ public class ComidaService {
     private final ComidaIngredienteRepository comidaIngredienteRepository;
     private final IngredienteRepository ingredienteRepository;
     private final EtiquetaRepository etiquetaRepository;
+    private final TipoComidaRepository tipoComidaRepository;
 
     /**
      * Crea una nueva comida.
@@ -57,9 +62,12 @@ public class ComidaService {
             );
         }
 
+        // Obtener tipo de comida
+        TipoComidaEntity tipoComida = resolverTipoComida(request.getTipoComidaId(), request.getTipoComidaNombre());
+
         Comida comida = new Comida();
         comida.setNombre(request.getNombre());
-        comida.setTipoComida(request.getTipoComida());
+        comida.setTipoComida(tipoComida);
         comida.setDescripcion(request.getDescripcion());
         comida.setTiempoPreparacionMinutos(request.getTiempoPreparacionMinutos());
         comida.setPorciones(request.getPorciones());
@@ -108,10 +116,20 @@ public class ComidaService {
     }
 
     /**
-     * Filtra comidas por tipo.
+     * Filtra comidas por tipo de comida (por ID).
      */
-    public Page<ComidaResponse> filtrarPorTipo(Comida.TipoComida tipo, Pageable pageable) {
-        return comidaRepository.findByTipoComida(tipo, pageable)
+    public Page<ComidaResponse> filtrarPorTipoId(Long tipoComidaId, Pageable pageable) {
+        return comidaRepository.findByTipoComidaId(tipoComidaId, pageable)
+            .map(this::construirComidaResponse);
+    }
+
+    /**
+     * Filtra comidas por tipo de comida (por nombre).
+     */
+    public Page<ComidaResponse> filtrarPorTipoNombre(String tipoComidaNombre, Pageable pageable) {
+        TipoComidaEntity tipoComida = tipoComidaRepository.findByNombreIgnoreCase(tipoComidaNombre)
+            .orElseThrow(() -> new EntityNotFoundException("Tipo de comida no encontrado: " + tipoComidaNombre));
+        return comidaRepository.findByTipoComidaId(tipoComida.getId(), pageable)
             .map(this::construirComidaResponse);
     }
 
@@ -133,8 +151,11 @@ public class ComidaService {
             );
         }
 
+        // Obtener tipo de comida
+        TipoComidaEntity tipoComida = resolverTipoComida(request.getTipoComidaId(), request.getTipoComidaNombre());
+
         comida.setNombre(request.getNombre());
-        comida.setTipoComida(request.getTipoComida());
+        comida.setTipoComida(tipoComida);
         comida.setDescripcion(request.getDescripcion());
         comida.setTiempoPreparacionMinutos(request.getTiempoPreparacionMinutos());
         comida.setPorciones(request.getPorciones());
@@ -276,7 +297,8 @@ public class ComidaService {
         return ComidaResponse.builder()
             .id(comida.getId())
             .nombre(comida.getNombre())
-            .tipoComida(comida.getTipoComida())
+            .tipoComidaId(comida.getTipoComida() != null ? comida.getTipoComida().getId() : null)
+            .tipoComida(comida.getTipoComida() != null ? comida.getTipoComida().getNombre() : null)
             .descripcion(comida.getDescripcion())
             .tiempoPreparacionMinutos(comida.getTiempoPreparacionMinutos())
             .porciones(comida.getPorciones())
@@ -345,5 +367,28 @@ public class ComidaService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP))
             .build();
+    }
+
+    /**
+     * Resuelve el tipo de comida por ID o nombre.
+     * Si ambos están presentes, el ID tiene prioridad.
+     * Si ninguno está presente, lanza excepción.
+     */
+    private TipoComidaEntity resolverTipoComida(Long tipoComidaId, String tipoComidaNombre) {
+        if (tipoComidaId != null) {
+            return tipoComidaRepository.findById(tipoComidaId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                    "Tipo de comida no encontrado con ID: " + tipoComidaId
+                ));
+        }
+        
+        if (tipoComidaNombre != null && !tipoComidaNombre.isBlank()) {
+            return tipoComidaRepository.findByNombreIgnoreCase(tipoComidaNombre.trim())
+                .orElseThrow(() -> new EntityNotFoundException(
+                    "Tipo de comida no encontrado con nombre: " + tipoComidaNombre
+                ));
+        }
+        
+        throw new IllegalArgumentException("Debe proporcionar tipoComidaId o tipoComidaNombre");
     }
 }

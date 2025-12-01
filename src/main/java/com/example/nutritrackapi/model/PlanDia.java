@@ -10,6 +10,9 @@ import lombok.*;
  * US-12: Gestionar Meta (configurar días)
  * US-21: Ver Actividades de mi Plan (cliente consulta)
  * 
+ * MIGRACIÓN: tipoComida ahora es una relación @ManyToOne a TipoComidaEntity
+ * para permitir tipos de comida dinámicos.
+ * 
  * Ejemplo: Plan de 30 días con 4 comidas diarias = 120 registros en plan_dias
  */
 @Entity
@@ -32,11 +35,12 @@ public class PlanDia {
     private Integer numeroDia;
 
     /**
-     * Tipo de comida del día
+     * Tipo de comida - Relación con tabla maestra tipos_comida
+     * Permite gestionar tipos de comida dinámicamente
      */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_comida", nullable = false, length = 50)
-    private Comida.TipoComida tipoComida;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tipo_comida", nullable = false)
+    private TipoComidaEntity tipoComida;
 
     /**
      * Notas adicionales para esta comida del día
@@ -63,7 +67,7 @@ public class PlanDia {
     public String toString() {
         return "PlanDia{id=" + id + 
                ", dia=" + numeroDia + 
-               ", tipo=" + tipoComida + 
+               ", tipoComida=" + (tipoComida != null ? tipoComida.getNombre() : "null") + 
                ", comida=" + (comida != null ? comida.getNombre() : "null") + "}";
     }
 }

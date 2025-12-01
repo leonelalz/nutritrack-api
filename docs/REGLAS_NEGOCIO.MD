@@ -519,7 +519,29 @@ public ResponseEntity<?> loginFallback(Exception e) {
   - `repository/EtiquetaRepository.java`
 - **Estado:** ✅ **IMPLEMENTADO** (Noviembre 2025)
 
-### RN33 - Validación Lógica de Fechas en Registros
+### ✅ RN33 - Validación de Contraindicaciones Médicas en Rutinas
+- **Regla:** Cuando un usuario activa una rutina, el sistema debe validar que la rutina NO contenga ejercicios con etiquetas que coincidan con las condiciones médicas/lesiones del perfil de salud del usuario.
+- **Módulos Afectados:** Módulo 4 (Exploración y Activación)
+- **Prioridad:** 🚨 **CRÍTICA - SEGURIDAD DE SALUD**
+- **Implementación:**
+  - Método `validarContraindicacionesUsuario()` en `UsuarioRutinaService` ejecutado antes de activar rutina
+  - Query `findCondicionesMedicasByPerfilUsuarioId()` en `UsuarioEtiquetasSaludRepository` para obtener condiciones médicas del usuario
+  - Query `findContraindicacionesUsuarioRutina()` en `RutinaRepository` usando join query:
+    ```
+    Rutina → RutinaEjercicio → Ejercicio → Etiqueta ∩ UsuarioEtiquetasSalud (CONDICION_MEDICA)
+    ```
+  - Si hay coincidencias, lanza `BusinessException` con mensaje descriptivo de las contraindicaciones
+  - Previene activación de rutinas con ejercicios que podrían afectar la condición médica del usuario
+- **Ejemplo de Uso:**
+  - Usuario con etiqueta "Lesión de rodilla" intenta activar rutina que contiene ejercicios con etiqueta "Lesión de rodilla"
+  - Sistema rechaza con mensaje: "Esta rutina contiene ejercicios que podrían afectar tu condición médica: Lesión de rodilla"
+- **Ubicación:** 
+  - `service/UsuarioRutinaService.java`
+  - `repository/UsuarioEtiquetasSaludRepository.java`
+  - `repository/RutinaRepository.java`
+- **Estado:** ✅ **IMPLEMENTADO** (Noviembre 2025)
+
+### RN34 - Validación Lógica de Fechas en Registros
 - **Regla:** Los registros de progreso (comidas, ejercicios, mediciones) deben validar que la fecha no sea futura y sea posterior o igual a la fecha de inicio del plan activo.
 - **Módulos Afectados:** Módulo 5 (Seguimiento de Progreso)
 - **Prioridad:** 🔴 **ALTA - INTEGRIDAD**

@@ -49,6 +49,18 @@ public interface UsuarioEtiquetasSaludRepository extends JpaRepository<UsuarioEt
     List<Long> findEtiquetasAlergenosByPerfilUsuarioId(Long perfilUsuarioId);
 
     /**
+     * RN33: Obtener IDs de etiquetas de condiciones médicas (lesiones) del usuario
+     * Usado para validar que las rutinas no contengan ejercicios contraindicados
+     */
+    @Query("""
+        SELECT e.id FROM Etiqueta e
+        INNER JOIN UsuarioEtiquetasSalud ues ON e.id = ues.etiqueta.id
+        WHERE ues.perfilUsuario.id = :perfilUsuarioId
+        AND e.tipoEtiqueta = 'CONDICION_MEDICA'
+        """)
+    List<Long> findCondicionesMedicasByPerfilUsuarioId(Long perfilUsuarioId);
+
+    /**
      * Verificar si usuario tiene una etiqueta específica
      */
     boolean existsByPerfilUsuarioIdAndEtiquetaId(Long perfilUsuarioId, Long etiquetaId);
