@@ -37,6 +37,11 @@ public class UsuarioPlanService {
      * US-18: Activa un plan nutricional para un usuario.
      * RN17: No permite duplicar el mismo plan activo.
      * RN18: Propone reemplazo si ya existe activo.
+     * 
+     * COMPORTAMIENTO:
+     * - Si el plan está CANCELADO: Se crea una NUEVA asignación (reinicia desde día 1)
+     * - Si el plan está ACTIVO: Error - debe pausarlo primero
+     * - Si el plan está PAUSADO: Usar reanudarPlan() en lugar de activar
      */
     @Transactional
     public UsuarioPlanResponse activarPlan(Long perfilUsuarioId, ActivarPlanRequest request) {
@@ -59,33 +64,50 @@ public class UsuarioPlanService {
         // RN32: Validar que el plan no contenga alérgenos del usuario
         validarAlergenosUsuario(perfilUsuarioId, request.getPlanId());
 
-        // RN17: Verificar que no existe el MISMO plan activo
-        boolean mismoPlanActivo = usuarioPlanRepository.existsByPerfilUsuarioIdAndPlanIdAndEstado(
-                perfilUsuarioId,
-                request.getPlanId(),
-                UsuarioPlan.EstadoAsignacion.ACTIVO
-        );
+        // Verificar estado de asignaciones existentes de este plan
+        var asignacionExistente = usuarioPlanRepository
+                .findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(perfilUsuarioId, request.getPlanId());
 
-        if (mismoPlanActivo) {
-            // RN18: Proponer reemplazo
-            throw new BusinessException(
-                    "Ya tienes este plan activo. Debes pausarlo o cancelarlo para reiniciarlo."
-            );
+        if (asignacionExistente.isPresent()) {
+            UsuarioPlan existente = asignacionExistente.get();
+            
+            switch (existente.getEstado()) {
+                case ACTIVO:
+                    // RN17 & RN18: Ya está activo, no permitir duplicar
+                    throw new BusinessException(
+                            "Ya tienes este plan activo. Debes pausarlo o cancelarlo primero."
+                    );
+                    
+                case PAUSADO:
+                    // Sugerir usar reanudar en lugar de activar
+                    throw new BusinessException(
+                            "Este plan está pausado. Usa 'Reanudar' para continuar desde donde lo dejaste, " +
+                            "o 'Cancelar' primero si quieres reiniciarlo desde el día 1."
+                    );
+                    
+                case CANCELADO:
+                case COMPLETADO:
+                    // OK - Se permite crear nueva asignación (reiniciar)
+                    log.info("Plan {} estaba en estado {}. Se creará nueva asignación.", 
+                            request.getPlanId(), existente.getEstado());
+                    break;
+            }
         }
 
-        // Crear asignación
+        // Crear NUEVA asignación (siempre empieza desde día 1)
         UsuarioPlan usuarioPlan = new UsuarioPlan();
         usuarioPlan.setPerfilUsuario(perfil);
         usuarioPlan.setPlan(plan);
         usuarioPlan.setFechaInicio(request.getFechaInicio() != null ? 
                 request.getFechaInicio() : LocalDate.now());
         usuarioPlan.setFechaFin(usuarioPlan.getFechaInicio().plusDays(plan.getDuracionDias() - 1));
-        usuarioPlan.setDiaActual(1);
+        usuarioPlan.setDiaActual(1);  // ← SIEMPRE empieza en día 1
         usuarioPlan.setEstado(UsuarioPlan.EstadoAsignacion.ACTIVO);
         usuarioPlan.setNotas(request.getNotas());
 
         UsuarioPlan saved = usuarioPlanRepository.save(usuarioPlan);
-        log.info("Plan {} activado exitosamente para usuario {}", plan.getId(), perfilUsuarioId);
+        log.info("Plan {} activado exitosamente para usuario {} (nueva asignación desde día 1)", 
+                plan.getId(), perfilUsuarioId);
 
         return UsuarioPlanResponse.fromEntity(saved);
     }

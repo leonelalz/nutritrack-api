@@ -1198,4 +1198,200 @@ public class RegistroService {
 
         return RegistroComidaResponse.fromEntity(registro);
     }
+
+    // ============================================================
+    // Progreso Acumulado del Plan
+    // ============================================================
+
+    /**
+     * Obtiene el progreso acumulado del plan nutricional activo.
+     * Incluye estadísticas completas desde el inicio del plan.
+     */
+    @Transactional(readOnly = true)
+    public ProgresoPlanResponse obtenerProgresoPlan(Long perfilUsuarioId) {
+        log.info("Obteniendo progreso del plan para usuario {}", perfilUsuarioId);
+
+        LocalDate hoy = LocalDate.now();
+
+        // Obtener plan activo
+        var optionalPlan = usuarioPlanRepository.findPlanActivoActual(perfilUsuarioId);
+        
+        if (optionalPlan.isEmpty()) {
+            return ProgresoPlanResponse.builder()
+                    .usuarioPlanId(null)
+                    .planId(null)
+                    .nombrePlan(null)
+                    .fechaInicio(null)
+                    .fechaActual(hoy)
+                    .diaActual(0)
+                    .diaPlanCiclico(0)
+                    .duracionDias(0)
+                    .cicloActual(0)
+                    .diasCompletados(0)
+                    .diasParciales(0)
+                    .diasSinRegistro(0)
+                    .porcentajeDiasCompletados(BigDecimal.ZERO)
+                    .totalComidasProgramadas(0)
+                    .totalComidasRegistradas(0)
+                    .porcentajeComidasRegistradas(BigDecimal.ZERO)
+                    .comidasHoyProgramadas(0)
+                    .comidasHoyCompletadas(0)
+                    .diaActualCompleto(false)
+                    .rachaActual(0)
+                    .rachaMejor(0)
+                    .historialDias(Collections.emptyList())
+                    .build();
+        }
+
+        UsuarioPlan planActivo = optionalPlan.get();
+        Plan plan = planActivo.getPlan();
+        LocalDate fechaInicio = planActivo.getFechaInicio();
+        int duracionDias = plan.getDuracionDias() != null ? plan.getDuracionDias() : 1;
+
+        // Calcular día actual y ciclo
+        long diasDesdeInicio = java.time.temporal.ChronoUnit.DAYS.between(fechaInicio, hoy);
+        int diaActual = (int) diasDesdeInicio + 1;
+        int diaPlanCiclico = diaActual <= duracionDias ? diaActual : ((diaActual - 1) % duracionDias) + 1;
+        int cicloActual = diaActual <= duracionDias ? 1 : ((diaActual - 1) / duracionDias) + 1;
+
+        // Obtener todos los registros desde el inicio del plan
+        List<RegistroComida> todosLosRegistros = registroComidaRepository
+                .findByPerfilUsuarioIdAndFechaBetween(perfilUsuarioId, fechaInicio, hoy);
+
+        // Agrupar registros por fecha
+        java.util.Map<LocalDate, List<RegistroComida>> registrosPorFecha = todosLosRegistros.stream()
+                .collect(Collectors.groupingBy(RegistroComida::getFecha));
+
+        // Calcular estadísticas día por día
+        int diasCompletados = 0;
+        int diasParciales = 0;
+        int diasSinRegistro = 0;
+        int totalComidasProgramadas = 0;
+        int totalComidasRegistradas = 0;
+        int rachaActual = 0;
+        int rachaMejor = 0;
+        int rachaTemp = 0;
+
+        List<ProgresoPlanResponse.DiaPlanInfo> historialDias = new java.util.ArrayList<>();
+
+        // Iterar desde fecha de inicio hasta hoy
+        LocalDate fecha = fechaInicio;
+        while (!fecha.isAfter(hoy)) {
+            // Calcular día del plan para esta fecha
+            long diasDesdeFecha = java.time.temporal.ChronoUnit.DAYS.between(fechaInicio, fecha);
+            int diaDelPlan = (int) diasDesdeFecha + 1;
+            int diaCiclico = diaDelPlan <= duracionDias ? diaDelPlan : ((diaDelPlan - 1) % duracionDias) + 1;
+
+            // Obtener comidas programadas para ese día del plan
+            List<PlanDia> comidasProgramadas = planDiaRepository.findByPlanIdAndNumeroDia(plan.getId(), diaCiclico);
+            int numProgramadas = comidasProgramadas.size();
+
+            // Obtener registros de ese día
+            List<RegistroComida> registrosDia = registrosPorFecha.getOrDefault(fecha, Collections.emptyList());
+            
+            // Contar cuántas comidas del plan fueron registradas
+            int numRegistradas = 0;
+            for (PlanDia planDia : comidasProgramadas) {
+                boolean registrada = registrosDia.stream()
+                        .anyMatch(r -> r.getComida().getId().equals(planDia.getComida().getId()));
+                if (registrada) numRegistradas++;
+            }
+
+            totalComidasProgramadas += numProgramadas;
+            totalComidasRegistradas += numRegistradas;
+
+            // Determinar estado del día
+            String estado;
+            boolean completo;
+            if (numProgramadas == 0) {
+                estado = "SIN_COMIDAS";
+                completo = true; // Si no hay comidas programadas, se considera completo
+                rachaTemp++;
+            } else if (numRegistradas == numProgramadas) {
+                estado = "COMPLETO";
+                completo = true;
+                diasCompletados++;
+                rachaTemp++;
+            } else if (numRegistradas > 0) {
+                estado = "PARCIAL";
+                completo = false;
+                diasParciales++;
+                rachaMejor = Math.max(rachaMejor, rachaTemp);
+                rachaTemp = 0;
+            } else {
+                estado = "SIN_REGISTRO";
+                completo = false;
+                diasSinRegistro++;
+                rachaMejor = Math.max(rachaMejor, rachaTemp);
+                rachaTemp = 0;
+            }
+
+            // Agregar al historial (últimos 7 días)
+            if (java.time.temporal.ChronoUnit.DAYS.between(fecha, hoy) < 7) {
+                historialDias.add(ProgresoPlanResponse.DiaPlanInfo.builder()
+                        .fecha(fecha)
+                        .diaPlan(diaCiclico)
+                        .comidasProgramadas(numProgramadas)
+                        .comidasCompletadas(numRegistradas)
+                        .completo(completo)
+                        .estado(estado)
+                        .build());
+            }
+
+            fecha = fecha.plusDays(1);
+        }
+
+        // Actualizar racha actual
+        rachaMejor = Math.max(rachaMejor, rachaTemp);
+        rachaActual = rachaTemp;
+
+        // Calcular comidas de hoy
+        List<PlanDia> comidasHoy = planDiaRepository.findByPlanIdAndNumeroDia(plan.getId(), diaPlanCiclico);
+        List<RegistroComida> registrosHoy = registrosPorFecha.getOrDefault(hoy, Collections.emptyList());
+        int comidasHoyProgramadas = comidasHoy.size();
+        int comidasHoyCompletadas = 0;
+        for (PlanDia planDia : comidasHoy) {
+            boolean registrada = registrosHoy.stream()
+                    .anyMatch(r -> r.getComida().getId().equals(planDia.getComida().getId()));
+            if (registrada) comidasHoyCompletadas++;
+        }
+        boolean diaActualCompleto = comidasHoyProgramadas > 0 && comidasHoyCompletadas == comidasHoyProgramadas;
+
+        // Calcular porcentajes
+        int diasTranscurridos = diasCompletados + diasParciales + diasSinRegistro;
+        BigDecimal porcentajeDias = diasTranscurridos > 0
+                ? BigDecimal.valueOf((double) diasCompletados / diasTranscurridos * 100)
+                        .setScale(1, java.math.RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        BigDecimal porcentajeComidas = totalComidasProgramadas > 0
+                ? BigDecimal.valueOf((double) totalComidasRegistradas / totalComidasProgramadas * 100)
+                        .setScale(1, java.math.RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        return ProgresoPlanResponse.builder()
+                .usuarioPlanId(planActivo.getId())
+                .planId(plan.getId())
+                .nombrePlan(plan.getNombre())
+                .fechaInicio(fechaInicio)
+                .fechaActual(hoy)
+                .diaActual(diaActual)
+                .diaPlanCiclico(diaPlanCiclico)
+                .duracionDias(duracionDias)
+                .cicloActual(cicloActual)
+                .diasCompletados(diasCompletados)
+                .diasParciales(diasParciales)
+                .diasSinRegistro(diasSinRegistro)
+                .porcentajeDiasCompletados(porcentajeDias)
+                .totalComidasProgramadas(totalComidasProgramadas)
+                .totalComidasRegistradas(totalComidasRegistradas)
+                .porcentajeComidasRegistradas(porcentajeComidas)
+                .comidasHoyProgramadas(comidasHoyProgramadas)
+                .comidasHoyCompletadas(comidasHoyCompletadas)
+                .diaActualCompleto(diaActualCompleto)
+                .rachaActual(rachaActual)
+                .rachaMejor(rachaMejor)
+                .historialDias(historialDias)
+                .build();
+    }
 }

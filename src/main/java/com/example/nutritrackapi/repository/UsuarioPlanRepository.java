@@ -76,4 +76,13 @@ public interface UsuarioPlanRepository extends JpaRepository<UsuarioPlan, Long> 
             Long perfilUsuarioId,
             Pageable pageable
     );
+
+    /**
+     * Obtiene la asignación más reciente de un plan específico para un usuario.
+     * Usado para verificar el estado antes de reactivar.
+     */
+    Optional<UsuarioPlan> findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(
+            Long perfilUsuarioId,
+            Long planId
+    );
 }

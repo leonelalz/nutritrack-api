@@ -77,4 +77,18 @@ public interface UsuarioRutinaRepository extends JpaRepository<UsuarioRutina, Lo
             Long perfilUsuarioId,
             Pageable pageable
     );
+
+    /**
+     * Busca la asignación más reciente de una rutina para un usuario,
+     * independientemente del estado. Usado para detectar si la rutina
+     * está PAUSADA o CANCELADA al intentar activarla.
+     */
+    @Query("SELECT ur FROM UsuarioRutina ur " +
+           "WHERE ur.perfilUsuario.id = :perfilUsuarioId " +
+           "AND ur.rutina.id = :rutinaId " +
+           "ORDER BY ur.fechaInicio DESC")
+    Optional<UsuarioRutina> findAsignacionMasReciente(
+            @Param("perfilUsuarioId") Long perfilUsuarioId,
+            @Param("rutinaId") Long rutinaId
+    );
 }

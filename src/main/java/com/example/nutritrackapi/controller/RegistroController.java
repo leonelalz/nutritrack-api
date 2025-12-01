@@ -388,6 +388,36 @@ public class RegistroController {
     }
 
     // ============================================================
+    // Progreso del Plan
+    // ============================================================
+
+    @GetMapping("/plan/progreso")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "👤 USER - Obtener progreso acumulado del plan", 
+               description = """
+                   Obtiene estadísticas completas del progreso del plan desde su inicio.
+                   
+                   INCLUYE:
+                   - Día actual del plan (con soporte cíclico)
+                   - Días completados vs parciales vs sin registro
+                   - Porcentaje de cumplimiento de días
+                   - Total de comidas programadas vs registradas
+                   - Racha actual y mejor racha
+                   - Historial de los últimos 7 días
+                   - Estado del día actual (comidas completadas hoy)
+                   
+                   IDEAL PARA:
+                   - Mostrar progreso en tarjeta de "Mis Metas"
+                   - Calcular porcentaje de barra de progreso
+                   - Mostrar estadísticas de cumplimiento
+                   """)
+    public ResponseEntity<ProgresoPlanResponse> obtenerProgresoPlan(Authentication authentication) {
+        Long perfilUsuarioId = obtenerPerfilUsuarioId(authentication);
+        ProgresoPlanResponse response = registroService.obtenerProgresoPlan(perfilUsuarioId);
+        return ResponseEntity.ok(response);
+    }
+
+    // ============================================================
     // Utilidades
     // ============================================================
 

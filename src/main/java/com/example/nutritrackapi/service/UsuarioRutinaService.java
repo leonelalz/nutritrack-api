@@ -36,6 +36,11 @@ public class UsuarioRutinaService {
      * RN17: No permite duplicar la misma rutina activa.
      * RN18: Propone reemplazo si ya existe activa.
      * RN33: Valida contraindicaciones médicas (lesiones/condiciones del usuario vs ejercicios).
+     * 
+     * COMPORTAMIENTO:
+     * - Si la rutina está CANCELADA: Se crea una NUEVA asignación (reinicia desde semana 1)
+     * - Si la rutina está ACTIVA: Error - debe pausarla primero
+     * - Si la rutina está PAUSADA: Usar reanudarRutina() en lugar de activar
      */
     @Transactional
     public UsuarioRutinaResponse activarRutina(Long perfilUsuarioId, ActivarRutinaRequest request) {
@@ -58,21 +63,37 @@ public class UsuarioRutinaService {
         // RN33: Validar contraindicaciones médicas
         validarContraindicacionesUsuario(perfilUsuarioId, request.getRutinaId());
 
-        // RN17: Verificar que no existe la MISMA rutina activa
-        boolean mismaRutinaActiva = usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
-                perfilUsuarioId,
-                request.getRutinaId(),
-                UsuarioPlan.EstadoAsignacion.ACTIVO
-        );
+        // Verificar estado de asignaciones existentes de esta rutina
+        var asignacionExistente = usuarioRutinaRepository
+                .findAsignacionMasReciente(perfilUsuarioId, request.getRutinaId());
 
-        if (mismaRutinaActiva) {
-            // RN18: Proponer reemplazo
-            throw new BusinessException(
-                    "Ya tienes esta rutina activa. Debes pausarla o cancelarla para reiniciarla."
-            );
+        if (asignacionExistente.isPresent()) {
+            UsuarioRutina existente = asignacionExistente.get();
+            
+            switch (existente.getEstado()) {
+                case ACTIVO:
+                    // RN17 & RN18: Ya está activa, no permitir duplicar
+                    throw new BusinessException(
+                            "Ya tienes esta rutina activa. Debes pausarla o cancelarla primero."
+                    );
+                    
+                case PAUSADO:
+                    // Sugerir usar reanudar en lugar de activar
+                    throw new BusinessException(
+                            "Esta rutina está pausada. Usa 'Reanudar' para continuar desde donde la dejaste, " +
+                            "o 'Cancelar' primero si quieres reiniciarla desde la semana 1."
+                    );
+                    
+                case CANCELADO:
+                case COMPLETADO:
+                    // OK - Se permite crear nueva asignación (reiniciar)
+                    log.info("Rutina {} estaba en estado {}. Se creará nueva asignación.", 
+                            request.getRutinaId(), existente.getEstado());
+                    break;
+            }
         }
 
-        // Crear asignación
+        // Crear NUEVA asignación (siempre empieza desde semana 1)
         UsuarioRutina usuarioRutina = new UsuarioRutina();
         usuarioRutina.setPerfilUsuario(perfil);
         usuarioRutina.setRutina(rutina);
@@ -80,12 +101,13 @@ public class UsuarioRutinaService {
                 request.getFechaInicio() : LocalDate.now());
         usuarioRutina.setFechaFin(usuarioRutina.getFechaInicio()
                 .plusWeeks(rutina.getDuracionSemanas()).minusDays(1));
-        usuarioRutina.setSemanaActual(1);
+        usuarioRutina.setSemanaActual(1);  // ← SIEMPRE empieza en semana 1
         usuarioRutina.setEstado(UsuarioPlan.EstadoAsignacion.ACTIVO);
         usuarioRutina.setNotas(request.getNotas());
 
         UsuarioRutina saved = usuarioRutinaRepository.save(usuarioRutina);
-        log.info("Rutina {} activada exitosamente para usuario {}", rutina.getId(), perfilUsuarioId);
+        log.info("Rutina {} activada exitosamente para usuario {} (nueva asignación desde semana 1)", 
+                rutina.getId(), perfilUsuarioId);
 
         return UsuarioRutinaResponse.fromEntity(saved);
     }
