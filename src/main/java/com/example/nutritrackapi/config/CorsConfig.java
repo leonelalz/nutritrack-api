@@ -24,6 +24,7 @@ public class CorsConfig {
             "http://localhost:3000",    // React dev server
             "http://localhost:4200",    // Angular dev server
             "https://kaleidoscopic-mermaid-ee80d5.netlify.app", //aplicacion desplegada
+            "https://nutritrack-fit.netlify.app", //ultima version de la aplicacion desplegada
             "https://nutritrack-api-wt8b.onrender.com"  // Render production
         ));
 
