@@ -118,8 +118,8 @@ class UsuarioRutinaServiceTest {
 
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
-            when(usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(false);
+            when(usuarioRutinaRepository.findAsignacionMasReciente(
+                    1L, 1L)).thenReturn(Optional.empty());
             when(usuarioRutinaRepository.save(any(UsuarioRutina.class))).thenReturn(usuarioRutina);
 
             // When
@@ -142,8 +142,8 @@ class UsuarioRutinaServiceTest {
 
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
-            when(usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
-                    anyLong(), anyLong(), any())).thenReturn(false);
+            when(usuarioRutinaRepository.findAsignacionMasReciente(
+                    anyLong(), anyLong())).thenReturn(Optional.empty());
             when(usuarioRutinaRepository.save(any(UsuarioRutina.class))).thenAnswer(i -> i.getArguments()[0]);
 
             // When
@@ -167,8 +167,8 @@ class UsuarioRutinaServiceTest {
 
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
-            when(usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
-                    anyLong(), anyLong(), any())).thenReturn(false);
+            when(usuarioRutinaRepository.findAsignacionMasReciente(
+                    anyLong(), anyLong())).thenReturn(Optional.empty());
             when(usuarioRutinaRepository.save(any(UsuarioRutina.class))).thenAnswer(i -> i.getArguments()[0]);
 
             // When
@@ -253,10 +253,17 @@ class UsuarioRutinaServiceTest {
             ActivarRutinaRequest request = new ActivarRutinaRequest();
             request.setRutinaId(1L);
 
+            UsuarioRutina rutinaActiva = UsuarioRutina.builder()
+                    .id(1L)
+                    .perfilUsuario(perfilUsuario)
+                    .rutina(rutina)
+                    .estado(UsuarioPlan.EstadoAsignacion.ACTIVO)
+                    .build();
+
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
-            when(usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(true);
+            when(usuarioRutinaRepository.findAsignacionMasReciente(
+                    1L, 1L)).thenReturn(Optional.of(rutinaActiva));
 
             // When & Then
             BusinessException exception = assertThrows(BusinessException.class, () -> {
@@ -276,8 +283,8 @@ class UsuarioRutinaServiceTest {
 
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(rutinaRepository.findById(2L)).thenReturn(Optional.of(rutinaDiferente));
-            when(usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
-                    1L, 2L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(false);
+            when(usuarioRutinaRepository.findAsignacionMasReciente(
+                    1L, 2L)).thenReturn(Optional.empty());
             when(usuarioRutinaRepository.save(any(UsuarioRutina.class))).thenReturn(usuarioRutina);
 
             // When
@@ -289,24 +296,31 @@ class UsuarioRutinaServiceTest {
         }
 
         @Test
-        @DisplayName("Debe permitir activar MISMA rutina si está PAUSADA")
+        @DisplayName("Debe sugerir reanudar si la rutina está PAUSADA")
         void activarRutina_RN17_PermiteMismaRutinaSiEstaPausada() {
             // Given
             ActivarRutinaRequest request = new ActivarRutinaRequest();
             request.setRutinaId(1L);
 
+            UsuarioRutina rutinaPausada = UsuarioRutina.builder()
+                    .id(1L)
+                    .perfilUsuario(perfilUsuario)
+                    .rutina(rutina)
+                    .estado(UsuarioPlan.EstadoAsignacion.PAUSADO)
+                    .build();
+
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
-            when(usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(false);
-            when(usuarioRutinaRepository.save(any(UsuarioRutina.class))).thenReturn(usuarioRutina);
+            when(usuarioRutinaRepository.findAsignacionMasReciente(
+                    1L, 1L)).thenReturn(Optional.of(rutinaPausada));
 
-            // When
-            UsuarioRutinaResponse response = usuarioRutinaService.activarRutina(1L, request);
-
-            // Then
-            assertNotNull(response, "Debe permitir activar misma rutina si está pausada");
-            verify(usuarioRutinaRepository).save(any(UsuarioRutina.class));
+            // When & Then - El servicio ahora sugiere usar Reanudar para rutinas pausadas
+            BusinessException exception = assertThrows(BusinessException.class, () -> {
+                usuarioRutinaService.activarRutina(1L, request);
+            });
+            
+            assertTrue(exception.getMessage().contains("pausada") || exception.getMessage().contains("Reanudar"),
+                    "Debe sugerir usar reanudar para rutina pausada");
         }
     }
 
@@ -325,10 +339,17 @@ class UsuarioRutinaServiceTest {
             ActivarRutinaRequest request = new ActivarRutinaRequest();
             request.setRutinaId(1L);
 
+            UsuarioRutina rutinaActiva = UsuarioRutina.builder()
+                    .id(1L)
+                    .perfilUsuario(perfilUsuario)
+                    .rutina(rutina)
+                    .estado(UsuarioPlan.EstadoAsignacion.ACTIVO)
+                    .build();
+
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
-            when(usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(true);
+            when(usuarioRutinaRepository.findAsignacionMasReciente(
+                    1L, 1L)).thenReturn(Optional.of(rutinaActiva));
 
             // When & Then
             BusinessException exception = assertThrows(BusinessException.class, () -> {
@@ -866,8 +887,8 @@ class UsuarioRutinaServiceTest {
             when(rutinaRepository.findById(1L)).thenReturn(Optional.of(rutina));
             when(rutinaRepository.findContraindicacionesUsuarioRutina(1L, 1L))
                     .thenReturn(List.of()); // Lista vacía = sin contraindicaciones
-            when(usuarioRutinaRepository.existsByPerfilUsuarioIdAndRutinaIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(false);
+            when(usuarioRutinaRepository.findAsignacionMasReciente(1L, 1L))
+                    .thenReturn(Optional.empty()); // No hay asignación previa
             when(usuarioRutinaRepository.save(any(UsuarioRutina.class))).thenReturn(usuarioRutina);
 
             // When
@@ -896,8 +917,8 @@ class UsuarioRutinaServiceTest {
             });
             
             // Verificar que NO se llamó a verificar duplicados (orden correcto)
-            verify(usuarioRutinaRepository, never()).existsByPerfilUsuarioIdAndRutinaIdAndEstado(
-                    anyLong(), anyLong(), any());
+            verify(usuarioRutinaRepository, never()).findAsignacionMasReciente(
+                    anyLong(), anyLong());
             assertTrue(exception.getMessage().contains("condición médica") || 
                       exception.getMessage().contains("Hipertensión"));
         }

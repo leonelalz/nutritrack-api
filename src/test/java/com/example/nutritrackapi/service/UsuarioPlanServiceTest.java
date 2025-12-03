@@ -129,8 +129,8 @@ class UsuarioPlanServiceTest {
 
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
-            when(usuarioPlanRepository.existsByPerfilUsuarioIdAndPlanIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(false);
+            when(usuarioPlanRepository.findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(
+                    1L, 1L)).thenReturn(Optional.empty());
             when(usuarioPlanRepository.save(any(UsuarioPlan.class))).thenReturn(usuarioPlan);
 
             // When
@@ -140,8 +140,8 @@ class UsuarioPlanServiceTest {
             assertNotNull(response, "La respuesta no debe ser nula");
             assertEquals("Plan de Pérdida de Peso", response.getPlanNombre());
             verify(usuarioPlanRepository).save(any(UsuarioPlan.class));
-            verify(usuarioPlanRepository).existsByPerfilUsuarioIdAndPlanIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO);
+            verify(usuarioPlanRepository).findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(
+                    1L, 1L);
         }
 
         @Test
@@ -155,8 +155,8 @@ class UsuarioPlanServiceTest {
 
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
-            when(usuarioPlanRepository.existsByPerfilUsuarioIdAndPlanIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(false);
+            when(usuarioPlanRepository.findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(
+                    1L, 1L)).thenReturn(Optional.empty());
             when(usuarioPlanRepository.save(any(UsuarioPlan.class))).thenAnswer(i -> i.getArguments()[0]);
 
             // When
@@ -181,8 +181,8 @@ class UsuarioPlanServiceTest {
 
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
-            when(usuarioPlanRepository.existsByPerfilUsuarioIdAndPlanIdAndEstado(
-                    anyLong(), anyLong(), any())).thenReturn(false);
+            when(usuarioPlanRepository.findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(
+                    anyLong(), anyLong())).thenReturn(Optional.empty());
             when(usuarioPlanRepository.save(any(UsuarioPlan.class))).thenAnswer(i -> i.getArguments()[0]);
 
             // When
@@ -267,10 +267,17 @@ class UsuarioPlanServiceTest {
             ActivarPlanRequest request = new ActivarPlanRequest();
             request.setPlanId(1L);
 
+            UsuarioPlan planActivo = UsuarioPlan.builder()
+                    .id(1L)
+                    .perfilUsuario(perfilUsuario)
+                    .plan(plan)
+                    .estado(UsuarioPlan.EstadoAsignacion.ACTIVO)
+                    .build();
+
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
-            when(usuarioPlanRepository.existsByPerfilUsuarioIdAndPlanIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(true);
+            when(usuarioPlanRepository.findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(
+                    1L, 1L)).thenReturn(Optional.of(planActivo));
 
             // When & Then
             BusinessException exception = assertThrows(BusinessException.class, () -> {
@@ -290,8 +297,8 @@ class UsuarioPlanServiceTest {
 
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(planRepository.findById(2L)).thenReturn(Optional.of(planDiferente));
-            when(usuarioPlanRepository.existsByPerfilUsuarioIdAndPlanIdAndEstado(
-                    1L, 2L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(false);
+            when(usuarioPlanRepository.findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(
+                    1L, 2L)).thenReturn(Optional.empty());
             when(usuarioPlanRepository.save(any(UsuarioPlan.class))).thenReturn(usuarioPlan);
 
             // When
@@ -303,25 +310,31 @@ class UsuarioPlanServiceTest {
         }
 
         @Test
-        @DisplayName("Debe permitir activar MISMO plan si está PAUSADO (no activo)")
+        @DisplayName("Debe sugerir reanudar si el plan está PAUSADO")
         void activarPlan_RN17_PermiteMismoPlanSiEstaPausado() {
             // Given
             ActivarPlanRequest request = new ActivarPlanRequest();
             request.setPlanId(1L);
 
+            UsuarioPlan planPausado = UsuarioPlan.builder()
+                    .id(1L)
+                    .perfilUsuario(perfilUsuario)
+                    .plan(plan)
+                    .estado(UsuarioPlan.EstadoAsignacion.PAUSADO)
+                    .build();
+
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
-            // El plan existe pero está PAUSADO (no ACTIVO)
-            when(usuarioPlanRepository.existsByPerfilUsuarioIdAndPlanIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(false);
-            when(usuarioPlanRepository.save(any(UsuarioPlan.class))).thenReturn(usuarioPlan);
+            when(usuarioPlanRepository.findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(
+                    1L, 1L)).thenReturn(Optional.of(planPausado));
 
-            // When
-            UsuarioPlanResponse response = usuarioPlanService.activarPlan(1L, request);
-
-            // Then
-            assertNotNull(response, "Debe permitir activar mismo plan si está pausado");
-            verify(usuarioPlanRepository).save(any(UsuarioPlan.class));
+            // When & Then - El servicio ahora sugiere usar Reanudar para planes pausados
+            BusinessException exception = assertThrows(BusinessException.class, () -> {
+                usuarioPlanService.activarPlan(1L, request);
+            });
+            
+            assertTrue(exception.getMessage().contains("pausado") || exception.getMessage().contains("Reanudar"),
+                    "Debe sugerir usar reanudar para plan pausado");
         }
 
         @Test
@@ -331,10 +344,17 @@ class UsuarioPlanServiceTest {
             ActivarPlanRequest request = new ActivarPlanRequest();
             request.setPlanId(1L);
 
+            UsuarioPlan planCompletado = UsuarioPlan.builder()
+                    .id(1L)
+                    .perfilUsuario(perfilUsuario)
+                    .plan(plan)
+                    .estado(UsuarioPlan.EstadoAsignacion.COMPLETADO)
+                    .build();
+
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
-            when(usuarioPlanRepository.existsByPerfilUsuarioIdAndPlanIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(false);
+            when(usuarioPlanRepository.findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(
+                    1L, 1L)).thenReturn(Optional.of(planCompletado));
             when(usuarioPlanRepository.save(any(UsuarioPlan.class))).thenReturn(usuarioPlan);
 
             // When
@@ -361,10 +381,17 @@ class UsuarioPlanServiceTest {
             ActivarPlanRequest request = new ActivarPlanRequest();
             request.setPlanId(1L);
 
+            UsuarioPlan planActivo = UsuarioPlan.builder()
+                    .id(1L)
+                    .perfilUsuario(perfilUsuario)
+                    .plan(plan)
+                    .estado(UsuarioPlan.EstadoAsignacion.ACTIVO)
+                    .build();
+
             when(perfilUsuarioRepository.findById(1L)).thenReturn(Optional.of(perfilUsuario));
             when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
-            when(usuarioPlanRepository.existsByPerfilUsuarioIdAndPlanIdAndEstado(
-                    1L, 1L, UsuarioPlan.EstadoAsignacion.ACTIVO)).thenReturn(true);
+            when(usuarioPlanRepository.findFirstByPerfilUsuarioIdAndPlanIdOrderByFechaInicioDesc(
+                    1L, 1L)).thenReturn(Optional.of(planActivo));
 
             // When & Then
             BusinessException exception = assertThrows(BusinessException.class, () -> {

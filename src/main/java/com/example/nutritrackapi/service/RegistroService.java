@@ -721,28 +721,202 @@ public class RegistroService {
     // ============================================================
 
     /**
-     * Calcula las calorías quemadas basándose en el ejercicio y los parámetros del registro.
-     * Fórmula: calorías = caloriasQuemadasPorMinuto × duración
-     * Si no hay duración, estima basándose en series y repeticiones.
+     * Calcula las calorías quemadas basándose en el trabajo real realizado.
+     * 
+     * Para ejercicios de FUERZA (con series, repeticiones y peso):
+     * - Usa la fórmula basada en trabajo mecánico y MET
+     * - Calorías = (Series × Repeticiones × Peso × Factor) / Eficiencia
+     * - Factor varía según grupo muscular (piernas queman más que brazos)
+     * 
+     * Para ejercicios de CARDIO/otros (con duración):
+     * - Usa calorías por minuto × duración
+     * 
+     * Si el frontend envía calorías precalculadas, las usa directamente.
      */
     private BigDecimal calcularCaloriasQuemadas(Ejercicio ejercicio, RegistroEjercicioRequest request) {
-        BigDecimal caloriasPorMinuto = ejercicio.getCaloriasQuemadasPorMinuto();
+        // Si el frontend envía calorías calculadas, usarlas directamente
+        if (request.getCaloriasQuemadas() != null && request.getCaloriasQuemadas().compareTo(BigDecimal.ZERO) > 0) {
+            log.debug("Usando calorías enviadas por frontend: {}", request.getCaloriasQuemadas());
+            return request.getCaloriasQuemadas();
+        }
+
+        // Determinar si es ejercicio de fuerza (tiene series/reps/peso) o cardio (tiene duración)
+        boolean tieneSeriesReps = (request.getSeries() != null && request.getSeries() > 0) 
+                               || (request.getRepeticiones() != null && request.getRepeticiones() > 0);
+        boolean tienePeso = request.getPesoKg() != null && request.getPesoKg().compareTo(BigDecimal.ZERO) > 0;
+        boolean tieneDuracion = request.getDuracionMinutos() != null && request.getDuracionMinutos() > 0;
+
+        // Ejercicios de FUERZA: calcular basado en trabajo mecánico
+        if (tieneSeriesReps && tienePeso) {
+            return calcularCaloriasFuerza(ejercicio, request);
+        }
         
-        // Si el ejercicio no tiene calorías definidas, usar valor por defecto según tipo
+        // Ejercicios de FUERZA sin peso (peso corporal): usar factor reducido
+        if (tieneSeriesReps && !tienePeso) {
+            return calcularCaloriasPesoCorporal(ejercicio, request);
+        }
+
+        // Ejercicios de CARDIO o con duración: usar calorías por minuto
+        if (tieneDuracion) {
+            return calcularCaloriasCardio(ejercicio, request);
+        }
+
+        // Fallback: estimar basado en tipo de ejercicio
+        return estimarCaloriasMinimas(ejercicio);
+    }
+
+    /**
+     * Calcula calorías para ejercicios de fuerza con peso.
+     * 
+     * Fórmula basada en investigación de ejercicio:
+     * Trabajo (Joules) = Peso (kg) × Repeticiones × Distancia movimiento (m) × 9.81
+     * Calorías = Trabajo / 4184 × Factor de eficiencia muscular (≈0.25)
+     * 
+     * Simplificado: Calorías ≈ Series × Repeticiones × Peso × Factor grupo muscular / 200
+     * 
+     * Factores por grupo muscular (basados en masa muscular involucrada):
+     * - Piernas (sentadillas, peso muerto): 0.08-0.10 cal por rep×kg
+     * - Espalda (remo, jalones): 0.06-0.08 cal por rep×kg
+     * - Pecho (press banca): 0.05-0.07 cal por rep×kg
+     * - Hombros: 0.04-0.06 cal por rep×kg
+     * - Brazos: 0.03-0.05 cal por rep×kg
+     */
+    private BigDecimal calcularCaloriasFuerza(Ejercicio ejercicio, RegistroEjercicioRequest request) {
+        int series = request.getSeries() != null ? request.getSeries() : 1;
+        int repeticiones = request.getRepeticiones() != null ? request.getRepeticiones() : 10;
+        BigDecimal peso = request.getPesoKg() != null ? request.getPesoKg() : BigDecimal.ZERO;
+
+        // Factor según grupo muscular
+        BigDecimal factorGrupoMuscular = obtenerFactorGrupoMuscular(ejercicio.getGrupoMuscular());
+        
+        // Fórmula: Series × Repeticiones × Peso × Factor
+        // Ejemplo: 3 series × 10 reps × 20kg × 0.05 = 30 calorías
+        BigDecimal totalReps = BigDecimal.valueOf((long) series * repeticiones);
+        BigDecimal calorias = totalReps.multiply(peso).multiply(factorGrupoMuscular);
+        
+        // Añadir calorías base por el esfuerzo (incluso sin peso, hay gasto energético)
+        // Aproximadamente 0.5-1 caloría por repetición por el esfuerzo cardiovascular
+        BigDecimal caloriasBase = totalReps.multiply(new BigDecimal("0.5"));
+        calorias = calorias.add(caloriasBase);
+
+        log.debug("Calorías fuerza: {} series × {} reps × {} kg × factor {} = {} cal", 
+                series, repeticiones, peso, factorGrupoMuscular, calorias);
+        
+        return calorias.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Calcula calorías para ejercicios de peso corporal (sin pesas).
+     * Ejemplo: flexiones, dominadas, sentadillas sin peso
+     */
+    private BigDecimal calcularCaloriasPesoCorporal(Ejercicio ejercicio, RegistroEjercicioRequest request) {
+        int series = request.getSeries() != null ? request.getSeries() : 1;
+        int repeticiones = request.getRepeticiones() != null ? request.getRepeticiones() : 10;
+
+        // Factor por tipo de ejercicio de peso corporal
+        BigDecimal factorPorRepeticion = obtenerFactorPesoCorporal(ejercicio);
+        
+        // Fórmula: Series × Repeticiones × Factor
+        // Ejemplo: 3 series × 15 flexiones × 0.8 = 36 calorías
+        BigDecimal totalReps = BigDecimal.valueOf((long) series * repeticiones);
+        BigDecimal calorias = totalReps.multiply(factorPorRepeticion);
+
+        log.debug("Calorías peso corporal: {} series × {} reps × factor {} = {} cal", 
+                series, repeticiones, factorPorRepeticion, calorias);
+        
+        return calorias.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Calcula calorías para ejercicios de cardio basado en duración.
+     */
+    private BigDecimal calcularCaloriasCardio(Ejercicio ejercicio, RegistroEjercicioRequest request) {
+        int duracion = request.getDuracionMinutos();
+        
+        BigDecimal caloriasPorMinuto = ejercicio.getCaloriasQuemadasPorMinuto();
         if (caloriasPorMinuto == null || caloriasPorMinuto.compareTo(BigDecimal.ZERO) == 0) {
             caloriasPorMinuto = estimarCaloriasPorMinuto(ejercicio.getTipoEjercicio());
         }
 
-        // Calcular duración
-        Integer duracion = request.getDuracionMinutos();
-        if (duracion == null || duracion == 0) {
-            // Estimar duración basándose en series y repeticiones
-            // Estimación: cada serie toma aproximadamente 1-2 minutos (incluyendo descanso)
-            Integer series = request.getSeries() != null ? request.getSeries() : 1;
-            duracion = series * 2; // 2 minutos por serie aproximadamente
-        }
+        BigDecimal calorias = caloriasPorMinuto.multiply(BigDecimal.valueOf(duracion));
+        
+        log.debug("Calorías cardio: {} min × {} cal/min = {} cal", 
+                duracion, caloriasPorMinuto, calorias);
+        
+        return calorias.setScale(2, RoundingMode.HALF_UP);
+    }
 
-        return caloriasPorMinuto.multiply(BigDecimal.valueOf(duracion));
+    /**
+     * Obtiene el factor de calorías por repetición×kg según el grupo muscular.
+     */
+    private BigDecimal obtenerFactorGrupoMuscular(Ejercicio.GrupoMuscular grupo) {
+        if (grupo == null) {
+            return new BigDecimal("0.05"); // Factor medio por defecto
+        }
+        
+        return switch (grupo) {
+            // Grupos grandes (más masa muscular = más calorías)
+            case PIERNAS, GLUTEOS, CUADRICEPS, ISQUIOTIBIALES, GEMELOS -> new BigDecimal("0.08");
+            case ESPALDA -> new BigDecimal("0.07");
+            case PECHO -> new BigDecimal("0.06");
+            // Grupos medianos
+            case HOMBROS, CORE, ABDOMINALES -> new BigDecimal("0.05");
+            // Grupos pequeños
+            case BICEPS, TRICEPS, BRAZOS -> new BigDecimal("0.04");
+            // Cuerpo completo (promedio alto)
+            case CUERPO_COMPLETO -> new BigDecimal("0.09");
+            // Cardio y otros
+            case CARDIO, OTRO -> new BigDecimal("0.05");
+        };
+    }
+
+    /**
+     * Obtiene el factor de calorías por repetición para ejercicios de peso corporal.
+     */
+    private BigDecimal obtenerFactorPesoCorporal(Ejercicio ejercicio) {
+        // Basado en el tipo de ejercicio y grupo muscular
+        Ejercicio.GrupoMuscular grupo = ejercicio.getGrupoMuscular();
+        
+        if (grupo == null) {
+            return new BigDecimal("0.5"); // Por defecto
+        }
+        
+        return switch (grupo) {
+            // Ejercicios que usan grandes grupos musculares
+            case PIERNAS, GLUTEOS, CUADRICEPS, ISQUIOTIBIALES, GEMELOS -> new BigDecimal("1.0"); // Sentadillas, lunges
+            case CUERPO_COMPLETO -> new BigDecimal("1.2"); // Burpees, mountain climbers
+            case ESPALDA -> new BigDecimal("0.9"); // Dominadas, remo invertido
+            case PECHO -> new BigDecimal("0.8"); // Flexiones
+            case CORE, ABDOMINALES -> new BigDecimal("0.6"); // Abdominales, plancha
+            case HOMBROS -> new BigDecimal("0.7"); // Pike push-ups
+            // Grupos pequeños
+            case BICEPS, TRICEPS, BRAZOS -> new BigDecimal("0.5"); // Dips, chin-ups
+            // Cardio y otros
+            case CARDIO, OTRO -> new BigDecimal("0.5");
+        };
+    }
+
+    /**
+     * Estima calorías mínimas cuando no hay suficientes datos.
+     */
+    private BigDecimal estimarCaloriasMinimas(Ejercicio ejercicio) {
+        // Estimación conservadora basada en tipo de ejercicio
+        Ejercicio.TipoEjercicio tipo = ejercicio.getTipoEjercicio();
+        
+        if (tipo == null) {
+            return new BigDecimal("20"); // Mínimo 20 calorías
+        }
+        
+        return switch (tipo) {
+            case HIIT -> new BigDecimal("50");
+            case CARDIO -> new BigDecimal("40");
+            case FUERZA, FUNCIONAL -> new BigDecimal("30");
+            case DEPORTIVO -> new BigDecimal("35");
+            case YOGA, PILATES -> new BigDecimal("15");
+            case FLEXIBILIDAD, EQUILIBRIO -> new BigDecimal("10");
+            case REHABILITACION -> new BigDecimal("8");
+            default -> new BigDecimal("20");
+        };
     }
 
     /**

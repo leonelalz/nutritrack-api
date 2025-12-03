@@ -60,6 +60,7 @@ class RutinaServiceTest {
         rutina.setNombre("Rutina Fullbody 12 semanas");
         rutina.setDescripcion("Rutina de cuerpo completo para principiantes");
         rutina.setDuracionSemanas(12);
+        rutina.setPatronSemanas(4);
         rutina.setNivelDificultad(Ejercicio.NivelDificultad.INTERMEDIO);
         rutina.setActivo(true);
         rutina.setEtiquetas(new HashSet<>(Set.of(etiqueta)));
@@ -68,6 +69,7 @@ class RutinaServiceTest {
         rutinaRequest.setNombre("Rutina Fullbody 12 semanas");
         rutinaRequest.setDescripcion("Rutina de cuerpo completo para principiantes");
         rutinaRequest.setDuracionSemanas(12);
+        rutinaRequest.setPatronSemanas(4);
         rutinaRequest.setNivelDificultad(Ejercicio.NivelDificultad.INTERMEDIO);
         rutinaRequest.setEtiquetaIds(Set.of(1L));
 
@@ -81,6 +83,8 @@ class RutinaServiceTest {
         rutinaEjercicio.setId(1L);
         rutinaEjercicio.setRutina(rutina);
         rutinaEjercicio.setEjercicio(ejercicio);
+        rutinaEjercicio.setSemanaBase(1);
+        rutinaEjercicio.setDiaSemana(1);
         rutinaEjercicio.setOrden(1);
         rutinaEjercicio.setSeries(4);
         rutinaEjercicio.setRepeticiones(10);
@@ -244,6 +248,8 @@ class RutinaServiceTest {
         // Given
         RutinaEjercicioRequest ejercicioRequest = new RutinaEjercicioRequest();
         ejercicioRequest.setEjercicioId(1L);
+        ejercicioRequest.setSemanaBase(1);
+        ejercicioRequest.setDiaSemana(1);
         ejercicioRequest.setOrden(1);
         ejercicioRequest.setSeries(4);
         ejercicioRequest.setRepeticiones(10);
@@ -289,6 +295,8 @@ class RutinaServiceTest {
         // Given
         RutinaEjercicioRequest ejercicioRequest = new RutinaEjercicioRequest();
         ejercicioRequest.setEjercicioId(1L);
+        ejercicioRequest.setSemanaBase(1);
+        ejercicioRequest.setDiaSemana(1);
         ejercicioRequest.setOrden(1);
         ejercicioRequest.setSeries(4);
         ejercicioRequest.setRepeticiones(10);
@@ -309,6 +317,8 @@ class RutinaServiceTest {
         // Given
         RutinaEjercicioRequest ejercicioRequest = new RutinaEjercicioRequest();
         ejercicioRequest.setEjercicioId(1L);
+        ejercicioRequest.setSemanaBase(1);
+        ejercicioRequest.setDiaSemana(1);
         ejercicioRequest.setOrden(1);
         ejercicioRequest.setSeries(5); // Cambio
         ejercicioRequest.setRepeticiones(12); // Cambio
@@ -383,6 +393,8 @@ class RutinaServiceTest {
         // Given
         RutinaEjercicioRequest ejercicioRequest = new RutinaEjercicioRequest();
         ejercicioRequest.setEjercicioId(1L);
+        ejercicioRequest.setSemanaBase(1);
+        ejercicioRequest.setDiaSemana(1);
         ejercicioRequest.setOrden(1);
         ejercicioRequest.setSeries(4);
         ejercicioRequest.setRepeticiones(10);

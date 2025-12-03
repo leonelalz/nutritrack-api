@@ -315,7 +315,7 @@ class AuthServiceTest {
         doNothing().when(cuentaAuthRepository).delete(cuentaAuth);
 
         // When
-        authService.eliminarCuenta("test@example.com");
+        authService.eliminarCuenta("test@example.com", request);
 
         // Then
         verify(cuentaAuthRepository).findByEmail("test@example.com");
@@ -333,7 +333,7 @@ class AuthServiceTest {
         // When/Then
         RuntimeException exception = assertThrows(
             RuntimeException.class,
-            () -> authService.eliminarCuenta("test@example.com")
+            () -> authService.eliminarCuenta("test@example.com", request)
         );
 
         assertTrue(exception.getMessage().contains("ELIMINAR") || 
@@ -352,7 +352,7 @@ class AuthServiceTest {
         // When/Then
         RuntimeException exception = assertThrows(
             RuntimeException.class,
-            () -> authService.eliminarCuenta("test@example.com")
+            () -> authService.eliminarCuenta("test@example.com", request)
         );
 
         assertTrue(exception.getMessage().contains("ELIMINAR") || 
@@ -374,7 +374,7 @@ class AuthServiceTest {
         // When/Then
         RuntimeException exception = assertThrows(
             RuntimeException.class,
-            () -> authService.eliminarCuenta("noexiste@test.com")
+            () -> authService.eliminarCuenta("noexiste@test.com", request)
         );
 
         assertTrue(exception.getMessage().contains("no encontrada") || 

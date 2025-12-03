@@ -358,9 +358,10 @@ public class AuthController {
     @Operation(summary = "Eliminar cuenta", 
                description = "Elimina permanentemente la cuenta del usuario. Requiere escribir 'ELIMINAR' para confirmar")
     public ResponseEntity<ApiResponse<Void>> eliminarCuenta(
-            Authentication authentication) {
+            Authentication authentication,
+            @Valid @RequestBody DeleteAccountRequest request) {
         try {
-            authService.eliminarCuenta(authentication.getName());
+            authService.eliminarCuenta(authentication.getName(), request);
             return ResponseEntity.ok(ApiResponse.success(null, "Cuenta eliminada exitosamente"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()

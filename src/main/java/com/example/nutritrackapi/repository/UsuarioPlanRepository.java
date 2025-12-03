@@ -42,12 +42,14 @@ public interface UsuarioPlanRepository extends JpaRepository<UsuarioPlan, Long> 
     );
 
     /**
-     * Obtiene el plan activo actual de un usuario (si existe).
+     * Obtiene el plan activo actual de un usuario (el más reciente si hay varios).
+     * Usa LIMIT 1 para evitar NonUniqueResultException cuando hay múltiples planes activos.
      */
-    @Query("SELECT up FROM UsuarioPlan up " +
-           "WHERE up.perfilUsuario.id = :perfilUsuarioId " +
+    @Query(value = "SELECT * FROM usuarios_planes up " +
+           "WHERE up.id_perfil_usuario = :perfilUsuarioId " +
            "AND up.estado = 'ACTIVO' " +
-           "ORDER BY up.fechaInicio DESC")
+           "ORDER BY up.fecha_inicio DESC " +
+           "LIMIT 1", nativeQuery = true)
     Optional<UsuarioPlan> findPlanActivoActual(@Param("perfilUsuarioId") Long perfilUsuarioId);
 
     /**

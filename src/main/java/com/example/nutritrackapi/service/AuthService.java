@@ -142,8 +142,13 @@ public class AuthService {
      * Cascade delete eliminará automáticamente perfil, mediciones, etiquetas, etc.
      */
     @Transactional
-    public void eliminarCuenta(String email) {
+    public void eliminarCuenta(String email, DeleteAccountRequest request) {
         log.info("Eliminando cuenta: {}", email);
+
+        // RN05: Validación de confirmación
+        if (request == null || !"ELIMINAR".equals(request.getConfirmacion())) {
+            throw new RuntimeException("Confirmación incorrecta. Debes escribir exactamente 'ELIMINAR'");
+        }
 
         // Buscar y eliminar cuenta (cascade eliminará todo lo relacionado)
         CuentaAuth cuenta = cuentaAuthRepository.findByEmail(email)

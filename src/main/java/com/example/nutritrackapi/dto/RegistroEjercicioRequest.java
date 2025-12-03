@@ -56,6 +56,10 @@ public class RegistroEjercicioRequest {
     @Schema(description = "Duración total en minutos (opcional para ejercicios de repeticiones)", example = "15")
     private Integer duracionMinutos;
 
+    @PositiveOrZero(message = "Las calorías quemadas deben ser un número positivo o cero")
+    @Schema(description = "Calorías quemadas calculadas por el frontend (opcional, si no se envía se calculan automáticamente)", example = "150")
+    private BigDecimal caloriasQuemadas;
+
     @Size(max = 500, message = "Las notas no pueden exceder 500 caracteres")
     @Schema(description = "Notas adicionales", example = "Buen entrenamiento, sin dolor")
     private String notas;

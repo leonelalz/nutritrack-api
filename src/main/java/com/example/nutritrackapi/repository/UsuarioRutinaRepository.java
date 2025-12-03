@@ -43,12 +43,14 @@ public interface UsuarioRutinaRepository extends JpaRepository<UsuarioRutina, Lo
     );
 
     /**
-     * Obtiene la rutina activa actual de un usuario (si existe).
+     * Obtiene la rutina activa actual de un usuario (la más reciente si hay varias).
+     * Usa LIMIT 1 para evitar NonUniqueResultException cuando hay múltiples rutinas activas.
      */
-    @Query("SELECT ur FROM UsuarioRutina ur " +
-           "WHERE ur.perfilUsuario.id = :perfilUsuarioId " +
+    @Query(value = "SELECT * FROM usuarios_rutinas ur " +
+           "WHERE ur.id_perfil_usuario = :perfilUsuarioId " +
            "AND ur.estado = 'ACTIVO' " +
-           "ORDER BY ur.fechaInicio DESC")
+           "ORDER BY ur.fecha_inicio DESC " +
+           "LIMIT 1", nativeQuery = true)
     Optional<UsuarioRutina> findRutinaActivaActual(@Param("perfilUsuarioId") Long perfilUsuarioId);
 
     /**
@@ -82,11 +84,13 @@ public interface UsuarioRutinaRepository extends JpaRepository<UsuarioRutina, Lo
      * Busca la asignación más reciente de una rutina para un usuario,
      * independientemente del estado. Usado para detectar si la rutina
      * está PAUSADA o CANCELADA al intentar activarla.
+     * Usa LIMIT 1 para evitar NonUniqueResultException cuando hay múltiples asignaciones.
      */
-    @Query("SELECT ur FROM UsuarioRutina ur " +
-           "WHERE ur.perfilUsuario.id = :perfilUsuarioId " +
-           "AND ur.rutina.id = :rutinaId " +
-           "ORDER BY ur.fechaInicio DESC")
+    @Query(value = "SELECT * FROM usuarios_rutinas ur " +
+           "WHERE ur.id_perfil_usuario = :perfilUsuarioId " +
+           "AND ur.id_rutina = :rutinaId " +
+           "ORDER BY ur.fecha_inicio DESC " +
+           "LIMIT 1", nativeQuery = true)
     Optional<UsuarioRutina> findAsignacionMasReciente(
             @Param("perfilUsuarioId") Long perfilUsuarioId,
             @Param("rutinaId") Long rutinaId
